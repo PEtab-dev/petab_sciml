@@ -43,7 +43,7 @@ The standard PEtab format is unsuitable for incorporating large arrays of values
 Hence, we provide a HDF5-based file format to store and incorporate this array data efficiently.
 The general structure is
 ```hdf5
-arrays.hdf5                       # arbitrary filename
+arrays.hdf5                       # (arbitrary filename)
 ├── metadata
 │   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major. 
 ├── inputs                        # (optional)
@@ -63,15 +63,15 @@ arrays.hdf5                       # arbitrary filename
 
 The schema is provided as [JSON schema](assets/array_data_schema.json). Currently, validation is only provided via the PEtab SciML library, and does not check the validity of framework-specific Ids (e.g. for inputs, parameters, and layers).
 
-The naming of inputs or layer parameters is framework-specific or user-specified.
+The Ids of inputs or layer parameters are framework-specific or user-specified.
 For inputs:
 
-- NN models in the PEtab SciML [YAML format](@ref NN_YAML) follow PyTorch indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
+- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
 - NN models in other framework-specific formats follow the indexing and naming conventions of the respective framework.
 
 For parameters:
 
-- NN models in the PEtab SciML [YAML format](@ref NN_YAML) follow PyTorch indexing and naming conventions. For example, in a PyTorch `Linear` layer, the parameter array Ids are `weight` and/or `bias`
+- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch indexing and naming conventions. For example, in a PyTorch `Linear` layer, the parameter array Ids are `weight` and/or `bias`
 - NN models in other framework-specific formats follow the indexing and naming conventions of the respective framework.
 
 !!! tip "For developers: Respect memory order"
