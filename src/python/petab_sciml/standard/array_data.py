@@ -2,24 +2,35 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from mkstd import Hdf5Standard
 from mkstd.types.array import get_array_type
 
 
 __all__ = [
-    "Array",
+    "ConditionSpecificSingleInputData",
+    "SingleInputData",
     "Metadata",
-    "Arrays",
-    "ArrayStandard",
+    "ArrayData",
+    "ArrayDataStandard",
 ]
 
 
-class Array(BaseModel):
-    """An array.
-    
-    For example, input data, or layer weights.
+DATA = "data"
+CONDITION_IDS = "conditionIds"
+
+
+Array = get_array_type()
+
+
+class ConditionSpecificSingleInputData(BaseModel):
+    """Condition-specific input data for a single input."""
+
+    data: list[Array | str]
+    """The data.
+
+    A list with any combination of arrays and array filenames.
     """
 
     conditionIds: list[str] | None = Field(default=None)
@@ -28,17 +39,9 @@ class Array(BaseModel):
     The default (`None`) indicates all conditions.
     """
 
-    targetId: str | None = Field(default=None)
-    """The Id for the target that will be assigned the tensor value.
 
-    If this is not provided, then the target must be assigned via the
-    NN YAML file.
-    """
-
-    targetValue: get_array_type() | str
-    """The data."""
-
-    # Post-constructor validation: ensure no duplicates in the condition IDs?
+SingleInputData = RootModel[list[ConditionSpecificSingleInputData]]
+"""All input data for a single input."""
 
 
 class Metadata(BaseModel):
@@ -51,7 +54,7 @@ class Metadata(BaseModel):
     """
 
 
-class Arrays(BaseModel):
+class ArrayData(BaseModel):
     """Multiple arrays.
 
     For example, data for different inputs for different conditions,
@@ -61,18 +64,28 @@ class Arrays(BaseModel):
     metadata: Metadata
     """Additional metadata for the input data."""
 
-    arrays: list[Array]
-    """The array."""
+    inputs: dict[str, SingleInputData] = {}
+    """Input data arrays.
+
+    Keys are input IDs, values are the array data.
+    """
+
+    parameters: dict[str, dict[str, Array | str]] = {}
+    """Parameter value arrays.
+
+    Outer dict keys are layer IDs. Inner dict keys are the parameter IDs, and
+    inner dict values are array data or array filenames.
+    """
 
 
-ArraysStandard = Hdf5Standard(model=Arrays)
+ArrayDataStandard = Hdf5Standard(model=ArrayData)
 
 
 if __name__ == "__main__":
     from pathlib import Path
 
 
-    ArraysStandard.save_schema(
+    ArrayDataStandard.save_schema(
         Path(__file__).resolve().parents[4]
-        / "docs" / "src" / "assets" / "arrays_schema.json"
+        / "docs" / "src" / "assets" / "array_data_schema.json"
     )
