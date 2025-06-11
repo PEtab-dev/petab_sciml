@@ -8,7 +8,7 @@ import torch.fx
 import torch.nn as nn
 from pydantic import BaseModel, Field
 
-from mkstd import JsonStandard
+from mkstd import YamlStandard
 
 
 __all__ = ["Input", "Layer", "Node", "NNModel", "NNModelStandard"]
@@ -282,11 +282,18 @@ class NNModel(BaseModel):
         return torch.fx.GraphModule(_PytorchModule(), graph)
 
 
-NNModelStandard = JsonStandard(model=NNModel)
+NNModelStandard = YamlStandard(model=NNModel)
 
 
 if __name__ == "__main__":
     from pathlib import Path
 
+    from mkstd import JsonStandard
 
-    NNModelStandard.save_schema(Path(__file__).resolve().parents[4] / "docs" / "src" / "assets" / "nn_model_schema.json")
+
+    # The NN model file is YAML-formatted, so the schema is provided in YAML format.
+    NNModelStandard.save_schema(Path(__file__).resolve().parents[4] / "docs" / "src" / "assets" / "nn_model_schema.yaml")
+
+    # However, the schema format is JsonSchema, so the schema is also provided redundantly in JSON schema.
+    NNModelStandardJson = JsonStandard(model=NNModel)
+    NNModelStandardJson.save_schema(Path(__file__).resolve().parents[4] / "docs" / "src" / "assets" / "nn_model_schema.json")

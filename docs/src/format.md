@@ -82,7 +82,7 @@ For parameters:
 
 ### [NN model YAML format](@id NN_YAML)
 
-The `petab_sciml` library provides a NN model YAML format for model exchange. This format follows PyTorch conventions for layer names and arguments. The schema is provided as [JSON schema](assets/nn_model_schema.json), which enables validation with various third-party tools.
+The `petab_sciml` library provides a NN model YAML format for model exchange. This format follows PyTorch conventions for layer names and arguments. The schema is provided as [JSON schema](assets/nn_model_schema.json), which enables validation with various third-party tools, and also as [YAML-formatted JSON Schema](assets/nn_model_schema.yaml) for readability.
 
 !!! tip "For users: Define models in PyTorch"
     The recommended approach to create a NN model YAML file is to first define a PyTorch model (`torch.nn.Module`) and use the Python `petab_sciml` library to export this to YAML. See the tutorials for examples of this.

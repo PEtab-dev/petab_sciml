@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .specification import Input, MLModel, PetabScimlStandard
+from petab_sciml.standard.nn_model import Input, NNModel, NNModelStandard
 
 
 class Net(nn.Module):
@@ -53,30 +53,28 @@ class Net(nn.Module):
 
 # Create a pytorch module, convert it to PEtab SciML, then save it to disk.
 net0 = Net()
-mlmodel0 = MLModel.from_pytorch_module(
-    module=net0, mlmodel_id="model1", inputs=[Input(input_id="input1")]
+nn_model0 = NNModel.from_pytorch_module(
+    module=net0, nn_model_id="model0", inputs=[Input(input_id="input0")]
 )
-petab_sciml_models0 = PetabScimlStandard.model(models=[mlmodel0])
-PetabScimlStandard.save_data(
-    data=petab_sciml_models0, filename="data/models0.yaml"
+NNModelStandard.save_data(
+    data=nn_model0, filename="data/nn_model0.yaml"
 )
 
 # Read the stored model from disk, reconstruct the pytorch module
-loaded_petab_sciml_models = PetabScimlStandard.load_data("data/models0.yaml")
-net1 = loaded_petab_sciml_models.models[0].to_pytorch_module()
+loaded_model = NNModelStandard.load_data("data/nn_model0.yaml")
+net1 = loaded_model.to_pytorch_module()
 
 # Store the pytorch module to disk again and verify that the round-trip was successful
-mlmodel1 = MLModel.from_pytorch_module(
-    module=net1, mlmodel_id="model1", inputs=[Input(input_id="input1")]
+nn_model1 = NNModel.from_pytorch_module(
+    module=net1, nn_model_id="model0", inputs=[Input(input_id="input0")]
 )
-petab_sciml_models1 = PetabScimlStandard.model(models=[mlmodel1])
-PetabScimlStandard.save_data(
-    data=petab_sciml_models1, filename="data/models1.yaml"
+NNModelStandard.save_data(
+    data=nn_model1, filename="data/nn_model1.yaml"
 )
 
-with open("data/models0.yaml") as f:
+with open("data/nn_model0.yaml") as f:
     data0 = f.read()
-with open("data/models1.yaml") as f:
+with open("data/nn_model1.yaml") as f:
     data1 = f.read()
 
 
