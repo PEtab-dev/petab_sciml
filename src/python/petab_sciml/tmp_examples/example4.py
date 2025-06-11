@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from petab_sciml_standard import Input, MLModel, PetabScimlStandard
+from petab_sciml.standard import Input, NNModel, NNModelStandard
 
 
 class Net1(nn.Module):
@@ -20,10 +20,9 @@ class Net1(nn.Module):
 net0 = Net1()
 input_ = torch.ones(1, 5, 5)
 net0.forward(input_)
-mlmodel0 = MLModel.from_pytorch_module(
-    module=net0, mlmodel_id="model1", inputs=[Input(input_id="input1")]
+nn_model0 = NNModel.from_pytorch_module(
+    module=net0, nn_model_id="model0", inputs=[Input(input_id="input0")]
 )
-petab_sciml_models0 = PetabScimlStandard.model(models=[mlmodel0])
-PetabScimlStandard.save_data(
-    data=petab_sciml_models0, filename="data4/models1.yaml"
+NNModelStandard.save_data(
+    data=nn_model0, filename="data4/nn_model0.yaml"
 )

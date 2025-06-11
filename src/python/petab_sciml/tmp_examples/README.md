@@ -1,18 +1,17 @@
 In the first example (`example.py`) we:
-1. define a data format standard for ML models and save the schema to `standard/schema.yaml`. See `petab_sciml_standard.py`.
-2. create an ML model in pytorch
-3. convert that pytorch model into a PEtab SciML ML model and store it to disk (see `data/models0.yaml`)
-4. read the model from disk, reconstruct the pytorch model, then convert that reconstructed pytorch model back into PEtab SciML, and store it to disk once more (see `data/models1.yaml`)
+1. create an NN model in pytorch
+2. convert that pytorch model into a PEtab SciML `NNModel` and store it to disk (see `data/nn_model0.yaml`)
+3. read the model from disk, reconstruct the pytorch model, then convert that reconstructed pytorch model back into an `NNModel`, and store it to disk once more (see `data/nn_model1.yaml`)
 
 In total, this means we do:
 ```
 pytorch model
--> petab sciml model
--> petab sciml yaml
--> petab sciml model
+-> petab sciml NN model
+-> petab sciml NN model yaml
+-> petab sciml NN model
 -> pytorch model
--> petab sciml model
--> petab sciml yaml
+-> petab sciml NN model
+-> petab sciml NN model yaml
 ```
 and then verify that the two YAML files match.
 
