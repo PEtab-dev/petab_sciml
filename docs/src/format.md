@@ -40,7 +40,7 @@ A NN model must consist of two parts to be compatible with the PEtab SciML speci
 
 The standard PEtab format is unsuitable for incorporating large arrays of values into an estimation problem. This includes the large datasets used to train NNs, or the parameter values of wide or deep NNs.
 
-Hence, we provide a HDF5-based file format to store and incorporate this array data efficiently.
+Hence, we provide a HDF5-based file format to store and incorporate this array data efficiently. Users can choose to provide input data and parameter values in a single array data file, or to arbitrarily split them across multiple array data files.
 The general structure is
 ```hdf5
 arrays.hdf5                       # (arbitrary filename)
