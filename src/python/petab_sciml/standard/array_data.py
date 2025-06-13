@@ -59,19 +59,20 @@ class ArrayData(BaseModel):
     """
 
     metadata: Metadata
-    """Additional metadata for the input data."""
+    """Additional metadata for the arrays."""
 
     inputs: dict[str, SingleInputData] = {}
     """Input data arrays.
 
-    Keys are input IDs, values are the array data.
+    Keys are input IDs, values are the input data arrays and their applicable
+    conditions.
     """
 
     parameters: dict[str, dict[str, Array]] = {}
     """Parameter value arrays.
 
-    Outer dict keys are layer IDs. Inner dict keys are the parameter IDs, and
-    inner dict values are array data.
+    Outer dict keys are layer IDs. Inner dict keys are layer-specific parameter
+    IDs, and inner dict values are the parameter value arrays.
     """
 
 
