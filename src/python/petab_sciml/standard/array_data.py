@@ -27,11 +27,8 @@ Array = get_array_type()
 class ConditionSpecificSingleInputData(BaseModel):
     """Condition-specific input data for a single input."""
 
-    data: list[Array | str]
-    """The data.
-
-    A list with any combination of arrays and array filenames.
-    """
+    data: Array
+    """The data."""
 
     conditionIds: list[str] | None = Field(default=None)
     """The dataset is used with these conditions.
@@ -70,11 +67,11 @@ class ArrayData(BaseModel):
     Keys are input IDs, values are the array data.
     """
 
-    parameters: dict[str, dict[str, Array | str]] = {}
+    parameters: dict[str, dict[str, Array]] = {}
     """Parameter value arrays.
 
     Outer dict keys are layer IDs. Inner dict keys are the parameter IDs, and
-    inner dict values are array data or array filenames.
+    inner dict values are array data.
     """
 
 

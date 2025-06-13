@@ -45,18 +45,18 @@ The general structure is
 ```hdf5
 arrays.hdf5                       # (arbitrary filename)
 ├── metadata
-│   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major. 
+│   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major.
 ├── inputs                        # (optional)
 │   ├── inputId1
-│   │   ├─┬─ conditionIds         # (optional) an arbitrary number of PEtab condition IDs. 
+│   │   ├─┬─ conditionIds         # (optional) an arbitrary number of PEtab condition IDs (list of string).
 │   │   │ │  ├── conditionId1 
 │   │   │ │  └── ... 
-│   │   │ └── data                # array OR array filename string. 
+│   │   │ └── data                # the input data (array).
 │   │   └── ...
 │   └── ...
 └── parameters                    # (optional)
     ├── layerId1
-    │   ├── parameterId1          # array OR array filename string.
+    │   ├── parameterId1          # the parameter values (array).
     │   └── ...
     └── ...
 ```
