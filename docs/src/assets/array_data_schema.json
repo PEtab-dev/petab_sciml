@@ -4,16 +4,6 @@
             "description": "Condition-specific input data for a single input.",
             "properties": {
                 "data": {
-                    "items": {
-                        "anyOf": [
-                            {
-                                "type": "array"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    },
                     "title": "Data",
                     "type": "array"
                 },
@@ -81,14 +71,10 @@
         "parameters": {
             "additionalProperties": {
                 "additionalProperties": {
-                    "anyOf": [
-                        {
-                            "type": "array"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
+                    "additionalProperties": {
+                        "type": "array"
+                    },
+                    "type": "object"
                 },
                 "type": "object"
             },

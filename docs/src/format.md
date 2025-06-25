@@ -40,33 +40,38 @@ A NN model must consist of two parts to be compatible with the PEtab SciML speci
 
 The standard PEtab format is unsuitable for incorporating large arrays of values into an estimation problem. This includes the large datasets used to train NNs, or the parameter values of wide or deep NNs.
 
-Hence, we provide a HDF5-based file format to store and incorporate this array data efficiently.
+Hence, we provide a HDF5-based file format to store and incorporate this array data efficiently. Users can choose to provide input data and parameter values in a single array data file, or to arbitrarily split them across multiple array data files.
 The general structure is
 ```hdf5
 arrays.hdf5                       # (arbitrary filename)
 ├── metadata
-│   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major. 
+│   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major.
 ├── inputs                        # (optional)
 │   ├── inputId1
-│   │   ├─┬─ conditionIds         # (optional) an arbitrary number of PEtab condition IDs. 
+│   │   ├─┬─ conditionIds         # (optional) an arbitrary number of PEtab condition IDs (list of string).
 │   │   │ │  ├── conditionId1 
 │   │   │ │  └── ... 
-│   │   │ └── data                # array OR array filename string. 
+│   │   │ └── data                # the input data (array).
 │   │   └── ...
 │   └── ...
 └── parameters                    # (optional)
-    ├── layerId1
-    │   ├── parameterId1          # array OR array filename string.
+    ├── netId1
+    │   ├── layerId1
+    │   │   ├── parameterId1      # the parameter values (array).
+    │   │   └── ...
     │   └── ...
     └── ...
 ```
 
 The schema is provided as [JSON schema](assets/array_data_schema.json). Currently, validation is only provided via the PEtab SciML library, and does not check the validity of framework-specific Ids (e.g. for inputs, parameters, and layers).
 
+!!! tip "Multiple NNs may share the same input array data"
+    Like PEtab parameters, NN inputs are global variables. Hence, shared input array data for multiple NNs can be specified by using the same input Id in each NN. Tools and users should be careful to only intentionally assign multiple inputs the same Id.
+
 The Ids of inputs or layer parameters are framework-specific or user-specified.
 For inputs:
 
-- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
+- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch array dimension indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
 - NN models in other framework-specific formats follow the indexing and naming conventions of the respective framework.
 
 For parameters:
