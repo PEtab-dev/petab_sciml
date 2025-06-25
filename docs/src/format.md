@@ -55,18 +55,23 @@ arrays.hdf5                       # (arbitrary filename)
 │   │   └── ...
 │   └── ...
 └── parameters                    # (optional)
-    ├── layerId1
-    │   ├── parameterId1          # the parameter values (array).
+    ├── netId1
+    │   ├── layerId1
+    │   │   ├── parameterId1      # the parameter values (array).
+    │   │   └── ...
     │   └── ...
     └── ...
 ```
 
 The schema is provided as [JSON schema](assets/array_data_schema.json). Currently, validation is only provided via the PEtab SciML library, and does not check the validity of framework-specific Ids (e.g. for inputs, parameters, and layers).
 
+!!! tip "Multiple NNs may share the same input array data"
+    Like PEtab parameters, NN inputs are global variables. Hence, shared input array data for multiple NNs can be specified by using the same input Id in each NN. Tools and users should be careful to only intentionally assign multiple inputs the same Id.
+
 The Ids of inputs or layer parameters are framework-specific or user-specified.
 For inputs:
 
-- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
+- The PEtab SciML [NN model YAML format](@ref NN_YAML) follows PyTorch array dimension indexing. For example, if the first layer is `Conv2d`, the input should be in `(C, W, H)` format.
 - NN models in other framework-specific formats follow the indexing and naming conventions of the respective framework.
 
 For parameters:

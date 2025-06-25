@@ -68,11 +68,13 @@ class ArrayData(BaseModel):
     conditions.
     """
 
-    parameters: dict[str, dict[str, Array]] = {}
+    parameters: dict[str, dict[str, dict[str, Array]]] = {}
     """Parameter value arrays.
 
-    Outer dict keys are layer IDs. Inner dict keys are layer-specific parameter
-    IDs, and inner dict values are the parameter value arrays.
+    Outer dict keys are NN model IDs.
+    Inner dict keys are layer IDs.
+    Inner inner dict keys are layer-specific parameter IDs, and values are the
+    corresponding array data.
     """
 
 

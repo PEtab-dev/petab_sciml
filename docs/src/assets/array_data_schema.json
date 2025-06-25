@@ -71,7 +71,10 @@
         "parameters": {
             "additionalProperties": {
                 "additionalProperties": {
-                    "type": "array"
+                    "additionalProperties": {
+                        "type": "array"
+                    },
+                    "type": "object"
                 },
                 "type": "object"
             },
