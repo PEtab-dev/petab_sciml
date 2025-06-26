@@ -11,6 +11,8 @@ authors = [
 ]
 dependencies = [
   "mkstd",
+  "torch",
+  "pydantic",
 ]
 requires-python = ">=3.8"
 description = "Specify parameter estimation problems and hybrid models."
