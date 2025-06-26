@@ -3,13 +3,15 @@ Format Specification
 
 A PEtab SciML problem extends the PEtab standard version 2 to
 accommodate hybrid models (SciML problems) that combine neural network
-(NN) and mechanistic components. Two new file types are introduced by
+(NN) and mechanistic components. Three new file types are introduced by
 the extension:
 
 1. `Neural Network File(s) <@ref%20nn_format>`__: Optional YAML file(s)
    describing NN model(s).
 2. `Hybridization table <@ref%20hybrid_table>`__: Table for assigning NN
    outputs and inputs.
+1. `Array Data File(s) <@ref%20hdf5_array>`__: HDF5 files for storing NN
+   input data or parameter values.
 
 PEtab SciML further extends the following standard PEtab files:
 
