@@ -1,7 +1,7 @@
 `Supported Layers and Activation Functions <@id%20layers_activation>`__
 =======================================================================
 
-The PEtab SciML neural network model YAML format supports numerous
+The PEtab SciML NN model YAML format supports numerous
 standard neural network layers and activation functions. Layer names and
 associated keyword arguments follow the PyTorch naming scheme. PyTorch
 is used because it is currently the most popular machine learning
