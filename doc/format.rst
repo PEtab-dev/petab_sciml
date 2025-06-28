@@ -426,43 +426,56 @@ NN bounds are optional and default to ``-inf`` for the lower bound and
 ---------------------------------------
 
 PEtab SciML files are defined within the ``extensions`` section of a
-PEtab YAML file. This section specifies the configuration of NNs and
-optional array files used for simulation or parameter estimation.
+PEtab YAML file, with subsections for neural network models,
+hybridization tables, and array files. The general structure is
 
-Fields
-~~~~~~
+.. code::
+
+   ...
+   extensions:
+     petab_sciml:
+       version: 1.0.0        # see PEtab extensions spec.
+       required: true        # see PEtab extensions spec.
+       neural_networks:      # (required)
+         netId1:
+           location: ...     # location of NN model file (string).
+           format: ...       # equinox | lux.jl | yaml
+           dynamic: ...      # the hybridization type (bool).
+         ...
+       hybridization_files:  # (required) list of location of hybridization table files
+         - ...
+         - ...
+       array_files:          # list of location of array HDF5 files
+         - ...
+         - ...
+
+
+The location fields (``location``, ``hybridization_files``, ``array_files``)
+within this ``petab_sciml`` extension section are the same format as other
+location fields in a PEtab v2 problem YAML file.
 
 ``neural_networks`` [REQUIRED]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~
 
-A list of NN definitions. Each entry is a mapping with the following
-keys:
+-  The keys (e.g. ``netId1`` in the example above) are the NN model Ids.
+-  ``format`` [STRING, REQUIRED]: The format that the NN model is provided in.
+   This should be a format supported by one of the frameworks that currently
+   implement the PEtab SciML standard (see TODO add page about PEtab.jl and
+   AMICI/diffrax). Note that the ``equinox`` and ``lux.jl`` formats are not
+   file formats; rather, they indicate that the NN model is specified in a
+   programming language with the respective package.
 
--  ``location`` [STRING]: File path to the NN model.
--  ``format`` [STRING]: Format of the NN. Use ``YAML`` if the model is
-   defined in the `PEtab SciML YAML format <@ref%20NN_YAML>`__. For
-   models defined using external libraries, specify the library name
-   (e.g., ``Lux.jl``, ``equinox.py``). -``dynamic`` [BOOL]: Indicates
-   the hybridization type (see `Hybrid Types <@ref%20hybrid_types>`__):
+   -  ``equinox``: the file contains an NN model specified in a Python file as
+      a subclass of ``equinox.Module`` (see
+      `Equinox documentation <https://docs.kidger.site/equinox/>`__).
+      The subclass name must be the NN model Id.
+   -  ``lux.jl``: the file contains an NN model specified in a Julia file as a
+      Lux.jl function
+      (see `Lux.jl documentation <https://lux.csail.mit.edu/stable/>`__).
+      The function name must be the NN model Id.
+   -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
+      model YAML format (see `NN model YAML format <@ref%20NN_YAML>`__).
 
-   -  ``true``: dynamic hybridization
-   -  ``false``: static hybridization
-
-``array_files`` [OPTIONAL]
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A list of array file definitions. Each entry is a mapping with the
-following keys:
-
--  **``location``** [STRING]: File path to the array file.
--  **``format``** [STRING]: Format of the file (e.g., ``HDF5``).
-
-Parameter array files must follow the structure described in `HDF5
-Parameter Structure <@ref%20hdf5_ps_structure>`__. Input array files
-must follow the structure described in `HDF5 Input
-Structure <@ref%20hdf5_input_structure>`__.
-
-If a NN is provided in another format than the YAML format, respective
-tool must provide the NN during problem import. Note that regardless of
-NN model format, for exchange purposes the NN model **must** be
-available in a file (not in the main PEtab problem import script).
+-  ``dynamic`` [BOOL, REQUIRED]: The hybridization type
+   (see `hybridization types <@ref%20hybrid_types>`__). ``true`` indicates
+   dynamic hybridization; ``false`` indicates static hybridization.
