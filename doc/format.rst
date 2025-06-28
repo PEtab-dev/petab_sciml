@@ -455,7 +455,7 @@ within this ``petab_sciml`` extension section are the same format as other
 location fields in a PEtab v2 problem YAML file.
 
 ``neural_networks`` [REQUIRED]
-~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  The keys (e.g. ``netId1`` in the example above) are the NN model Ids.
 -  ``format`` [STRING, REQUIRED]: The format that the NN model is provided in.
