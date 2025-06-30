@@ -58,7 +58,8 @@ would be in the single NN case.
 ------------------------------------------
 
 The NN model format is flexible, meaning models can be provided in any
-format compatible with the PEtab SciML specification. Additionally,
+format compatible with the PEtab SciML specification (TODO see page
+about supported formats/supporting frameworks). Additionally,
 the ``petab_sciml`` library provides a NN model YAML format that can be
 imported by tools across various programming languages.
 
@@ -185,7 +186,7 @@ valid PEtab identifier, to avoid confusion about what it refers to
 parameter, and output referenced in the PEtab problem must be defined
 under ``modelEntityId`` and mapped to a PEtab identifier. For the
 ``PEtabEntityId`` column the same rules as in PEtab v2 apply.
-Additionally array file Ids defined in the `YAML <@ref%20YAML_file>`__
+Additionally array file IDs defined in the `YAML <@ref%20YAML_file>`__
 file are considered valid PEtab entities.
 
 ``modelEntityId`` [STRING, REQUIRED]
@@ -233,7 +234,7 @@ table <@ref%20hybrid_table>`__.
 Outputs
 ^^^^^^^
 
-The model Id ``$nnId.outputs{[outputArgumentIndex]{[$outputIndex]}}``
+The model ID ``$nnId.outputs{[outputArgumentIndex]{[$outputIndex]}}``
 refers to specific outputs of a NN identified by ``$nnId``.
 
 -  ``$outputId``: The output argument number in the NN forward function.
@@ -320,7 +321,7 @@ Inputs
 Valid ``targetValue``\ ’s for a NN input are:
 
 -  A parameter in the parameter table.
--  An array input file (assigned an Id in the `YAML problem
+-  An array input file (assigned an ID in the `YAML problem
    file <@ref%20YAML_file>`__).
 
 .. _outputs-1:
@@ -331,7 +332,7 @@ Outputs
 Valid ``targetId``\ ’s for a NN output are:
 
 -  A non-estimated model parameter.
--  A species’ initial value (referenced by the species’ Id). In this
+-  A species’ initial value (referenced by the species’ ID). In this
    case, any other species initialization is overridden.
 
 Condition and Hybridization Tables
@@ -455,7 +456,7 @@ location fields in a PEtab v2 problem YAML file.
 ``neural_networks`` [REQUIRED]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  The keys (e.g. ``netId1`` in the example above) are the NN model Ids.
+-  The keys (e.g. ``netId1`` in the example above) are the NN model IDs.
 -  ``format`` [STRING, REQUIRED]: The format that the NN model is provided in.
    This should be a format supported by one of the frameworks that currently
    implement the PEtab SciML standard (see TODO add page about PEtab.jl and
@@ -466,11 +467,15 @@ location fields in a PEtab v2 problem YAML file.
    -  ``equinox``: the file contains an NN model specified in a Python file as
       a subclass of ``equinox.Module`` (see
       `Equinox documentation <https://docs.kidger.site/equinox/>`__).
-      The subclass name must be the NN model Id.
+      The subclass name must be the NN model ID.
    -  ``lux.jl``: the file contains an NN model specified in a Julia file as a
       Lux.jl function
       (see `Lux.jl documentation <https://lux.csail.mit.edu/stable/>`__).
-      The function name must be the NN model Id.
+      The function name must be the NN model ID.
+   -  ``pytorch``: the file contains an NN model specified in a Python file as a
+      subclass of ``torch.nn.Module`` (see
+      `PyTorch documentation <https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html#define-the-class>`__).
+      The subclass name must be the NN model ID.
    -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
       model YAML format (see `NN model YAML format <@ref%20NN_YAML>`__).
 
