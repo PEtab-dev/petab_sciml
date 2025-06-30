@@ -292,8 +292,8 @@ if __name__ == "__main__":
 
 
     # The NN model file is YAML-formatted, so the schema is provided in YAML format.
-    NNModelStandard.save_schema(Path(__file__).resolve().parents[4] / "docs" / "src" / "assets" / "nn_model_schema.yaml")
+    NNModelStandard.save_schema(Path(__file__).resolve().parents[4] / "doc" / "standard" / "nn_model_schema.yaml")
 
     # However, the schema format is JsonSchema, so the schema is also provided redundantly in JSON schema.
     NNModelStandardJson = JsonStandard(model=NNModel)
-    NNModelStandardJson.save_schema(Path(__file__).resolve().parents[4] / "docs" / "src" / "assets" / "nn_model_schema.json")
+    NNModelStandardJson.save_schema(Path(__file__).resolve().parents[4] / "doc" / "standard" / "nn_model_schema.json")
