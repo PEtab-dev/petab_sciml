@@ -6,11 +6,11 @@ accommodate hybrid models (SciML problems) that combine neural network
 (NN) and mechanistic components. Three new file types are introduced by
 the extension:
 
-1. `Neural Network File(s) <@ref%20nn_format>`__: Optional YAML file(s)
+1. `Neural Network File(s) <@ref%20nn_format>`__: File(s)
    describing NN model(s).
 2. `Hybridization table <@ref%20hybrid_table>`__: Table for assigning NN
    outputs and inputs.
-1. `Array Data File(s) <@ref%20hdf5_array>`__: HDF5 files for storing NN
+3. `Array Data File(s) <@ref%20hdf5_array>`__: HDF5 files for storing NN
    input data or parameter values.
 
 PEtab SciML further extends the following standard PEtab files:
@@ -58,9 +58,7 @@ would be in the single NN case.
 ------------------------------------------
 
 The NN model format is flexible, meaning models can be provided in any
-format compatible with the PEtab SciML specification (for example,
-`Lux.jl <https://github.com/LuxDL/Lux.jl>`__ in
-`PEtab.jl <https://github.com/sebapersson/PEtab.jl>`__). Additionally,
+format compatible with the PEtab SciML specification. Additionally,
 the ``petab_sciml`` library provides a NN model YAML format that can be
 imported by tools across various programming languages.
 
@@ -121,15 +119,15 @@ them across multiple array data files. The general structure is
 The schema is provided as `JSON
 schema <standard/array_data_schema.json>`__. Currently, validation is only
 provided via the PEtab SciML library, and does not check the validity of
-framework-specific Ids (e.g. for inputs, parameters, and layers).
+framework-specific IDs (e.g. for inputs, parameters, and layers).
 
 !!! tip “Multiple NNs may share the same input array data” Like PEtab
 parameters, NN inputs are global variables. Hence, shared input array
-data for multiple NNs can be specified by using the same input Id in
+data for multiple NNs can be specified by using the same input ID in
 each NN. Tools and users should be careful to only intentionally assign
-multiple inputs the same Id.
+multiple inputs the same ID.
 
-The Ids of inputs or layer parameters are framework-specific or
+The IDs of inputs or layer parameters are framework-specific or
 user-specified. For inputs:
 
 -  The PEtab SciML `NN model YAML format <@ref%20NN_YAML>`__ follows
@@ -142,7 +140,7 @@ For parameters:
 
 -  The PEtab SciML `NN model YAML format <@ref%20NN_YAML>`__ follows
    PyTorch indexing and naming conventions. For example, in a PyTorch
-   ``Linear`` layer, the parameter array Ids are ``weight`` and/or
+   ``Linear`` layer, the parameter array IDs are ``weight`` and/or
    ``bias``
 -  NN models in other framework-specific formats follow the indexing and
    naming conventions of the respective framework.
@@ -199,7 +197,7 @@ and parameters of NNs.
 `Parameters <@id%20nn_parameters>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The model Id
+The model ID
 ``$nnId.parameters[$layerId].{[$arrayId]{[$parameterIndex]}}`` refers to
 the parameters of a NN identified by ``$nnId``.
 
@@ -215,7 +213,7 @@ table.
 `Inputs <@id%20nn_inputs>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The model Id ``$nnId.inputs{[$inputArgumentIndex]{[$inputIndex]}}``
+The model ID ``$nnId.inputs{[$inputArgumentIndex]{[$inputIndex]}}``
 refers to specific inputs of the NN identified by ``$nnId``.
 
 -  ``$inputArgumentIndex``: The input argument number in the NN forward
@@ -225,7 +223,7 @@ refers to specific inputs of the NN identified by ``$nnId``.
    if the input is a file.
 
 For `static hybridization <@ref%20hybrid_types>`__ NN input PEtab
-identifiers are considered valid PETAB_IDs without restrictions (e.g.,
+identifiers are considered valid PEtab IDs without restrictions (e.g.,
 they may be referenced in the parameters table, condition table,
 hybridization table, etc.). For `dynamic
 hybridization <@ref%20hybrid_types>`__, input PEtab identifiers can only
