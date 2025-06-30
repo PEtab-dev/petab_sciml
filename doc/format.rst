@@ -438,7 +438,7 @@ hybridization tables, and array files. The general structure is
        neural_networks:      # (required)
          netId1:
            location: ...     # location of NN model file (string).
-           format: ...       # equinox | lux.jl | yaml
+           format: ...       # equinox | lux.jl | pytorch | yaml
            dynamic: ...      # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
