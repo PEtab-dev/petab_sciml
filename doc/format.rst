@@ -439,7 +439,7 @@ hybridization tables, and array files. The general structure is
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           dynamic: ...      # the hybridization type (bool).
+           static: ...      # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
@@ -479,6 +479,6 @@ location fields in a PEtab v2 problem YAML file.
    -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
       model YAML format (see `NN model YAML format <@ref%20NN_YAML>`__).
 
--  ``dynamic`` [BOOL, REQUIRED]: The hybridization type
+-  ``static`` [BOOL, REQUIRED]: The hybridization type
    (see `hybridization types <@ref%20hybrid_types>`__). ``true`` indicates
-   dynamic hybridization; ``false`` indicates static hybridization.
+   static hybridization; ``false`` indicates dynamic hybridization.
