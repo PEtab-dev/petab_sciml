@@ -4,16 +4,6 @@
             "description": "Condition-specific input data for a single input.",
             "properties": {
                 "data": {
-                    "items": {
-                        "anyOf": [
-                            {
-                                "type": "array"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    },
                     "title": "Data",
                     "type": "array"
                 },
@@ -57,12 +47,13 @@
             "title": "Metadata",
             "type": "object"
         },
-        "RootModel_list_ConditionSpecificSingleInputData__": {
-            "items": {
+        "SingleInputData": {
+            "additionalProperties": {
                 "$ref": "#/$defs/ConditionSpecificSingleInputData"
             },
-            "title": "RootModel[list[ConditionSpecificSingleInputData]]",
-            "type": "array"
+            "description": "All input data for a single input.",
+            "title": "SingleInputData",
+            "type": "object"
         }
     },
     "description": "Multiple arrays.\n\nFor example, data for different inputs for different conditions,\nor values for different parameters of different layers.",
@@ -72,7 +63,7 @@
         },
         "inputs": {
             "additionalProperties": {
-                "$ref": "#/$defs/RootModel_list_ConditionSpecificSingleInputData__"
+                "$ref": "#/$defs/SingleInputData"
             },
             "default": {},
             "title": "Inputs",
@@ -81,14 +72,10 @@
         "parameters": {
             "additionalProperties": {
                 "additionalProperties": {
-                    "anyOf": [
-                        {
-                            "type": "array"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
+                    "additionalProperties": {
+                        "type": "array"
+                    },
+                    "type": "object"
                 },
                 "type": "object"
             },
