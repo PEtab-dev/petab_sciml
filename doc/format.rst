@@ -99,23 +99,25 @@ them across multiple array data files. The general structure is
 .. code::
 
    arrays.hdf5                       # (arbitrary filename)
-   ├── metadata
-   │   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major.
-   ├── inputs                        # (optional)
-   │   ├── inputId1
-   │   │   ├── 0                     # (required) 0-indexed numbering of each array for a single input (string).
-   │   │   │   ├── conditionIds      # (optional) an arbitrary number of PEtab condition IDs (list of string).
+   ├── metadata                      # [GROUP]
+   │   └── perm                      # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
+   ├── inputs                        # (optional) [GROUP] reserved keyword
+   │   ├── inputId1                  # [GROUP] an input ID
+   │   │   ├── 0                     # [GROUP] 0-based numbering of each conditionIds-data pair for this input
+   │   │   │   ├── conditionIds      # (optional) [DATASET, STRING ARRAY] an arbitrary number of PEtab condition IDs
    │   │   │   │   ├── conditionId1
    │   │   │   │   └── ...
-   │   │   │   └── data              # the input data (array).
+   │   │   │   └── data              # [DATASET, FLOAT ARRAY] the input data
    │   │   ├── 1
-   │   │   │   └── ...
+   │   │   │   ├── conditionIds
+   │   │   │   │   └── ...
+   │   │   │   └── data
    │   │   └── ...
    │   └── ...
-   └── parameters                    # (optional)
-       ├── netId1
-       │   ├── layerId1
-       │   │   ├── parameterId1      # the parameter values (array).
+   └── parameters                    # (optional) [GROUP] reserved keyword
+       ├── netId1                    # [GROUP] a NN ID
+       │   ├── layerId1              # [GROUP] a layer ID
+       │   │   ├── parameterId1      # [DATASET, FLOAT ARRAY] the parameter values
        │   │   └── ...
        │   └── ...
        └── ...
