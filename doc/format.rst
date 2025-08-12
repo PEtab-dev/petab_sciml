@@ -117,7 +117,7 @@ them across multiple array data files. The general structure is
        │   └── ...
        └── ...
 
-As NN input data may be condition-specific, arrays can be associated with specific conditions in the array data files directly. A single input can have either one single global array to specify the input's data in all conditions, or multiple condition-specific arrays. In the global case, the name of the array must be ``0``. In the condition-specific case, the name of the array must be a semicolon-delimited list of all relevant condition IDs, and all simulated condition IDs must be associated with exactly one array.
+As NN input data may be condition-specific, arrays can be associated with specific conditions in the array data files directly. A single input can have either one single global array to specify the input's data in all conditions, or multiple condition-specific arrays. In the global case, the name of the array must be ``0`` [STRING]. In the condition-specific case, the name of the array must be a semicolon-delimited list of all relevant condition IDs, and all simulated condition IDs must be associated with exactly one array.
 
 The schema is provided as `JSON
 schema <standard/array_data_schema.json>`__. Currently, validation is only
