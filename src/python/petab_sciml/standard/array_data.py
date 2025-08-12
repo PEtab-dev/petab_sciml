@@ -9,8 +9,6 @@ from mkstd.types.array import get_array_type
 
 
 __all__ = [
-    "ConditionSpecificSingleInputData",
-    "SingleInputData",
     "Metadata",
     "ArrayData",
     "ArrayDataStandard",
@@ -22,6 +20,7 @@ __all__ = [
     "PARAMETERS",
     "ROW",
     "COLUMN",
+    "ALL_CONDITION_IDS",
 ]
 
 
@@ -33,6 +32,7 @@ PARAMETERS = "parameters"
 PERM = "perm"
 ROW = "row"
 COLUMN = "column"
+ALL_CONDITION_IDS = "0"
 
 
 Array = get_array_type()
@@ -79,34 +79,25 @@ class ArrayData(BaseModel):
     @classmethod
     def validate_condition_ids(cls, inputs) -> dict[str, SingleInputData]:
         for input_id, input_data in inputs.items():
-            root_data = input_data.root
-            if not root_data:
+            if not input_data:
                 raise ValueError(
                     f"No input data supplied for input `{input_id}`."
                 )
 
-            if len(root_data) == 1:
-                if list(root_data.values())[0].conditionIds:
-                    raise ValueError(
-                        "Do not specify condition IDs if supplying only one "
-                        "array for an input. When only one array is supplied, "
-                        "it is applied to all conditions. "
-                        f"Input: `{input_id}`."
-                    )
-            else:
-                for array_dict in root_data.values():
-                    if not array_dict.conditionIds:
+            for condition_ids_str, array in input_data.items():
+                n_arrays = len(input_data)
+                if (
+                    (condition_ids_str == ALL_CONDITION_IDS) and
+                    (n_arrays != 1)
+                ):
                         raise ValueError(
-                            "Condition IDs must be specified for each array, "
-                            "when multiple arrays are supplied for a single "
-                            f"input. Input: `{input_id}`."
+                            "The condition IDs list is "
+                            f"`{ALL_CONDITION_IDS}`, which indicates that the "
+                            "array will be applied to all conditions. In this "
+                            "case, exactly one array must be specified. "
+                            f"However, {n_arrays} arrays were specified for "
+                            f"input `{input_id}`."
                         )
-                if list(root_data.keys()) != list(map(str, range(len(root_data)))):
-                    raise ValueError(
-                        "The keys of the condition-specific array data for a "
-                        "single input must be ascending from 0. "
-                        f"Input: `{input_id}`."
-                    )
         return inputs
 
 
