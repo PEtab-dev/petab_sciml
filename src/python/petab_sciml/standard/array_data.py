@@ -38,34 +38,6 @@ COLUMN = "column"
 Array = get_array_type()
 
 
-class ConditionSpecificSingleInputData(BaseModel):
-    """Condition-specific input data for a single input."""
-
-    data: Array
-    """The data."""
-
-    conditionIds: list[str] | None = Field(default=None)
-    """The dataset is used with these conditions.
-
-    The default (`None`) indicates all conditions.
-    """
-
-    # TODO switch to `exclude_if`
-    # https://github.com/pydantic/pydantic/issues/12056
-    @model_serializer
-    def exclude_empty_condition_ids(self):
-        excluded_keys = [CONDITION_IDS] if not self.conditionIds else []
-        return {k: v for k, v in self if k not in excluded_keys}
-
-
-class SingleInputData(RootModel):
-    """All input data for a single input."""
-    # The HDF5 formt does not support dictionaries inside lists. Hence, the
-    # `str` keys for this root `dict` are just ascending integers. Since HDF5
-    # does not support integer keys, they are of type `str`.
-    root: dict[str, ConditionSpecificSingleInputData]
-
-
 class Metadata(BaseModel):
     """Metadata for array(s)."""
 
@@ -86,11 +58,12 @@ class ArrayData(BaseModel):
     metadata: Metadata
     """Additional metadata for the arrays."""
 
-    inputs: dict[str, SingleInputData] = {}
+    inputs: dict[str, dict[str, Array]] = {}
     """Input data arrays.
 
-    Keys are input IDs, values are the input data arrays and their applicable
-    conditions.
+    Outer keys are input IDs.
+    Inner dict keys are semicolon-delimited lists of condition IDs,
+    and values are the corresponding input array data for those conditions.
     """
 
     parameters: dict[str, dict[str, dict[str, Array]]] = {}
