@@ -98,21 +98,16 @@ them across multiple array data files. The general structure is
 
 .. code::
 
-   arrays.hdf5                       # (arbitrary filename)
-   ├── metadata                      # [GROUP]
-   │   └── perm                      # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
-   ├── inputs                        # (optional) [GROUP] reserved keyword
-   │   ├── inputId1                  # [GROUP] an input ID
-   │   │   ├── 0                     # [GROUP] 0-based numbering of each conditionIds-data pair for this input
-   │   │   │   ├── conditionIds      # (optional) [DATASET, STRING ARRAY] an arbitrary number of PEtab condition IDs
-   │   │   │   │   ├── conditionId1
-   │   │   │   │   └── ...
-   │   │   │   └── data              # [DATASET, FLOAT ARRAY] the input data
-   │   │   ├── 1
-   │   │   │   ├── conditionIds
-   │   │   │   │   └── ...
-   │   │   │   └── data
+   arrays.hdf5                            # (arbitrary filename)
+   ├── metadata                           # [GROUP]
+   │   └── perm                           # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
+   ├── inputs                             # (optional) [GROUP] reserved keyword
+   │   ├── inputId1                       # [GROUP] an input ID
+   │   │   ├── conditionId1;conditionId2  # [DATASET, FLOAT ARRAY] the input data. The name is a semicolon-delimited list of relevant conditions, or "0" for all conditions.
+   │   │   ├── conditionId3
    │   │   └── ...
+   │   ├── inputId2
+   │   │   └── 0                          # Unlike for inputId1, here the condition ID list is "0" to represent all conditions.
    │   └── ...
    └── parameters                    # (optional) [GROUP] reserved keyword
        ├── netId1                    # [GROUP] a NN ID
@@ -122,7 +117,7 @@ them across multiple array data files. The general structure is
        │   └── ...
        └── ...
 
-As NN input data may be condition-specific, arrays can be associated with specific conditions in the array data files directly. A single input can have either one single global `data` to specify the input's data in all conditions, or multiple condition-specific `data`. In the global `data` case, `conditionIds` must be omitted. In the condition-specific `data` case, all simulated condition IDs must be associated with exactly one `data`, to avoid undefined input.
+As NN input data may be condition-specific, arrays can be associated with specific conditions in the array data files directly. A single input can have either one single global array to specify the input's data in all conditions, or multiple condition-specific arrays. In the global case, the name of the array must be ``0`` [STRING]. In the condition-specific case, the name of the array must be a semicolon-delimited list of all relevant condition IDs, and all simulated condition IDs must be associated with exactly one array.
 
 The schema is provided as `JSON
 schema <standard/array_data_schema.json>`__. Currently, validation is only

@@ -9,8 +9,6 @@ from mkstd.types.array import get_array_type
 
 
 __all__ = [
-    "ConditionSpecificSingleInputData",
-    "SingleInputData",
     "Metadata",
     "ArrayData",
     "ArrayDataStandard",
@@ -22,6 +20,7 @@ __all__ = [
     "PARAMETERS",
     "ROW",
     "COLUMN",
+    "ALL_CONDITION_IDS",
 ]
 
 
@@ -33,37 +32,10 @@ PARAMETERS = "parameters"
 PERM = "perm"
 ROW = "row"
 COLUMN = "column"
+ALL_CONDITION_IDS = "0"
 
 
 Array = get_array_type()
-
-
-class ConditionSpecificSingleInputData(BaseModel):
-    """Condition-specific input data for a single input."""
-
-    data: Array
-    """The data."""
-
-    conditionIds: list[str] | None = Field(default=None)
-    """The dataset is used with these conditions.
-
-    The default (`None`) indicates all conditions.
-    """
-
-    # TODO switch to `exclude_if`
-    # https://github.com/pydantic/pydantic/issues/12056
-    @model_serializer
-    def exclude_empty_condition_ids(self):
-        excluded_keys = [CONDITION_IDS] if not self.conditionIds else []
-        return {k: v for k, v in self if k not in excluded_keys}
-
-
-class SingleInputData(RootModel):
-    """All input data for a single input."""
-    # The HDF5 formt does not support dictionaries inside lists. Hence, the
-    # `str` keys for this root `dict` are just ascending integers. Since HDF5
-    # does not support integer keys, they are of type `str`.
-    root: dict[str, ConditionSpecificSingleInputData]
 
 
 class Metadata(BaseModel):
@@ -86,11 +58,12 @@ class ArrayData(BaseModel):
     metadata: Metadata
     """Additional metadata for the arrays."""
 
-    inputs: dict[str, SingleInputData] = {}
+    inputs: dict[str, dict[str, Array]] = {}
     """Input data arrays.
 
-    Keys are input IDs, values are the input data arrays and their applicable
-    conditions.
+    Outer keys are input IDs.
+    Inner dict keys are semicolon-delimited lists of condition IDs,
+    and values are the corresponding input array data for those conditions.
     """
 
     parameters: dict[str, dict[str, dict[str, Array]]] = {}
@@ -106,34 +79,25 @@ class ArrayData(BaseModel):
     @classmethod
     def validate_condition_ids(cls, inputs) -> dict[str, SingleInputData]:
         for input_id, input_data in inputs.items():
-            root_data = input_data.root
-            if not root_data:
+            if not input_data:
                 raise ValueError(
                     f"No input data supplied for input `{input_id}`."
                 )
 
-            if len(root_data) == 1:
-                if list(root_data.values())[0].conditionIds:
-                    raise ValueError(
-                        "Do not specify condition IDs if supplying only one "
-                        "array for an input. When only one array is supplied, "
-                        "it is applied to all conditions. "
-                        f"Input: `{input_id}`."
-                    )
-            else:
-                for array_dict in root_data.values():
-                    if not array_dict.conditionIds:
+            for condition_ids_str, array in input_data.items():
+                n_arrays = len(input_data)
+                if (
+                    (condition_ids_str == ALL_CONDITION_IDS) and
+                    (n_arrays != 1)
+                ):
                         raise ValueError(
-                            "Condition IDs must be specified for each array, "
-                            "when multiple arrays are supplied for a single "
-                            f"input. Input: `{input_id}`."
+                            "The condition IDs list is "
+                            f"`{ALL_CONDITION_IDS}`, which indicates that the "
+                            "array will be applied to all conditions. In this "
+                            "case, exactly one array must be specified. "
+                            f"However, {n_arrays} arrays were specified for "
+                            f"input `{input_id}`."
                         )
-                if list(root_data.keys()) != list(map(str, range(len(root_data)))):
-                    raise ValueError(
-                        "The keys of the condition-specific array data for a "
-                        "single input must be ascending from 0. "
-                        f"Input: `{input_id}`."
-                    )
         return inputs
 
 

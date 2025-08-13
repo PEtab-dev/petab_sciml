@@ -6,7 +6,7 @@ TODO move to test suite for python package
 import pytest
 
 import numpy as np
-from petab_sciml import ArrayData, ArrayDataStandard, METADATA, INPUTS, PARAMETERS, PERM, CONDITION_IDS, ROW, DATA
+from petab_sciml import ArrayData, ArrayDataStandard, METADATA, INPUTS, PARAMETERS, PERM, CONDITION_IDS, ROW, DATA, ALL_CONDITION_IDS
 
 
 def test_array_data_dict():
@@ -15,16 +15,10 @@ def test_array_data_dict():
         METADATA: {PERM: ROW},
         INPUTS: {
             "inputId1": {
-                "0": {
-                    CONDITION_IDS: ["cond1", "cond2"],
-                    DATA: np.eye(2),
-                },
-                "1": {
-                    CONDITION_IDS: ["cond3", "cond4"],
-                    DATA: np.eye(4),
-                },
+                "cond1;cond2": np.eye(2),
+                "cond3;cond4": np.eye(4),
             },
-            "inputId2": {"0": {DATA: np.eye(3)}},
+            "inputId2": {ALL_CONDITION_IDS: np.eye(3)},
         },
     }
 
