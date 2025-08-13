@@ -98,24 +98,26 @@ them across multiple array data files. The general structure is
 
 .. code::
 
-   arrays.hdf5                       # (arbitrary filename)
-   ├── metadata
-   │   └── perm                      # reserved keyword (string). "row" for row-major, "column" for column-major.
-   ├── inputs                        # (optional)
-   │   ├── inputId1
-   │   │   ├─┬─ conditionIds         # (optional) an arbitrary number of PEtab condition IDs (list of string).
-   │   │   │ │  ├── conditionId1 
-   │   │   │ │  └── ... 
-   │   │   │ └── data                # the input data (array).
+   arrays.hdf5                            # (arbitrary filename)
+   ├── metadata                           # [GROUP]
+   │   └── perm                           # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
+   ├── inputs                             # (optional) [GROUP] reserved keyword
+   │   ├── inputId1                       # [GROUP] an input ID
+   │   │   ├── conditionId1;conditionId2  # [DATASET, FLOAT ARRAY] the input data. The name is a semicolon-delimited list of relevant conditions, or "0" for all conditions.
+   │   │   ├── conditionId3
    │   │   └── ...
+   │   ├── inputId2
+   │   │   └── 0                          # Unlike for inputId1, here the condition ID list is "0" to represent all conditions.
    │   └── ...
-   └── parameters                    # (optional)
-       ├── netId1
-       │   ├── layerId1
-       │   │   ├── parameterId1      # the parameter values (array).
+   └── parameters                    # (optional) [GROUP] reserved keyword
+       ├── netId1                    # [GROUP] a NN ID
+       │   ├── layerId1              # [GROUP] a layer ID
+       │   │   ├── parameterId1      # [DATASET, FLOAT ARRAY] the parameter values
        │   │   └── ...
        │   └── ...
        └── ...
+
+As NN input data may be condition-specific, arrays can be associated with specific conditions in the array data files directly. A single input can have either one single global array to specify the input's data in all conditions, or multiple condition-specific arrays. In the global case, the name of the array must be ``0`` [STRING]. In the condition-specific case, the name of the array must be a semicolon-delimited list of all relevant condition IDs, and all simulated condition IDs must be associated with exactly one array.
 
 The schema is provided as `JSON
 schema <standard/array_data_schema.json>`__. Currently, validation is only
@@ -439,7 +441,7 @@ hybridization tables, and array files. The general structure is
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           static: ...      # the hybridization type (bool).
+           static: ...       # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
