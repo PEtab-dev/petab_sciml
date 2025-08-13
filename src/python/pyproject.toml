@@ -10,7 +10,7 @@ authors = [
   {name = "Dilan Pathirana"},
 ]
 dependencies = [
-  "mkstd>=0.0.9",
+  "mkstd>=0.0.10",
   "torch",
   "pydantic",
 ]
