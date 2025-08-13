@@ -272,6 +272,10 @@ class NNModel(BaseModel):
                     state[node.name] = graph.call_function(
                         function, args, kwargs
                     )
+                case "call_method":
+                    state[node.name] = graph.call_method(
+                        node.target, args, kwargs
+                    )
                 case "call_module":
                     state[node.name] = graph.call_module(
                         node.target, args, kwargs
