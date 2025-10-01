@@ -54,15 +54,16 @@ defining a SciML problem, see the Format specification.
 Why a SciML data format?
 ------------------------
 
-There are several technical challenges with training SciML models. First, coding a correct
+There are several technical challenges with training SciML models. Firstly, coding a correct
 and performant loss/objective function is non-trivial, especially for more complex models
-like those events or partial observability. Second, efficient training requires gradients
-computed via automatic differentiation (AD). Yet writing fast, AD-compatible code in
-frameworks like JAX, PyTorch, or the Julia SciML ecosystem can be challenging. Similarly,
+like those events or partial observability. Secondly, efficient training requires gradients
+computed via automatic differentiation (AD). Although frameworks like JAX,
+PyTorch and the Julia SciML ecosystem support AD-compatible code, it can still
+be challenging to write performant code. Similarly,
 porting models between frameworks to leverage framework-specific benefits is time-consuming
-because syntax and AD framework differ. As a result, training setups are often hard-coded
+because each AD framework uses different syntax. As a result, training setups are often hard-coded
 to a single framework. This undermines reusability, both for extending prior work and for
-creating benchmark collections that can run across toolchains.
+creating benchmark collections that can run across AD frameworks.
 
 All this motivated PEtab SciML. By providing a programming-language-independent, accessible,
 table-based format, specifying the training objective becomes simpler. A standard
