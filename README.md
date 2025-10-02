@@ -46,4 +46,4 @@ pip install petab-sciml
 
 ## Documentation
 
-Information on features and tutorials can be found in the online [documentation](ADD).
+Information on features and tutorials can be found in the online [documentation](https://petab-sciml.readthedocs.io/latest/introduction.html).
