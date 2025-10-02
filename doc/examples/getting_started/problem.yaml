@@ -11,7 +11,7 @@ problems:
       - "conditions.tsv"
     mapping_files:
       - "mapping.tsv"
-format_version: 2
+format_version: 2.0.0
 extensions:
   sciml:
     array_files:
