@@ -8,8 +8,8 @@ and mechanistic ordinary differential equation (ODE) models.
 Highlights
 ----------
 
-Extending the `PEtab format <https://petab.readthedocs.io/>`_ for mechanistic models,
-PEtab SciML provides an accessible, reproducible way to specify SciML training problems
+Extending the `PEtab format <https://petab.readthedocs.io/>`_ for mechanistic ODE models,
+PEtab SciML provides a human readable, reproducible way to specify SciML training problems
 across diverse scenarios, in a format directly importable by downstream tools. The main
 aspects enabling this are:
 
@@ -21,13 +21,17 @@ aspects enabling this are:
   toolboxes for dynamic-model training in Julia
   (`PEtab.jl <https://github.com/sebapersson/PEtab.jl>`_) and Python/JAX
   (`AMICI <https://github.com/AMICI-dev/AMICI>`_).
+- **Broad support for ML architectures.** A diverse set of ML architectures can be
+  specified via an exchangeable PEtab SciML YAML format (supports export from PyTorch
+  modules), or via importer-specific libraries (e.g., Lux.jl in PEtab.jl; Equinox in
+  AMICI).
 - **Diverse model types.** All model features of the
   `PEtab format <https://petab.readthedocs.io/>`_ are supported, like models with partial
-  observability, multiple simulation conditions, diverse noise models, and events/callbacks.
+  observability, multiple simulation conditions, diverse noise models, and/or events.
 - **Efficient training strategies.** With minimal user input, PEtab SciML problems can be
   rewritten at the PEtab abstraction level to be compatible with training strategies such as
   multiple shooting, curriculum learning, and regularization (e.g., of ML outputs).
-- **Thoroughly tested.** An extensive test suite ensures importers produce correct,
+- **Thoroughly tested.** An extensive test suite ensures importers produce correct and
   consistent output.
 - **Linting and helpers.** The PEtab SciML Python library provides a linter and utility
   functions for creating common problem types (e.g., Neural ODEs) and transformations (e.g.,
@@ -46,30 +50,30 @@ The PEtab SciML Python3 helper library can be installed with:
 How to read the documentation
 -----------------------------
 
-If you are new to PEtab SciML, start with the Getting Started tutorial. It is a
-prerequisite for the How-to guides, which cover different model scenarios (e.g., Neural
-ODEs, ML model upstream of the ODE). For a complete description of all options when
-defining a SciML problem, see the Format specification.
+If you are new to PEtab SciML, start with the :doc:`Getting Started tutorial <tutorial>`.
+It is a prerequisite for the How-to guides, which cover different model scenarios (e.g.,
+Neural ODEs, ML model upstream of the ODE). For a complete description of all options when
+defining a SciML problem, see the :doc:`Format specification <format>`.
 
 Why a SciML data format?
 ------------------------
 
 There are several technical challenges with training SciML models. Firstly, coding a correct
-and performant loss/objective function is non-trivial, especially for more complex models
-like those events or partial observability. Secondly, efficient training requires gradients
-computed via automatic differentiation (AD). Although frameworks like JAX,
-PyTorch and the Julia SciML ecosystem support AD-compatible code, it can still
-be challenging to write performant code. Similarly,
-porting models between frameworks to leverage framework-specific benefits is time-consuming
-because each AD framework uses different syntax. As a result, training setups are often hard-coded
-to a single framework. This undermines reusability, both for extending prior work and for
-creating benchmark collections that can run across AD frameworks.
+and performant loss/objective function is non-trivial, especially for more complex scenarios
+like models with events/callbacks or partial observability. Secondly, efficient training
+requires gradients computed via automatic differentiation (AD). Although frameworks like
+JAX, PyTorch and the Julia SciML ecosystem support AD-compatible code, it can still be
+challenging to write performant code. Similarly, porting models between frameworks to leverage
+framework-specific benefits is time-consuming because each AD backend uses different syntax.
+As a result, training setups are often hard-coded to a single framework. This undermines
+reusability, both for extending prior work and for creating benchmark collections that can
+run across different toolboxes.
 
-All this motivated PEtab SciML. By providing a programming-language-independent, accessible,
-table-based format, specifying the training objective becomes simpler. A standard
-specification also lets importers in suitable frameworks (e.g., JAX, Julia) be engineered
-for performance and correctness across the entire standard rather than for ad-hoc use cases.
-Together, these points improve exchangeability, correctness, and overall reproducibility.
+PEtab SciML solves these problems by providing a human-writable, tabular,
+language-independent specification of the training objective. This further enables generic
+importers in different ecosystems (e.g., JAX, Julia SciML) to generate correct, performant
+training objectives without ad-hoc, per-project engineering. Together, this improves
+exchangeability and overall reproducibility.
 
 
 Getting Help with and Extending PEtab SciML
@@ -77,7 +81,9 @@ Getting Help with and Extending PEtab SciML
 
 If you run into problems:
 
-- Check the Troubleshooting section of the docs.
-- If you encounter unexpected behavior or a bug, please open an issue on GitHub.
+- Check the :doc:`Troubleshooting <trouble>` section of the documentation.
+- If you encounter unexpected behavior or a bug, please open an
+  `issue <https://github.com/PEtab-dev/petab_sciml/issues/>`_ on GitHub
 
-If PEtab SciML is missing a feature you need, please open an issue on GitHub.
+If PEtab SciML is missing a feature you need, please open an
+`issue <https://github.com/PEtab-dev/petab_sciml/issues/>`_ on GitHub

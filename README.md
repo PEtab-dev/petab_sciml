@@ -7,8 +7,8 @@ and mechanistic ordinary differential equation (ODE) models.
 
 ## Highlights
 
-Extending the [PEtab format](https://petab.readthedocs.io/) for mechanistic models,
-PEtab SciML provides an accessible, reproducible way to specify SciML training problems
+Extending the [PEtab format](https://petab.readthedocs.io) for mechanistic ODE models,
+PEtab SciML provides a human readable, reproducible way to specify SciML training problems
 across diverse scenarios, in a format directly importable by downstream tools. The main
 aspects enabling this are:
 
@@ -20,13 +20,17 @@ aspects enabling this are:
   toolboxes for dynamic-model training in Julia
   ([PEtab.jl](https://github.com/sebapersson/PEtab.jl)) and Python/JAX
   ([AMICI](https://github.com/AMICI-dev/AMICI)).
+- **Broad support for ML architectures.** A diverse set of ML architectures can be
+  specified via an exchangeable PEtab SciML YAML format (supports export from PyTorch
+  modules), or via importer-specific libraries (e.g., Lux.jl in PEtab.jl; Equinox in
+  AMICI).
 - **Diverse model types.** All model features of the
-  [PEtab format](https://petab.readthedocs.io/) are supported, like models with partial
-  observability, multiple simulation conditions, diverse noise models, and events/callbacks.
+  [PEtab format](https://petab.readthedocs.io) are supported, like models with partial
+  observability, multiple simulation conditions, diverse noise models, and/or events.
 - **Efficient training strategies.** With minimal user input, PEtab SciML problems can be
   rewritten at the PEtab abstraction level to be compatible with training strategies such as
   multiple shooting, curriculum learning, and regularization (e.g., of ML outputs).
-- **Thoroughly tested.** An extensive test suite ensures importers produce correct,
+- **Thoroughly tested.** An extensive test suite ensures importers produce correct and
   consistent output.
 - **Linting and helpers.** The PEtab SciML Python library provides a linter and utility
   functions for creating common problem types (e.g., Neural ODEs) and transformations (e.g.,
