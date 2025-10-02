@@ -6,16 +6,10 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
 
 .. toctree::
    :maxdepth: 3
-   :caption: User guide
-   :caption: Getting Started
-
-   examples/getting_started/getting_started.ipynb
-
-.. toctree::
-   :maxdepth: 3
-   :caption: PEtab SciML file format
+   :caption: User Guide
 
    Introduction <introduction>
+   Getting Started <examples/getting_started/getting_started.ipynb>
 
 .. toctree::
    :caption: PEtab SciML file format
