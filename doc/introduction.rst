@@ -5,6 +5,11 @@ PEtab SciML is a table-based data format for creating training (parameter estima
 problems for **scientific machine learning (SciML)** models that combine machine learning
 and mechanistic ordinary differential equation (ODE) models.
 
+**Beta Disclaimer**: this software is under active development and may contain bugs or 
+instabilities. The PEtab SciML format is finalised and support for it has been implemented 
+in PEtab importers, though not yet released.  Documentation and utility functions are
+currently being added. 
+
 Highlights
 ----------
 
