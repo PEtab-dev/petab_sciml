@@ -207,9 +207,13 @@ class NNModel(BaseModel):
 
     @staticmethod
     def from_pytorch_module(
-        module: nn.Module, nn_model_id: str, inputs: list[Input]
+        module: nn.Module, nn_model_id: str, inputs: list[Input] = None,
     ) -> NNModel:
-        """Create a PEtab SciML NN model from a pytorch module."""
+        """Create a PEtab SciML NN model from a pytorch module.
+
+        If `inputs` are not provided, their info will be generated from the
+        network.
+        """
         layers = []
         layer_ids = []
         for layer_id, layer_module in module.named_modules():
@@ -227,11 +231,17 @@ class NNModel(BaseModel):
         nodes = []
         node_names = []
         pytorch_nodes = list(torch.fx.symbolic_trace(module).graph.nodes)
+        generate_inputs = False
+        if inputs is None:
+            generate_inputs = True
+            inputs = []
         for pytorch_node in pytorch_nodes:
             op = pytorch_node.op
             target = pytorch_node.target
             if op == "call_function":
                 target = pytorch_node.target.__name__
+            if op == "placeholder" and generate_inputs:
+                inputs.append(Input(input_id=pytorch_node.target))
 
             # Convert module args to strings
             args = [

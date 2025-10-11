@@ -1,6 +1,7 @@
 nn_model_id: model0
 inputs:
-- input_id: input0
+- input_id: input1
+- input_id: input2
 layers:
 - layer_id: fc1
   layer_type: Linear
