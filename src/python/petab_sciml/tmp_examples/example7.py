@@ -5,10 +5,7 @@ from petab_sciml.standard.nn_model import Input, NNModel, NNModelStandard
 
 
 class Net(nn.Module):
-    """Example network.
-
-    Ref: https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
-    """
+    """Network with `torch.cat` and multiple inputs and outputs."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -16,13 +13,11 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 10)
 
     def forward(self, input1: torch.Tensor, input2: torch.Tensor) -> torch.Tensor:
-        #input = torch.cat(input1, input2)
         input = torch.cat([input1, input2])
 
         f1 = F.relu(self.fc1(input))
         f2 = F.relu(self.fc2(f1))
         output1 = f1
-        #return output1
         output2 = f2
         return output1, output2
 
