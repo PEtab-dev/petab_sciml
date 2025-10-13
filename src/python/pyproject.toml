@@ -45,6 +45,10 @@ doc = [
     "sphinx-autodoc-typehints",
 ]
 
+test = [
+    "pytest"
+]
+
 [project.urls]
 Repository = "https://github.com/sebapersson/petab_sciml"
 "Bug Tracker" = "https://github.com/sebapersson/petab_sciml/issues"

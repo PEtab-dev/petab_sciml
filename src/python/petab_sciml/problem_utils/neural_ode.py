@@ -1,12 +1,15 @@
-from libsbml import Model, parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
+from libsbml import parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
 import pandas as pd
 from typing import Iterable
 from yaml import safe_dump
 
-def generate_neural_ode_problem(species_all: Iterable[str], filename: str="model.xml") -> None:
+
+def generate_neural_ode_problem(
+    species_all: Iterable[str], filename: str = "model.xml"
+) -> None:
     document = write_sbml(species_all, filename)
-    breakpoint()
     write_petab(document, filename)
+
 
 def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
     document = SBMLDocument(3, 1)
@@ -14,8 +17,8 @@ def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
     model = document.createModel()
 
     per_second = model.createUnitDefinition()
-    per_second.setId('per_second')     
-    unit = per_second.createUnit()                            
+    per_second.setId("per_second")
+    unit = per_second.createUnit()
     unit.setKind(UNIT_KIND_SECOND)
     unit.setExponent(-1)
     unit.setScale(0)
@@ -50,10 +53,10 @@ def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
         kinetic_law = r.createKineticLaw()
         kinetic_law.setMath(math_ast)
 
-
     writeSBML(document, filename)
 
     return document
+
 
 def write_petab(document: SBMLDocument, filename: str) -> None:
     model = document.model
@@ -61,7 +64,6 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
     conditions = {"conditionId": ["cond1"]}
     pd.DataFrame(conditions).to_csv("conditions.tsv", sep="\t", index=False)
 
-    breakpoint()
     # hybridization
     species = [sp.id for sp in model.species]
     params = [param.id for param in model.parameters]
@@ -78,14 +80,14 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
     outputs = [f"net1.outputs[0][{s}]" for s, _ in enumerate(target_values)]
     mapping = {
         "petabEntityId": target_ids + target_values + ["net1_ps"],
-        "modelEntityId": inputs + outputs + ["net1.parameters"]
+        "modelEntityId": inputs + outputs + ["net1.parameters"],
     }
     pd.DataFrame(mapping).to_csv("mapping.tsv", sep="\t", index=False)
-    
+
     # measurements - hmm skip?
     # network params hdf5 - different function
     # network yaml - different function
-    
+
     # observables
     observable_ids = [f"{s}_o" for s in species]
     observables = {
@@ -104,24 +106,26 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
         "lowerBound": ["-inf"],
         "upperBound": ["inf"],
         "nominalValue": [None],
-        "estimate": [1]
+        "estimate": [1],
     }
     pd.DataFrame(parameters).to_csv("parameters.tsv", sep="\t", index=False)
 
-    # problem.yaml 
+    # problem.yaml
     problem = {
-        "problems": [{
-            "model_files": {
-                "model": {
-                    "location": filename,
-                    "language": "sbml",
+        "problems": [
+            {
+                "model_files": {
+                    "model": {
+                        "location": filename,
+                        "language": "sbml",
+                    },
+                    "measurement_files": ["measurements.tsv"],
+                    "observable_files": ["observables.tsv"],
+                    "condition_files": ["conditions.tsv"],
+                    "mapping_files": ["mapping.tsv"],
                 },
-                "measurement_files": ["measurements.tsv"],
-                "observable_files": ["observables.tsv"],
-                "condition_files": ["conditions.tsv"],
-                "mapping_files": ["mapping.tsv"],
-            },
-        }],
+            }
+        ],
         "format_version": "2.0.0",
         "extensions": {
             "sciml": {
@@ -133,10 +137,10 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
                         "static": False,
                         "format": "YAML",
                     }
-                }
+                },
             }
         },
-        "parameter_file": "parameters.tsv"
+        "parameter_file": "parameters.tsv",
     }
     with open("problem.yaml", "w") as file:
         safe_dump(problem, file, sort_keys=False)
