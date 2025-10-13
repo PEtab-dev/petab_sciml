@@ -41,14 +41,22 @@ def test_generate_neural_ode_problem(tmp_path):
 
 
 def test_generate_neural_ode_problem_with_options(tmp_path):
-    """generate_neural_ode_problem"""
+    """generate_neural_ode_problem_with_options"""
 
     test_dir = tmp_path / "petab"
     test_dir.mkdir()
 
     with chdir(test_dir):
         species = ["prey", "predator", "symbiote"]
-        generate_neural_ode_problem(species, filename="three_species_model.xml")
+        network_arrays = ["supernet_params.h5", "supernet_inputs.h5"]
+        generate_neural_ode_problem(
+            species, 
+            model_filename="three_species_model.xml",
+            measurements_filename="measurements_exp_test.tsv",
+            network_name="supernet",
+            network_filename="supernet.yaml",
+            array_filenames=network_arrays,
+        )
 
         expected_files = [
             "three_species_model.xml",
@@ -81,3 +89,16 @@ def test_generate_neural_ode_problem_with_options(tmp_path):
                 problem["problems"][0]["model_files"]["model"]["location"]
                 == "three_species_model.xml"
             )
+            assert (
+                problem["problems"][0]["model_files"]["measurement_files"][0]
+                == "measurements_exp_test.tsv"
+            )
+            assert (
+                "supernet" in problem["extensions"]["sciml"]["neural_nets"].keys()
+            )
+            assert (
+                problem["extensions"]["sciml"]["neural_nets"]["supernet"]["location"]
+                == "supernet.yaml"
+            )
+            assert problem["extensions"]["sciml"]["array_files"] == network_arrays
+

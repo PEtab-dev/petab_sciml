@@ -5,13 +5,44 @@ from yaml import safe_dump
 
 
 def generate_neural_ode_problem(
-    species_all: Iterable[str], filename: str = "model.xml"
+    species_all: Iterable[str], 
+    model_filename: str = "model.xml",
+    measurements_filename: str = "measurements.tsv",
+    network_name: str = "net1",
+    network_filename: str = "net1.yaml",
+    array_filenames: Iterable[str] = [],
 ) -> None:
-    document = write_sbml(species_all, filename)
-    write_petab(document, filename)
+    """
+    Generate the PEtab files for a neural ODE problem with the given species.
+    This function will generate files defining conditions, hybridization, mappings
+    observables, parameters and a PEtab problem.yaml file. The measurements 
+    need to be provided by the user but a filename for the measurements can be
+    specified. 
+    
+    :param species_all:
+        List of species names to include in the model.
+    :param model_filename:
+        Name of the SBML file to create.
+    :param measurements_filename:
+        Name of the measurements TSV file to be referenced in the PEtab problem.
+    :param network_name:
+        Name of the neural network to be used in the problem. This name will be 
+        used by PEtab importers to identify the network in compiled models.
+    :param network_filename:
+        Name of the neural network YAML file defining the network architecture.
+    :param array_filenames:
+        List of names of array files to be referenced in the PEtab problem
+        (e.g. network parameters, network inputs).
+    """
+    document = _write_sbml(species_all, model_filename)
+    _write_petab(document, model_filename, measurements_filename, network_name, network_filename, array_filenames)
 
 
-def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
+def _write_sbml(species_all: Iterable[str], model_filename: str) -> SBMLDocument:
+    """
+    Write the SBML model file with the given filename for a neural ODE PEtab 
+    problem and return the created SBML document.
+    """
     document = SBMLDocument(3, 1)
 
     model = document.createModel()
@@ -53,12 +84,24 @@ def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
         kinetic_law = r.createKineticLaw()
         kinetic_law.setMath(math_ast)
 
-    writeSBML(document, filename)
+    writeSBML(document, model_filename)
 
     return document
 
 
-def write_petab(document: SBMLDocument, filename: str) -> None:
+def _write_petab(
+        document: SBMLDocument, 
+        model_filename: str, 
+        measurements_filename: str,
+        network_name: str,
+        network_filename: str,
+        array_filenames: Iterable[str],
+) -> None:
+    """
+    Write the PEtab files for a neural ODE PEtab problem with the given SBML
+    document and referencing the model, measurements, network and array filenames
+    provided.
+    """
     model = document.model
     # conditions
     conditions = {"conditionId": ["cond1"]}
@@ -67,8 +110,8 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
     # hybridization
     species = [sp.id for sp in model.species]
     params = [param.id for param in model.parameters]
-    target_ids = [f"net1_input{s}" for s, _ in enumerate(species)]
-    target_values = [f"net1_output{s}" for s, _ in enumerate(params)]
+    target_ids = [f"{network_name}_input{s}" for s, _ in enumerate(species)]
+    target_values = [f"{network_name}_output{s}" for s, _ in enumerate(params)]
     hybridization = {
         "targetId": target_ids + params,
         "target_value": species + target_values,
@@ -76,17 +119,13 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
     pd.DataFrame(hybridization).to_csv("hybridization.tsv", sep="\t", index=False)
 
     # mapping
-    inputs = [f"net1.inputs[0][{s}]" for s, _ in enumerate(target_ids)]
-    outputs = [f"net1.outputs[0][{s}]" for s, _ in enumerate(target_values)]
+    inputs = [f"{network_name}.inputs[0][{s}]" for s, _ in enumerate(target_ids)]
+    outputs = [f"{network_name}.outputs[0][{s}]" for s, _ in enumerate(target_values)]
     mapping = {
-        "petabEntityId": target_ids + target_values + ["net1_ps"],
-        "modelEntityId": inputs + outputs + ["net1.parameters"],
+        "petabEntityId": target_ids + target_values + [f"{network_name}_ps"],
+        "modelEntityId": inputs + outputs + [f"{network_name}.parameters"],
     }
     pd.DataFrame(mapping).to_csv("mapping.tsv", sep="\t", index=False)
-
-    # measurements - hmm skip?
-    # network params hdf5 - different function
-    # network yaml - different function
 
     # observables
     observable_ids = [f"{s}_o" for s in species]
@@ -101,7 +140,7 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
 
     # parameters
     parameters = {
-        "parameterId": ["net1_ps"],
+        "parameterId": [f"{network_name}_ps"],
         "parameterScale": ["lin"],
         "lowerBound": ["-inf"],
         "upperBound": ["inf"],
@@ -116,10 +155,10 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
             {
                 "model_files": {
                     "model": {
-                        "location": filename,
+                        "location": model_filename,
                         "language": "sbml",
                     },
-                    "measurement_files": ["measurements.tsv"],
+                    "measurement_files": [measurements_filename],
                     "observable_files": ["observables.tsv"],
                     "condition_files": ["conditions.tsv"],
                     "mapping_files": ["mapping.tsv"],
@@ -129,11 +168,11 @@ def write_petab(document: SBMLDocument, filename: str) -> None:
         "format_version": "2.0.0",
         "extensions": {
             "sciml": {
-                "array_files": [],
+                "array_files": array_filenames,
                 "hybridization_files": ["hybridization.tsv"],
                 "neural_nets": {
-                    "net1": {
-                        "location": None,
+                    network_name: {
+                        "location": network_filename,
                         "static": False,
                         "format": "YAML",
                     }
