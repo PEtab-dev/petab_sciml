@@ -90,7 +90,7 @@ def test_generate_neural_ode_problem_with_options(tmp_path):
                 == "three_species_model.xml"
             )
             assert (
-                problem["problems"][0]["model_files"]["measurement_files"][0]
+                problem["problems"][0]["measurement_files"][0]
                 == "measurements_exp_test.tsv"
             )
             assert (

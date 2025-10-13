@@ -1,8 +1,7 @@
 from libsbml import parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
 import pandas as pd
 from typing import Iterable
-from yaml import safe_dump
-
+from ruamel.yaml import YAML
 
 def generate_neural_ode_problem(
     species_all: Iterable[str], 
@@ -114,7 +113,7 @@ def _write_petab(
     target_values = [f"{network_name}_output{s}" for s, _ in enumerate(params)]
     hybridization = {
         "targetId": target_ids + params,
-        "target_value": species + target_values,
+        "targetValue": species + target_values,
     }
     pd.DataFrame(hybridization).to_csv("hybridization.tsv", sep="\t", index=False)
 
@@ -131,7 +130,7 @@ def _write_petab(
     observable_ids = [f"{s}_o" for s in species]
     observables = {
         "observableId": observable_ids,
-        "observableFormular": species,
+        "observableFormula": species,
         "noiseFormula": [0.05] * len(species),
         "observableTransformation": ["lin"] * len(species),
         "noiseDistribution": ["normal"] * len(species),
@@ -157,12 +156,12 @@ def _write_petab(
                     "model": {
                         "location": model_filename,
                         "language": "sbml",
-                    },
-                    "measurement_files": [measurements_filename],
-                    "observable_files": ["observables.tsv"],
-                    "condition_files": ["conditions.tsv"],
-                    "mapping_files": ["mapping.tsv"],
+                    },    
                 },
+                "measurement_files": [measurements_filename],
+                "observable_files": ["observables.tsv"],
+                "condition_files": ["conditions.tsv"],
+                "mapping_files": ["mapping.tsv"],
             }
         ],
         "format_version": "2.0.0",
@@ -182,4 +181,6 @@ def _write_petab(
         "parameter_file": "parameters.tsv",
     }
     with open("problem.yaml", "w") as file:
-        safe_dump(problem, file, sort_keys=False)
+        yaml = YAML()
+        yaml.indent(mapping=2, sequence=4, offset=2)
+        yaml.dump(problem, file)
