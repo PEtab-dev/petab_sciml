@@ -1,11 +1,14 @@
-from libsbml import parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
+from libsbml import Model, parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
+import pandas as pd
 from typing import Iterable
+from yaml import safe_dump
 
 def generate_neural_ode_problem(species_all: Iterable[str], filename: str="model.xml") -> None:
-    write_sbml(species_all, filename)
+    document = write_sbml(species_all, filename)
+    breakpoint()
+    write_petab(document, filename)
 
-
-def write_sbml(species_all: Iterable[str], filename: str) -> None:
+def write_sbml(species_all: Iterable[str], filename: str) -> SBMLDocument:
     document = SBMLDocument(3, 1)
 
     model = document.createModel()
@@ -50,6 +53,90 @@ def write_sbml(species_all: Iterable[str], filename: str) -> None:
 
     writeSBML(document, filename)
 
-def write_petab(species_all: Iterable[str]) -> None:
-    # generate petab files and save them 
-    return
+    return document
+
+def write_petab(document: SBMLDocument, filename: str) -> None:
+    model = document.model
+    # conditions
+    conditions = {"conditionId": ["cond1"]}
+    pd.DataFrame(conditions).to_csv("conditions.tsv", sep="\t", index=False)
+
+    breakpoint()
+    # hybridization
+    species = [sp.id for sp in model.species]
+    params = [param.id for param in model.parameters]
+    target_ids = [f"net1_input{s}" for s, _ in enumerate(species)]
+    target_values = [f"net1_output{s}" for s, _ in enumerate(params)]
+    hybridization = {
+        "targetId": target_ids + params,
+        "target_value": species + target_values,
+    }
+    pd.DataFrame(hybridization).to_csv("hybridization.tsv", sep="\t", index=False)
+
+    # mapping
+    inputs = [f"net1.inputs[0][{s}]" for s, _ in enumerate(target_ids)]
+    outputs = [f"net1.outputs[0][{s}]" for s, _ in enumerate(target_values)]
+    mapping = {
+        "petabEntityId": target_ids + target_values + ["net1_ps"],
+        "modelEntityId": inputs + outputs + ["net1.parameters"]
+    }
+    pd.DataFrame(mapping).to_csv("mapping.tsv", sep="\t", index=False)
+    
+    # measurements - hmm skip?
+    # network params hdf5 - different function
+    # network yaml - different function
+    
+    # observables
+    observable_ids = [f"{s}_o" for s in species]
+    observables = {
+        "observableId": observable_ids,
+        "observableFormular": species,
+        "noiseFormula": [0.05] * len(species),
+        "observableTransformation": ["lin"] * len(species),
+        "noiseDistribution": ["normal"] * len(species),
+    }
+    pd.DataFrame(observables).to_csv("observables.tsv", sep="\t", index=False)
+
+    # parameters
+    parameters = {
+        "parameterId": ["net1_ps"],
+        "parameterScale": ["lin"],
+        "lowerBound": ["-inf"],
+        "upperBound": ["inf"],
+        "nominalValue": [None],
+        "estimate": [1]
+    }
+    pd.DataFrame(parameters).to_csv("parameters.tsv", sep="\t", index=False)
+
+    # problem.yaml 
+    problem = {
+        "problems": [{
+            "model_files": {
+                "model": {
+                    "location": filename,
+                    "language": "sbml",
+                },
+                "measurement_files": ["measurements.tsv"],
+                "observable_files": ["observables.tsv"],
+                "condition_files": ["conditions.tsv"],
+                "mapping_files": ["mapping.tsv"],
+            },
+        }],
+        "format_version": "2.0.0",
+        "extensions": {
+            "sciml": {
+                "array_files": [],
+                "hybridization_files": ["hybridization.tsv"],
+                "neural_nets": {
+                    "net1": {
+                        "location": None,
+                        "static": False,
+                        "format": "YAML",
+                    }
+                }
+            }
+        },
+        "parameter_file": "parameters.tsv"
+    }
+    with open("problem.yaml", "w") as file:
+        safe_dump(problem, file, sort_keys=False)

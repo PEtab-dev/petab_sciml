@@ -12,8 +12,10 @@ authors = [
 dependencies = [
   "mkstd>=0.0.10",
   "torch",
+  "pandas",
   "pydantic",
   "python-libsbml",
+  "PyYAML",
 ]
 requires-python = ">=3.8"
 description = "Specify parameter estimation problems and hybrid models."
