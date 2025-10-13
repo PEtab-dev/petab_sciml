@@ -46,14 +46,6 @@ def _write_sbml(species_all: Iterable[str], model_filename: str) -> SBMLDocument
 
     model = document.createModel()
 
-    per_second = model.createUnitDefinition()
-    per_second.setId("per_second")
-    unit = per_second.createUnit()
-    unit.setKind(UNIT_KIND_SECOND)
-    unit.setExponent(-1)
-    unit.setScale(0)
-    unit.setMultiplier(1)
-
     c1 = model.createCompartment()
     c1.setConstant(True)
     c1.setSize(1)
