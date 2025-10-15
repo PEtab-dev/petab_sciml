@@ -32,9 +32,9 @@ forward:
   args:
   - net_input
   kwargs: {}
-- name: tanh
+- name: sigmoid
   op: call_method
-  target: tanh
+  target: sigmoid
   args:
   - layer1
   kwargs: {}
@@ -42,11 +42,11 @@ forward:
   op: call_module
   target: layer2
   args:
-  - tanh
+  - sigmoid
   kwargs: {}
-- name: tanh_1
+- name: sigmoid_1
   op: call_method
-  target: tanh
+  target: sigmoid
   args:
   - layer2
   kwargs: {}
@@ -54,7 +54,7 @@ forward:
   op: call_module
   target: layer3
   args:
-  - tanh_1
+  - sigmoid_1
   kwargs: {}
 - name: output
   op: output
