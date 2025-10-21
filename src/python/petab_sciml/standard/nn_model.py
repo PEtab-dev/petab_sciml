@@ -85,6 +85,15 @@ extra_repr = {
 }
 
 
+# Default PyTorch kwargs, to ensure that these are saved to YAML.
+default_kwargs = {
+    # torch.cat
+    "cat": {
+        "dim": 0,
+    },
+}
+
+
 def extract_module_args(module: nn.Module) -> dict:
     """Get the arguments used to create the module.
 
@@ -249,12 +258,14 @@ class NNModel(BaseModel):
                 for arg in pytorch_node.args
             ]
 
+            kwargs = default_kwargs.get(target, {}) | pytorch_node.kwargs
+
             node = Node(
                 name=pytorch_node.name,
                 op=op,
                 target=target,
                 args=args,
-                kwargs=pytorch_node.kwargs,
+                kwargs=kwargs,
             )
             nodes.append(node)
             node_names.append(node.name)

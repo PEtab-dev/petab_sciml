@@ -32,7 +32,8 @@ forward:
   args:
   - - input1
     - input2
-  kwargs: {}
+  kwargs:
+    dim: 0
 - name: fc1
   op: call_module
   target: fc1
