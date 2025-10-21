@@ -85,6 +85,15 @@ extra_repr = {
 }
 
 
+# Default PyTorch kwargs, to ensure that these are saved to YAML.
+default_kwargs = {
+    # torch.cat
+    "cat": {
+        "dim": 0,
+    },
+}
+
+
 def extract_module_args(module: nn.Module) -> dict:
     """Get the arguments used to create the module.
 
@@ -170,6 +179,26 @@ def get_module_layer_type(module: nn.Module) -> str:
     return type(module).__name__
 
 
+def _convert_arg_to_str(arg, pytorch_nodes):
+    """Replace modules with their IDs for serialization."""
+    if isinstance(arg, (list, tuple)):
+        return [
+            _convert_arg_to_str(arg=arg_i, pytorch_nodes=pytorch_nodes)
+            for arg_i in arg
+        ]
+    return arg if arg not in pytorch_nodes else str(arg)
+
+
+def _convert_str_to_arg(string, state):
+    """Replace module IDs with modules for deserialization."""
+    if isinstance(string, list):
+        return [
+            _convert_str_to_arg(string=string_i, state=state)
+            for string_i in string
+        ]
+    return string if string not in state else state[string]
+
+
 class NNModel(BaseModel):
     """An easy-to-use format to specify simple deep NN models.
 
@@ -187,9 +216,13 @@ class NNModel(BaseModel):
 
     @staticmethod
     def from_pytorch_module(
-        module: nn.Module, nn_model_id: str, inputs: list[Input]
+        module: nn.Module, nn_model_id: str, inputs: list[Input] = None,
     ) -> NNModel:
-        """Create a PEtab SciML NN model from a pytorch module."""
+        """Create a PEtab SciML NN model from a pytorch module.
+
+        If `inputs` are not provided, their info will be generated from the
+        network.
+        """
         layers = []
         layer_ids = []
         for layer_id, layer_module in module.named_modules():
@@ -207,26 +240,41 @@ class NNModel(BaseModel):
         nodes = []
         node_names = []
         pytorch_nodes = list(torch.fx.symbolic_trace(module).graph.nodes)
+        generate_inputs = False
+        if inputs is None:
+            generate_inputs = True
+            inputs = []
         for pytorch_node in pytorch_nodes:
             op = pytorch_node.op
             target = pytorch_node.target
             if op == "call_function":
                 target = pytorch_node.target.__name__
+            if op == "placeholder" and generate_inputs:
+                inputs.append(Input(input_id=pytorch_node.target))
+
+            # Convert module args to strings
+            args = [
+                _convert_arg_to_str(arg=arg, pytorch_nodes=pytorch_nodes)
+                for arg in pytorch_node.args
+            ]
+
+            kwargs = default_kwargs.get(target, {}) | pytorch_node.kwargs
+
             node = Node(
                 name=pytorch_node.name,
-                op=pytorch_node.op,
+                op=op,
                 target=target,
-                args=[
-                    (arg if arg not in pytorch_nodes else str(arg))
-                    for arg in pytorch_node.args
-                ],
-                kwargs=pytorch_node.kwargs,
+                args=args,
+                kwargs=kwargs,
             )
             nodes.append(node)
             node_names.append(node.name)
 
         nn_model = NNModel(
-            nn_model_id=nn_model_id, inputs=inputs, layers=layers, forward=nodes
+            nn_model_id=nn_model_id,
+            inputs=inputs,
+            layers=layers,
+            forward=nodes,
         )
         return nn_model
 
@@ -249,23 +297,23 @@ class NNModel(BaseModel):
         for node in self.forward:
             args = []
             if node.args:
-                for node_arg in node.args:
-                    arg = node_arg
-                    try:
-                        if arg in state:
-                            arg = state[arg]
-                    except TypeError:
-                        pass
-                    args.append(arg)
+                # Convert strings to modules
+                args = [
+                    _convert_str_to_arg(string=node_arg, state=state)
+                    for node_arg in node.args
+                ]
             args = tuple(args)
             kwargs = {}
             if node.kwargs:
-                kwargs = {k: state.get(v, v) for k, v in node.kwargs.items()}
+                kwargs = {
+                    k: _convert_str_to_arg(string=v, state=state)
+                    for k, v in node.kwargs.items()
+                }
             match node.op:
                 case "placeholder":
                     state[node.name] = graph.placeholder(node.target)
                 case "call_function":
-                    if node.target in ["flatten"]:
+                    if node.target in ["flatten", "cat"]:
                         function = getattr(torch, node.target)
                     else:
                         function = getattr(nn.functional, node.target)
@@ -296,8 +344,14 @@ if __name__ == "__main__":
 
 
     # The NN model file is YAML-formatted, so the schema is provided in YAML format.
-    NNModelStandard.save_schema(Path(__file__).resolve().parents[4] / "doc" / "standard" / "nn_model_schema.yaml")
+    NNModelStandard.save_schema(
+        Path(__file__).resolve().parents[4]
+        / "doc" / "standard" / "nn_model_schema.yaml"
+    )
 
     # However, the schema format is JsonSchema, so the schema is also provided redundantly in JSON schema.
     NNModelStandardJson = JsonStandard(model=NNModel)
-    NNModelStandardJson.save_schema(Path(__file__).resolve().parents[4] / "doc" / "standard" / "nn_model_schema.json")
+    NNModelStandardJson.save_schema(
+        Path(__file__).resolve().parents[4]
+        / "doc" / "standard" / "nn_model_schema.json"
+    )

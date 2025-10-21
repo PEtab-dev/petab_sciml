@@ -1,0 +1,69 @@
+nn_model_id: model0
+inputs:
+- input_id: input1
+- input_id: input2
+layers:
+- layer_id: fc1
+  layer_type: Linear
+  args:
+    in_features: 120
+    out_features: 84
+    bias: true
+- layer_id: fc2
+  layer_type: Linear
+  args:
+    in_features: 120
+    out_features: 10
+    bias: true
+forward:
+- name: input1
+  op: placeholder
+  target: input1
+  args: []
+  kwargs: {}
+- name: input2
+  op: placeholder
+  target: input2
+  args: []
+  kwargs: {}
+- name: cat
+  op: call_function
+  target: cat
+  args:
+  - - input1
+    - input2
+  kwargs:
+    dim: 0
+- name: fc1
+  op: call_module
+  target: fc1
+  args:
+  - cat
+  kwargs: {}
+- name: relu
+  op: call_function
+  target: relu
+  args:
+  - fc1
+  kwargs:
+    inplace: false
+- name: fc2
+  op: call_module
+  target: fc2
+  args:
+  - relu
+  kwargs: {}
+- name: relu_1
+  op: call_function
+  target: relu
+  args:
+  - fc2
+  kwargs:
+    inplace: false
+- name: output
+  op: output
+  target: output
+  args:
+  - - relu
+    - relu_1
+  kwargs: {}
