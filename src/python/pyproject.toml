@@ -15,7 +15,7 @@ dependencies = [
   "pandas",
   "pydantic",
   "python-libsbml",
-  "PyYAML",
+  "ruamel.yaml",
 ]
 requires-python = ">=3.8"
 description = "Specify parameter estimation problems and hybrid models."

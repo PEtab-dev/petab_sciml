@@ -1,4 +1,4 @@
-from libsbml import parseL3Formula, SBMLDocument, UNIT_KIND_SECOND, writeSBML
+from libsbml import parseL3Formula, readSBML, SBMLDocument, writeSBML
 import pandas as pd
 from typing import Iterable
 from ruamel.yaml import YAML
@@ -6,10 +6,7 @@ from ruamel.yaml import YAML
 def generate_neural_ode_problem(
     species_all: Iterable[str], 
     model_filename: str = "model.xml",
-    measurements_filename: str = "measurements.tsv",
     network_name: str = "net1",
-    network_filename: str = "net1.yaml",
-    array_filenames: Iterable[str] = [],
 ) -> None:
     """
     Generate the PEtab files for a neural ODE problem with the given species.
@@ -22,19 +19,12 @@ def generate_neural_ode_problem(
         List of species names to include in the model.
     :param model_filename:
         Name of the SBML file to create.
-    :param measurements_filename:
-        Name of the measurements TSV file to be referenced in the PEtab problem.
-    :param network_name:
-        Name of the neural network to be used in the problem. This name will be 
-        used by PEtab importers to identify the network in compiled models.
-    :param network_filename:
-        Name of the neural network YAML file defining the network architecture.
     :param array_filenames:
         List of names of array files to be referenced in the PEtab problem
         (e.g. network parameters, network inputs).
     """
     document = _write_sbml(species_all, model_filename)
-    _write_petab(document, model_filename, measurements_filename, network_name, network_filename, array_filenames)
+    _write_petab(document, network_name)
 
 
 def _write_sbml(species_all: Iterable[str], model_filename: str) -> SBMLDocument:
@@ -54,26 +44,22 @@ def _write_sbml(species_all: Iterable[str], model_filename: str) -> SBMLDocument
         s = model.createSpecies()
         s.setId(species)
         s.setConstant(False)
-        s.setInitialAmount(0.5)
+        s.setInitialAmount(1.0)
         s.setBoundaryCondition(False)
         s.setHasOnlySubstanceUnits(True)
 
         param_name = species + "_param"
         k = model.createParameter()
         k.setId(param_name)
-        k.setConstant(True)
-        k.setValue(1.3)
+        k.setConstant(False)
+        k.setValue(0.0)
 
-        reaction_id = species + "_reaction"
-        r = model.createReaction()
-        r.setId(reaction_id)
-        r.setReversible(False)
-
-        species_ref1 = r.createProduct()
-        species_ref1.setSpecies(species)
+        rule_id = species + "_reaction"
+        r = model.createRateRule()
+        r.setId(rule_id)
+        r.setVariable(species)
         math_ast = parseL3Formula(param_name)
-        kinetic_law = r.createKineticLaw()
-        kinetic_law.setMath(math_ast)
+        r.setMath(math_ast)
 
     writeSBML(document, model_filename)
 
@@ -81,12 +67,8 @@ def _write_sbml(species_all: Iterable[str], model_filename: str) -> SBMLDocument
 
 
 def _write_petab(
-        document: SBMLDocument, 
-        model_filename: str, 
-        measurements_filename: str,
-        network_name: str,
-        network_filename: str,
-        array_filenames: Iterable[str],
+    document: SBMLDocument,
+    network_name: str,
 ) -> None:
     """
     Write the PEtab files for a neural ODE PEtab problem with the given SBML
@@ -94,10 +76,7 @@ def _write_petab(
     provided.
     """
     model = document.model
-    # conditions
-    conditions = {"conditionId": ["cond1"]}
-    pd.DataFrame(conditions).to_csv("conditions.tsv", sep="\t", index=False)
-
+    
     # hybridization
     species = [sp.id for sp in model.species]
     params = [param.id for param in model.parameters]
@@ -118,17 +97,6 @@ def _write_petab(
     }
     pd.DataFrame(mapping).to_csv("mapping.tsv", sep="\t", index=False)
 
-    # observables
-    observable_ids = [f"{s}_o" for s in species]
-    observables = {
-        "observableId": observable_ids,
-        "observableFormula": species,
-        "noiseFormula": [0.05] * len(species),
-        "observableTransformation": ["lin"] * len(species),
-        "noiseDistribution": ["normal"] * len(species),
-    }
-    pd.DataFrame(observables).to_csv("observables.tsv", sep="\t", index=False)
-
     # parameters
     parameters = {
         "parameterId": [f"{network_name}_ps"],
@@ -139,6 +107,59 @@ def _write_petab(
         "estimate": [1],
     }
     pd.DataFrame(parameters).to_csv("parameters.tsv", sep="\t", index=False)
+
+def write_remaining_petab_files(
+    model_filename: str,
+    measurements_filename: str,
+    observables_filename: str,
+    network_filename: str,
+    array_filenames: Iterable[str],
+    mapping_filenames: Iterable[str] = ["mapping.tsv"],
+    parameters_filename: str = "parameters.tsv",
+    hybridization_filenames: Iterable[str] = ["hybridization.tsv"],
+) -> None:
+    """
+    Write the remaining PEtab files needed for the neural ODE PEtab problem. 
+    The mappings, parameters and hybridization files can be created using the 
+    `generate_neural_ode_problem` function. This function will create the
+    conditions and problem.yaml files.  The measuremets and observables files
+    need to be provided by the user.
+
+    :param model_filename:
+        Name of the SBML file to be referenced in the PEtab problem.
+    :param measurements_filename:
+        Name of the measurements TSV file to be referenced in the PEtab problem.
+        This file should be located in the same directory where the remaining PEtab
+        files are to be generated.
+    :param observables_filename:
+        Name of the observables TSV file to be created. This file should be 
+        located in the same directory where the remaining PEtab files are to be 
+        generated.
+    :param network_filename:
+        Name of the neural network YAML file defining the network architecture.
+    :param array_filenames:
+        List of names of array files to be referenced in the PEtab problem  
+    :param mapping_filenames:
+        List of names of mapping files to be referenced in the PEtab problem.
+    :param parameters_filename:
+        Name of the parameters TSV file to be referenced in the PEtab problem.
+    :param hybridization_filenames:
+        List of names of hybridization files to be referenced in the PEtab problem.
+    """
+    measurements = pd.read_csv(measurements_filename, sep="\t")
+    condition_ids = measurements["simulationConditionId"].unique()
+    
+    # conditions
+    conditions = {"conditionId": condition_ids}
+    pd.DataFrame(conditions).to_csv("conditions.tsv", sep="\t", index=False)
+
+    # get network name from mapping file
+    mapping = pd.read_csv("mapping.tsv", sep="\t")
+    matches = mapping.loc[
+        mapping["modelEntityId"].str.contains("parameters"), 
+        "modelEntityId"
+    ]
+    network_name = matches.values[0].split(".")[0]
 
     # problem.yaml
     problem = {
@@ -151,16 +172,16 @@ def _write_petab(
                     },    
                 },
                 "measurement_files": [measurements_filename],
-                "observable_files": ["observables.tsv"],
+                "observable_files": [observables_filename],
                 "condition_files": ["conditions.tsv"],
-                "mapping_files": ["mapping.tsv"],
+                "mapping_files": mapping_filenames,
             }
         ],
         "format_version": "2.0.0",
         "extensions": {
             "sciml": {
                 "array_files": array_filenames,
-                "hybridization_files": ["hybridization.tsv"],
+                "hybridization_files": hybridization_filenames,
                 "neural_nets": {
                     network_name: {
                         "location": network_filename,
@@ -170,9 +191,10 @@ def _write_petab(
                 },
             }
         },
-        "parameter_file": "parameters.tsv",
+        "parameter_file": parameters_filename,
     }
     with open("problem.yaml", "w") as file:
         yaml = YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
         yaml.dump(problem, file)
+

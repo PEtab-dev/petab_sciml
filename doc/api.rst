@@ -8,3 +8,4 @@ PEtab SciML Python API
 
    petab_sciml
    petab_sciml.standard
+   petab_sciml.problem_utils
