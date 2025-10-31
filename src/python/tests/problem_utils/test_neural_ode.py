@@ -1,22 +1,27 @@
 from contextlib import chdir
 import csv
 from petab_sciml.problem_utils.neural_ode import (
-    generate_neural_ode_problem, 
-    write_remaining_petab_files
+    create_neural_ode, 
+    create_neural_ode_problem,
 )
+from petab_sciml.standard.nn_model import NNModelStandard, NNModel, Input
 import os
+import torch
+from torch import nn
+import torch.nn.functional as F
 from yaml import safe_load
+from libsbml import readSBML
 
 
-def test_generate_neural_ode_problem(tmp_path):
-    """generate_neural_ode_problem"""
+def test_create_neural_ode(tmp_path):
+    """create_neural_ode"""
 
     test_dir = tmp_path / "petab"
     test_dir.mkdir()
 
     with chdir(test_dir):
         species = ["prey", "predator"]
-        generate_neural_ode_problem(species)
+        create_neural_ode(species)
 
         expected_files = [
             "model.xml",
@@ -62,24 +67,37 @@ def test_generate_neural_ode_problem(tmp_path):
             parameters = list(csv.DictReader(f, delimiter="\t"))
             assert parameters == parameters_expected
 
-def test_generate_neural_ode_problem_with_options(tmp_path):
-    """generate_neural_ode_problem"""
+def test_create_neural_ode_with_options(tmp_path):
+    """create_neural_ode"""
 
     test_dir = tmp_path / "petab"
     test_dir.mkdir()
 
     with chdir(test_dir):
-        species = ["prey", "predator"]
-        generate_neural_ode_problem(species, model_filename="lv.xml", network_name="mynet")
+        os.mkdir("petab_problem")
+        species = {"prey": 1.0, "predator": 2.0}
+        create_neural_ode(
+            species, 
+            model_filename="lv.xml", 
+            network_name="mynet",
+            save_directory="./petab_problem"
+        )
 
         expected_files = [
-            "lv.xml",
-            "hybridization.tsv",
-            "mapping.tsv",
-            "parameters.tsv",
+            "petab_problem/lv.xml",
+            "petab_problem/hybridization.tsv",
+            "petab_problem/mapping.tsv",
+            "petab_problem/parameters.tsv",
         ]
         for fname in expected_files:
             assert os.path.isfile(fname)
+            
+        document = readSBML("petab_problem/lv.xml")
+        model = document.getModel()
+        species_list = model.getListOfSpecies()
+        
+        assert species_list.get("prey").getInitialAmount() == 1.0
+        assert species_list.get("predator").getInitialAmount() == 2.0
 
         mapping_expected = [
             {"petabEntityId": "mynet_input0", "modelEntityId": "mynet.inputs[0][0]"},
@@ -88,28 +106,29 @@ def test_generate_neural_ode_problem_with_options(tmp_path):
             {"petabEntityId": "mynet_output1", "modelEntityId": "mynet.outputs[0][1]"},
             {"petabEntityId": "mynet_ps", "modelEntityId": "mynet.parameters"},
         ]
-        with open("mapping.tsv", "r") as f:
+        with open("petab_problem/mapping.tsv", "r") as f:
             mapping = list(csv.DictReader(f, delimiter="\t"))
             assert mapping == mapping_expected
 
 
-def test_write_remaining_petab_files(tmp_path):
-    """write_remaining_petab_files"""
+def test_create_neural_ode_problem(tmp_path):
+    """create_neural_ode_problem"""
 
     test_dir = tmp_path / "petab"
     test_dir.mkdir()
 
     with chdir(test_dir):
         species = ["prey", "predator"]
-        generate_neural_ode_problem(species)
+        create_neural_ode(species)
 
         _write_test_measurements_file()
+        _write_test_network_file()
+        network_filename = "net1.yaml"
         measurements_filename = "measurements.tsv"
         observables_filename = "observables.tsv"
-        network_filename = "net1.yaml"
         array_filenames = ["supernet_params.h5", "supernet_inputs.h5"]
 
-        write_remaining_petab_files(
+        create_neural_ode_problem(
             "model.xml",
             measurements_filename,
             observables_filename,
@@ -160,3 +179,29 @@ def _write_test_measurements_file():
         writer = csv.DictWriter(f, fieldnames=measurements[0].keys(), delimiter="\t")
         writer.writeheader()
         writer.writerows(measurements)
+
+def _write_test_network_file():
+    """Write a simple network yaml file for testing purposes."""
+
+    class NeuralNetwork(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.layer1 = torch.nn.Linear(2, 5)
+            self.layer2 = torch.nn.Linear(5, 5)
+            self.layer3 = torch.nn.Linear(5, 2)
+
+        def forward(self, net_input):
+            x = self.layer1(net_input)
+            x = F.tanh(x)
+            x = self.layer2(x)
+            x = F.tanh(x)
+            x = self.layer3(x)
+            return x
+
+    net1 = NeuralNetwork()
+    nn_model1 = NNModel.from_pytorch_module(
+        module=net1, nn_model_id="net1", inputs=[Input(input_id="input0")]
+    )
+    NNModelStandard.save_data(
+        data=nn_model1, filename="net1.yaml"
+    )
