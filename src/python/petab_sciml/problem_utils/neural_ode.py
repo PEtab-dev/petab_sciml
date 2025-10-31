@@ -19,7 +19,7 @@ def create_neural_ode(
     Args:
         species_all:
             List of species names to include in the model, or a dictionary
-            mapping species names to their initial amounts.
+            mapping species names to their initial values.
         model_filename:
             Name of the SBML file to create.
         network_name:
