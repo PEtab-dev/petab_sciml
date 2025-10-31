@@ -1,26 +1,26 @@
 problems:
   - model_files:
-      lv:
-        location: "lv.xml"
-        language: "sbml"
+      model:
+        location: lv.xml
+        language: sbml
     measurement_files:
-      - "measurements.tsv"
+      - measurements.tsv
     observable_files:
-      - "observables.tsv"
+      - observables.tsv
     condition_files:
-      - "conditions.tsv"
+      - conditions.tsv
     mapping_files:
-      - "mapping.tsv"
+      - mapping.tsv
 format_version: 2.0.0
 extensions:
   sciml:
     array_files:
-      - "net1_ps.hdf5"
+      - net1_ps.hdf5
     hybridization_files:
-      - "hybridization.tsv"
+      - hybridization.tsv
     neural_nets:
       net1:
-        location: "net1.yaml"
+        location: net1.yaml
         static: false
-        format: "YAML"
-parameter_file: "parameters.tsv"
+        format: YAML
+parameter_file: parameters.tsv

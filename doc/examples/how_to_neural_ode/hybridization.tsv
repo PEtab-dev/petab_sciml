@@ -1,5 +1,5 @@
 targetId	targetValue
-net1_input1	prey
-net1_input2	predator
-alpha	net1_output1
-delta	net1_output2
+net1_input0	prey
+net1_input1	predator
+prey_param	net1_output0
+predator_param	net1_output1
