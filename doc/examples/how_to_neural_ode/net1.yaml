@@ -6,19 +6,19 @@ layers:
   layer_type: Linear
   args:
     in_features: 2
-    out_features: 5
+    out_features: 10
     bias: true
 - layer_id: layer2
   layer_type: Linear
   args:
-    in_features: 5
-    out_features: 5
+    in_features: 10
+    out_features: 10
     bias: true
 - layer_id: layer3
   layer_type: Linear
   args:
-    in_features: 5
-    out_features: 1
+    in_features: 10
+    out_features: 2
     bias: true
 forward:
 - name: net_input
@@ -32,9 +32,9 @@ forward:
   args:
   - net_input
   kwargs: {}
-- name: sigmoid
+- name: tanh
   op: call_method
-  target: sigmoid
+  target: tanh
   args:
   - layer1
   kwargs: {}
@@ -42,11 +42,11 @@ forward:
   op: call_module
   target: layer2
   args:
-  - sigmoid
+  - tanh
   kwargs: {}
-- name: sigmoid_1
+- name: tanh_1
   op: call_method
-  target: sigmoid
+  target: tanh
   args:
   - layer2
   kwargs: {}
@@ -54,7 +54,7 @@ forward:
   op: call_module
   target: layer3
   args:
-  - sigmoid_1
+  - tanh_1
   kwargs: {}
 - name: output
   op: output
