@@ -2,12 +2,12 @@ Format Specification
 ====================
 
 A PEtab SciML problem extends the version 2 PEtab standard to
-accommodate hybrid models (SciML problems) that combine neural network
-(NN) and mechanistic components. Three new file types are introduced by
+accommodate hybrid models (SciML problems) that combine machine learning
+(ML) and mechanistic components. Three new file types are introduced by
 the extension:
 
 1. :ref:`Neural Network Files <nn_format>`: Files
-   describing NN models.
+   describing neural network (NN) models.
 2. :ref:`Hybridization Table <hybrid_table>`: Table for assigning NN
    inputs and outputs.
 3. :ref:`Array Data Files <hdf5_array>`: HDF5 files for storing NN
@@ -16,12 +16,11 @@ the extension:
 PEtab SciML further extends the following standard PEtab files:
 
 1. :ref:`Mapping Table <mapping_table>`: Extended to describe how NN
-   inputs, outputs and parameters map to PEtab entities.
+   inputs, outputs and parameters map to PEtab variables.
 2. :ref:`Parameters Table <parameter_table>`: Extended to describe
    nominal values for NN parameters.
 3. :ref:`Problem YAML File <YAML_file>`: Extended to include a new
-   SciML field for NN models and (optionally) array or tensor formatted
-   data.
+   SciML field for NN models and (optionally) array data.
 
 All other PEtab files remain unchanged. This specification explains the
 format for each file that is added or modified by the PEtab SciML
@@ -32,28 +31,28 @@ High Level Overview
 --------------------------------------------
 
 The PEtab SciML specification is designed to keep the mechanistic model,
-NN model, and PEtab problem as independent as possible while linking
+ML model, and PEtab problem as independent as possible while linking
 them through the hybridization and/or condition tables. In this context,
 mechanistic models are typically defined using community standards like
 SBML and are commonly simulated as systems of ordinary differential
 equations (ODEs). In this specification, the terms mechanistic model and ODE are used
 interchangeably. Essentially, the PEtab SciML approach takes a PEtab
 problem involving a mechanistic model and supports the integration
-of NN inputs and outputs.
+of ML inputs and outputs.
 
 PEtab SciML supports two classes of hybrid models:
 
 1. **Static hybridization**: For each experimental/simulation condition,
-   inputs are constant and the NN model sets constant parameters and/or
+   inputs are constant and the ML model sets constant parameters and/or
    initial values in the ODE model prior to model simulation.
-2. **Dynamic hybridization**: The NN model appears in the ODE
+2. **Dynamic hybridization**: The ML model appears in the ODE
    right-hand-side (RHS) and/or observable formula. Inputs and outputs
    are computed dynamically over the course of a simulation.
 
-A PEtab SciML problem can also include multiple NNs. Aside from ensuring
-that NNs do not conflict (e.g., by sharing the same output), no special
-considerations are required. Each additional NN is included just as it
-would be in the single NN case.
+A PEtab SciML problem can also include multiple ML models. Aside from ensuring
+that models do not conflict (e.g., by sharing the same output), no special
+considerations are required. Each additional ML model is included just as it
+would be in the single ML model case.
 
 .. _nn_format:
 NN Model YAML Format
@@ -126,7 +125,8 @@ conditions in the array data files directly. A single input can have either one
 single global array to specify the input's data in all conditions, or multiple 
 condition-specific arrays. In the global case, the name of the array must be 
 ``0`` [STRING]. In the condition-specific case, the name of the array must be a 
-semicolon-delimited list of all relevant condition IDs.
+semicolon-delimited list of all relevant condition IDs and an array must be
+specified for all conditions.
 
 The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`. 
 Currently, validation is only provided via the PEtab SciML library, and does 
@@ -330,6 +330,8 @@ Detailed Field Description
 -  ``targetId`` [STRING, REQUIRED]: The identifier of
    the non-estimated entity that will be modified. Restrictions depend
    on hybridization type (see static and dynamic hybridization details below).
+   The exact treatment of these entities by importers will also depend on whether
+   the ML model is statically or dynamically hybridized.
 -  ``targetValue`` [STRING, REQUIRED]: The value or expression that will
    be used to change the target.
 
