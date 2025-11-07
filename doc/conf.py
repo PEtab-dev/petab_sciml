@@ -59,7 +59,6 @@ autodoc_default_options = {
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["standard"]
-html_css_files = ['custom.css']
 # html_logo = "logo/logo-wide.svg"
 
 
