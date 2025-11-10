@@ -16,7 +16,7 @@ the extension:
 PEtab SciML further extends the following standard PEtab files:
 
 1. :ref:`Mapping Table <mapping_table>`: Extended to describe how NN
-   inputs, outputs and parameters map to PEtab variables.
+   inputs, outputs and parameters map to PEtab entities.
 2. :ref:`Parameters Table <parameter_table>`: Extended to describe
    nominal values for NN parameters.
 3. :ref:`Problem YAML File <YAML_file>`: Extended to include a new
@@ -163,9 +163,10 @@ For parameters:
 
    **For developers: Respect memory order**. Tools supporting the
    SciML extension should, for computational efficiency, reorder input data
-   and potential layer parameter arrays to match the memory ordering of the
-   target language. For example, PEtab.jl converts input data to follow
-   Julia based indexing.
+   and potential layer parameter arrays to match the indexing and memory
+   ordering of the target language. For example, PEtab.jl converts input data
+   to follow Julia based indexing. Use the ``perm`` field of array data files to
+   specify your chosen memory ordering.
 
 .. tip::
 
@@ -173,8 +174,8 @@ For parameters:
    format**. If the NN is not provided in the YAML format, exchange of NN
    parameters between software is not possible. To facilitate exchange, it
    is recommended that tools supporting PEtab SciML implement a function 
-   capable of exporting to the PEtab SciML format if all layers in the NN
-   correspond to layers supported by the PEtab SciML NN model YAML format.
+   capable of exporting to the PEtab SciML array data format with PyTorch 
+   indexing.
 
 .. _NN_YAML:
 NN model YAML format
@@ -221,7 +222,8 @@ Detailed Field Description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The model ID
-``$nnId.parameters[$layerId].{[$arrayId]{[$parameterIndex]}}`` refers to
+``$nnId.parameters{[$layerId]}.{$arrayId}{[$parameterIndex]}}`` 
+(e.g. ``$nnId.parameters[conv1].weight[0]``) refers to
 the parameters of a NN identified by ``$nnId``.
 
 -  ``$layerId``: The unique identifier of the layer (e.g., ``conv1``).
