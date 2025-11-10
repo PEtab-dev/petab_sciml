@@ -1,4 +1,5 @@
-`Supported Layers and Activation Functions <@id%20layers_activation>`__
+.. _layers_activation:
+Supported Layers and Activation Functions
 =======================================================================
 
 The PEtab SciML NN model YAML format supports numerous
