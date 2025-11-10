@@ -3,11 +3,11 @@ Format Specification
 
 A PEtab SciML problem extends the version 2 PEtab standard to
 accommodate hybrid models (SciML problems) that combine machine learning
-(ML) and mechanistic components. Three new file types are introduced by
+(ML) and mechanistic components. In PEtab SciML, the only supported ML models are neural networks (NNs). Three new file types are introduced by
 the extension:
 
 1. :ref:`Neural Network Files <nn_format>`: Files
-   describing neural network (NN) models.
+   describing NN models.
 2. :ref:`Hybridization Table <hybrid_table>`: Table for assigning NN
    inputs and outputs.
 3. :ref:`Array Data Files <hdf5_array>`: HDF5 files for storing NN
@@ -126,7 +126,7 @@ single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be 
 ``0`` [STRING]. In the condition-specific case, the name of the array must be a 
 semicolon-delimited list of all relevant condition IDs and an array must be
-specified for all conditions.
+specified for all simulated conditions.
 
 The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`. 
 Currently, validation is only provided via the PEtab SciML library, and does 
@@ -211,13 +211,13 @@ file are considered valid PEtab entities.
 Detailed Field Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  ``modelEntityId`` [STRING, REQUIRED]: A modeling-language-independent syntax 
+-  ``modelEntityId`` [STRING, REQUIRED]: A modeling-language-independent syntax (see below)
    which refers to inputs, outputs, and parameters of NNs.
 -  ``petabEntityId`` [STRING, REQUIRED]: Valid PEtab identifier that the
    ``modelEntityId`` maps to.
 
 .. _nn_parameters:
-Parameters
+``modelEntityId`` Syntax for Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The model ID
