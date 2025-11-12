@@ -519,11 +519,12 @@ language-specific formulations, and alternative NN formats (e.g., architectures 
 covered by the YAML format), may suit some tools, especially outside biology. The PEtab
 SciML standard remains useful across formats by providing a high-level abstraction that
 connects the dynamical model and NN components regardless of representation. For example,
-leveraging this abstraction, PEtab.jl can accept a
-`DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` together with NNs
-defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If adding support for other formats,
-to **thoroughly test correctness**, the PEtab SciML test suite can be adapted by replacing
-the NN and/or model files to match the formats any importer targets.
+leveraging this abstraction, PEtab.jl provides a Julia interface to create the PEtab tables
+and can accept a `DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` as
+the model together with NNs defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If
+adding support for other formats, to **thoroughly test correctness**, the PEtab SciML
+`test suite <https://github.com/sebapersson/petab_sciml_testsuite>`_ can be adapted by
+replacing the NN and/or model files to match the formats any importer targets.
 
 Dealing with arrays
 ~~~~~~~~~~~~~~~~~~~
