@@ -1,10 +1,10 @@
 Format Specification
 ====================
 
-A PEtab SciML problem extends the version 2 PEtab standard to
-accommodate hybrid models (SciML problems) that combine machine learning
-(ML) and mechanistic components. In PEtab SciML, the only supported ML models are neural networks (NNs). Three new file types are introduced by
-the extension:
+A PEtab SciML problem extends the version 2 PEtab standard to accommodate hybrid models
+(SciML problems) that combine machine learning (ML) and mechanistic components. In PEtab
+SciML, the only supported ML models are neural networks (NNs). Three new file types are
+introduced by the extension:
 
 1. :ref:`Neural Network Files <nn_format>`: Files
    describing NN models.
@@ -59,17 +59,10 @@ NN Model YAML Format
 ------------------------------------------
 
 The NN model format is flexible, meaning models can be provided in any
-format compatible with the PEtab SciML specification (see 
-:ref:`supported layers <layers_activation>` page). 
-Additionally, the ``petab_sciml`` library provides a NN model YAML format that 
+format compatible with the PEtab SciML specification (see
+:ref:`supported layers <layers_activation>` page).
+Additionally, the ``petab_sciml`` library provides a NN model YAML format that
 can be imported by tools across various programming languages.
-
-.. tip::
-
-   **Use the NN model YAML format for interoperability**. The NN model specification 
-   format in PEtab SciML is flexible, to ensure all architectures can be used. However, where
-   possible, the NN model YAML format should be used, to facilitate model
-   exchange.
 
 A NN model must consist of two parts to be compatible with the PEtab
 SciML specification:
@@ -85,6 +78,13 @@ SciML specification:
    holds for the output. Aside from the NN output values, every
    component that should be visible to other parts of the PEtab SciML
    problem must be defined elsewhere (e.g. in **layers**).
+
+.. tip::
+
+   **Use the NN model YAML format for interoperability**. The NN model specification format
+   in PEtab SciML is flexible, to ensure all architectures can be used. However, where
+   possible, the NN model YAML format should be used, to facilitate model exchange.
+
 
 .. _hdf5_array:
 Array data
@@ -120,26 +120,18 @@ them across multiple array data files. The general structure is:
        │   └── ...
        └── ...
 
-As NN input data may be condition-specific, arrays can be associated with specific 
-conditions in the array data files directly. A single input can have either one 
-single global array to specify the input's data in all conditions, or multiple 
-condition-specific arrays. In the global case, the name of the array must be 
-``0`` [STRING]. In the condition-specific case, the name of the array must be a 
+As NN input data may be condition-specific, arrays can be associated with specific
+conditions in the array data files directly. A single input can have either one
+single global array to specify the input's data in all conditions, or multiple
+condition-specific arrays. In the global case, the name of the array must be
+``0`` [STRING]. In the condition-specific case, the name of the array must be a
 semicolon-delimited list of all relevant condition IDs and an array must be
 specified for all simulated conditions.
 
-The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`. 
-Currently, validation is only provided via the PEtab SciML library, and does 
-not check the validity of framework-specific IDs (e.g. for inputs, parameters, 
+The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
+Currently, validation is only provided via the PEtab SciML library, and does
+not check the validity of framework-specific IDs (e.g. for inputs, parameters,
 and layers).
-
-.. tip::
-
-   **Multiple NNs may share the same input array data**: Like PEtab
-   parameters, NN inputs are global variables. Hence, shared input array
-   data for multiple NNs can be specified by using the same input ID in
-   each NN. Tools and users should be careful to only intentionally assign
-   multiple inputs the same ID.
 
 The IDs of inputs or layer parameters are framework-specific or
 user-specified. For inputs:
@@ -159,23 +151,15 @@ For parameters:
 -  NN models in other framework-specific formats follow the indexing and
    naming conventions of the respective framework.
 
-.. tip::
-
-   **For developers: Respect memory order**. Tools supporting the
-   SciML extension should, for computational efficiency, reorder input data
-   and potential layer parameter arrays to match the indexing and memory
-   ordering of the target language. For example, PEtab.jl converts input data
-   to follow Julia based indexing. Use the ``perm`` field of array data files to
-   specify your chosen memory ordering.
 
 .. tip::
 
-   **For developers: Allow export of parameters in PEtab SciML
-   format**. If the NN is not provided in the YAML format, exchange of NN
-   parameters between software is not possible. To facilitate exchange, it
-   is recommended that tools supporting PEtab SciML implement a function 
-   capable of exporting to the PEtab SciML array data format with PyTorch 
-   indexing.
+   **Multiple NNs may share the same input array data**: Like PEtab
+   parameters, NN inputs are global variables. Hence, shared input array
+   data for multiple NNs can be specified by using the same input ID in
+   each NN. Tools and users should be careful to only intentionally assign
+   multiple inputs the same ID.
+
 
 .. _NN_YAML:
 NN model YAML format
@@ -183,7 +167,7 @@ NN model YAML format
 
 The ``petab_sciml`` library provides a NN model YAML format for model
 exchange. This format follows PyTorch conventions for layer names and
-arguments. The schema is provided as a :download:`JSON schema <standard/nn_model_schema.json>`, 
+arguments. The schema is provided as a :download:`JSON schema <standard/nn_model_schema.json>`,
 which enables validation with various third-party tools, and also as a
 :download:`YAML-formatted JSON Schema <standard/nn_model_schema.yaml>` for readability.
 
@@ -192,7 +176,7 @@ which enables validation with various third-party tools, and also as a
    **For users: Define models in PyTorch**. The recommended approach
    to create a NN model YAML file is to first define a PyTorch model
    (``torch.nn.Module``) and use the Python ``petab_sciml`` library to
-   export this to YAML. See the "Getting Started" and "How-to" guides for examples 
+   export this to YAML. See the "Getting Started" and "How-to" guides for examples
    of this.
 
 .. _mapping_table:
@@ -222,7 +206,7 @@ Detailed Field Description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The model ID
-``$nnId.parameters{[$layerId]}.{$arrayId}{[$parameterIndex]}}`` 
+``$nnId.parameters{[$layerId]}.{$arrayId}{[$parameterIndex]}}``
 (e.g. ``$nnId.parameters[conv1].weight[0]``) refers to
 the parameters of a NN identified by ``$nnId``.
 
@@ -262,7 +246,7 @@ Outputs
 The model ID ``$nnId.outputs{[outputArgumentIndex]{[$outputIndex]}}``
 refers to specific outputs of a NN identified by ``$nnId``.
 
--  ``$outputId``: The output argument number in the NN forward function 
+-  ``$outputId``: The output argument number in the NN forward function
    (uses zero-based indexing).
 -  ``$outputIndex``: Indexing into the output argument
    (:ref:`syntax <mapping_table_indexing>`)
@@ -280,7 +264,7 @@ are:
 -  ``nn1.parameters[conv1].weight``
 
 .. warning::
-   
+
    **Do not break the hierarchy**: Identifiers that break the
    hierarchy (e.g., ``nn1.parameters.weight``) are not valid.
 
@@ -314,7 +298,7 @@ Hybridization Table
 --------------------------------------------
 
 Assignments of NN inputs and outputs in this table apply to all simulation conditions.
-The hybridization file is expected to be in tab-separated values format and to have, 
+The hybridization file is expected to be in tab-separated values format and to have,
 in any order, the following two columns:
 
 ======================= ===============
@@ -436,7 +420,7 @@ Detailed Field Description
       exists at the given path when the problem is imported and the
       parameters are set to be estimated, a file is created with
       randomly sampled values. Unless a numeric value is provided,
-      all assignments for a NN must refer to the same file, since all NN 
+      all assignments for a NN must refer to the same file, since all NN
       parameters should be collected in a single HDF5
       file following the structure described
       :ref:`here <hdf5_ps_structure>`.
@@ -455,7 +439,7 @@ NN bounds are optional and default to ``-inf`` for the lower bound and
 ``inf`` for the upper bound.
 
 .. _YAML_file:
-Problem YAML File 
+Problem YAML File
 ---------------------------------------
 
 PEtab SciML files are defined within the ``extensions`` section of a
@@ -514,3 +498,45 @@ The ``neural_networks`` section is required and must define the following:
 -  ``static`` [BOOL, REQUIRED]: The hybridization type
    (see :ref:`hybridization types <hybrid_types>`). ``true`` indicates
    static hybridization; ``false`` indicates dynamic hybridization.
+
+Notes for developers
+--------------------
+
+This section outlines recommendations and tips for developers interested in adding PEtab
+SciML support to their packages.
+
+Alternative model and neural-network formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Both the ODE model and NN formats are flexible. Still, the most widely supported model
+format is `SBML <https://sbml.org/>`_, the de facto standard for dynamical models in
+computational biology (field of standard developers). We recommend supporting SBML whenever
+possible to promote model exchange. Likewise, we recommend supporting the PEtab SciML
+NN :ref:`YAML format <NN_YAML>`.
+
+That said, alternative model formats (e.g., `BioNetGen <https://bionetgen.org/>`_) or
+language-specific formulations, and alternative NN formats (e.g., architectures not yet
+covered by the YAML format), may suit some tools, especially outside biology. The PEtab
+SciML standard remains useful across formats by providing a high-level abstraction that
+connects the dynamical model and NN components regardless of representation. For example,
+leveraging this abstraction, PEtab.jl can accept a
+`DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` together with NNs
+defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If adding support for other formats,
+to **thoroughly test correctness**, the PEtab SciML test suite can be adapted by replacing
+the NN and/or model files to match the formats any importer targets.
+
+Dealing with arrays
+~~~~~~~~~~~~~~~~~~~
+
+For array handling, it is recommended to:
+
+- **Respect memory/axis order.** For computational efficiency, reorder input data and any
+   layer-parameter arrays to the target language’s native indexing and memory layout.
+   For example, PEtab.jl permutes image inputs to Julia’s ``(H, W, C)`` convention.
+
+- **Allow export of parameters in PEtab SciML format**. If the NN model is not provided in
+   the YAML format, exchange of NN parameters between software is not possible as then
+   the parameter should following the indexing and memory layout of the respective
+   framework. To facilitate exchange, it is recommended that tools supporting PEtab SciML
+   implement a function  capable of exporting to the PEtab SciML array data format with
+   PyTorch indexing.
