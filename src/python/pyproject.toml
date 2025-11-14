@@ -8,6 +8,7 @@ version = "0.0.1"
 authors = [
   {name = "Sebastian Persson"},
   {name = "Dilan Pathirana"},
+  {name = "Branwen Snelling"},
 ]
 dependencies = [
   "mkstd>=0.0.10",
