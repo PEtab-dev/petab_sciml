@@ -156,9 +156,8 @@ For parameters:
 
    **Multiple NNs may share the same input array data**: Like PEtab
    parameters, NN inputs are global variables. Hence, shared input array
-   data for multiple NNs can be specified by using the same input ID in
-   each NN. Tools and users should be careful to only intentionally assign
-   multiple inputs the same ID.
+   data for multiple NNs can be specified by using the same input ID in each NN.
+   Thus, be careful to only intentionally assign multiple inputs the same ID.
 
 
 .. _NN_YAML:
@@ -519,10 +518,11 @@ language-specific formulations, and alternative NN formats (e.g., architectures 
 covered by the YAML format), may suit some tools, especially outside biology. The PEtab
 SciML standard remains useful across formats by providing a high-level abstraction that
 connects the dynamical model and NN components regardless of representation. For example,
-leveraging this abstraction, PEtab.jl provides a Julia interface to create the PEtab tables
-and can accept a `DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` as
-the model together with NNs defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If
-adding support for other formats, to **thoroughly test correctness**, the PEtab SciML
+leveraging this abstraction, `PEtab.jl <https://github.com/sebapersson/PEtab.jl/>`_
+provides a Julia interface to create the PEtab tables and can accept a
+`DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` as the model together
+with NNs defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If adding support for other
+formats, to **thoroughly test correctness**, the PEtab SciML
 `test suite <https://github.com/sebapersson/petab_sciml_testsuite>`_ can be adapted by
 replacing the NN and/or model files to match the formats any importer targets.
 
@@ -531,13 +531,14 @@ Dealing with arrays
 
 For array handling, it is recommended to:
 
-- **Respect memory/axis order.** For computational efficiency, reorder input data and any
-   layer-parameter arrays to the target language’s native indexing and memory layout.
-   For example, PEtab.jl permutes image inputs to Julia’s ``(H, W, C)`` convention.
+- **Respect memory/axis order.**
+   For computational efficiency, reorder input data and any layer-parameter arrays to the
+   target language’s native indexing and memory layout. For example, PEtab.jl permutes
+   image inputs to Julia’s ``(H, W, C)`` convention.
 
-- **Allow export of parameters in PEtab SciML format**. If the NN model is not provided in
-   the YAML format, exchange of NN parameters between software is not possible as then
-   the parameter should following the indexing and memory layout of the respective
-   framework. To facilitate exchange, it is recommended that tools supporting PEtab SciML
-   implement a function  capable of exporting to the PEtab SciML array data format with
-   PyTorch indexing.
+- **Allow export of parameters in PEtab SciML format**.
+   If a NN model is not provided in the PEtab SciML YAML format for an importer, HDF5
+   parameter files are generally not portable across tools. Because, In that case,
+   parameters should follow the importer's framework native indexing and memory layout.
+   To enable exchange, it it recommended for importers to implement a function that can
+   export NN parameters PEtab SciML array format using PyTorch indexing.
