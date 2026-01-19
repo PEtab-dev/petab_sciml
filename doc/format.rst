@@ -416,17 +416,17 @@ Detailed Field Description
 -  ``nominalValue`` [String \| NUMERIC, REQUIRED]: NN nominal values.
    This can be:
 
-   -  A PEtab variable that, via the problem :ref:`YAML
-      file <YAML_file>`, corresponds to an HDF5 file with the
-      required :ref:`structure <hdf5_ps_structure>`. If no file
-      exists at the given path when the problem is imported and the
-      parameters are set to be estimated, a file is created with
-      randomly sampled values. Unless a numeric value is provided,
-      all assignments for a NN must refer to the same file, since all NN
-      parameters should be collected in a single HDF5
-      file following the structure described
-      :ref:`here <hdf5_ps_structure>`.
-   -  A numeric value applied to all parameters under ``parameterId``.
+   - Empty/missing when parameters are provided via an array file following the
+     required :ref:`structure <hdf5_ps_structure>` and specified in the problem
+     :ref:`YAML file <YAML_file>`. If this field is empty, an array file must
+     exist. The PEtab SciML Python library provides a utility function to
+     interact with such a file, e.g., creating one filled with random values if
+     parameter values are not known. Note, for each ML model, there may be at
+     most one parameter entry across all array files. Therefore, even if a layer
+     is frozen, its values must be taken from the same entry as the other
+     parameters for that model.
+   - A numeric value applied to all values under ``parameterId``. Overrides
+     any potential values from an array file.
 
 -  ``estimate`` [0 \| 1, REQUIRED]: Indicates whether the parameters are
    estimated (``1``) or fixed (``0``).
@@ -439,6 +439,13 @@ However, most optimization algorithms used for NNs, such as ADAM, do not
 support parameter bounds in their standard implementations. Therefore,
 NN bounds are optional and default to ``-inf`` for the lower bound and
 ``inf`` for the upper bound.
+
+Priors for NN parameters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Priors following the standard PEtab syntax can be specified for an entire NN
+or for nested NN identifiers. The prior applies to all entities under the
+specified identifier.
 
 .. _YAML_file:
 Problem YAML File
