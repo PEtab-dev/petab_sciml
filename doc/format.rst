@@ -124,10 +124,10 @@ As NN input data may be condition-specific, arrays can be associated with specif
 conditions in the array data files directly. A single input can have either one
 single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be
-``0`` [STRING]. In the condition-specific case, the name of the array must be a
+``0`` [STRING], which is required for static hybridization. In the condition-specific case, the name of the array must be a
 semicolon-delimited list of all relevant condition IDs, and an array must be
 specified for all initial PEtab conditions (the first condition per PEtab v2
-experiment). As explained :ref:`here <hybrid_condition_table>`, array inputs
+experiment). Similarly to static hybridization in the :ref:`hybridization table <hybrid_condition_table>`, array inputs
 can only be assigned for initial PEtab conditions.
 
 The IDs of inputs or layer parameters are framework-specific or
@@ -333,8 +333,7 @@ input/output specifications are listed below.
 Inputs
 ^^^^^^
 
-Valid ``targetValue``\ s are expressions that may optionally depend on
-parameters defined in the parameter table.
+Valid ``targetValue``\ s are expressions that can be evaluated pre-simulation, i.e., the expressions may contain parameters that are defined in the parameter table, but not species or state variables in the ODE model, since even their initial condition is not available pre-simulation.
 
 .. _outputs-1:
 
@@ -344,7 +343,7 @@ Outputs
 Valid ``targetId``\ s for an NN output are:
 
 - A non-estimated model parameter.
-- A species initial value (referenced by the species ID). In this case,
+- The initial value of a species (referenced by the species ID). In this case,
    any other species initialization is overridden.
 
 .. _hybrid_condition_table:
@@ -352,7 +351,7 @@ Condition and Hybridization Tables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 NN input variables are valid ``targetId``\ s in the condition table. For array
-inputs, values can be assigned to specific conditions via the
+inputs, values must instead be assigned to specific conditions via the
 :ref:`array input file <hdf5_array>`. Since static-hybridized NN models are
 evaluated before model simulation, NN inputs should only be assigned in initial
 PEtab conditions (the first condition per experiment in the experiment
