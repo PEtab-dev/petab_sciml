@@ -125,13 +125,10 @@ conditions in the array data files directly. A single input can have either one
 single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be
 ``0`` [STRING]. In the condition-specific case, the name of the array must be a
-semicolon-delimited list of all relevant condition IDs and an array must be
-specified for all simulated conditions.
-
-The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
-Currently, validation is only provided via the PEtab SciML library, and does
-not check the validity of framework-specific IDs (e.g. for inputs, parameters,
-and layers).
+semicolon-delimited list of all relevant condition IDs, and an array must be
+specified for all initial PEtab conditions (the first condition per PEtab v2
+experiment). As explained :ref:`here <hybrid_condition_table>`, array inputs
+can only be assigned for initial PEtab conditions.
 
 The IDs of inputs or layer parameters are framework-specific or
 user-specified. For inputs:
@@ -323,42 +320,48 @@ Detailed Field Description
 Static hybridization
 ~~~~~~~~~~~~~~~~~~~~
 
-Static hybridization NN model inputs and outputs are constant targets
-(case 1 :ref:`here <hybrid_types>`).
+Static hybridization NN inputs and outputs are constant targets, which
+are evaluated once before model simulation and do not change over time.
+
+If an input is provided via an array file (HDF5), leave the corresponding
+row empty and reference the array via the input ID as described in
+:ref:`array file <hdf5_array>`. For non-array inputs, the valid
+input/output specifications are listed below.
 
 .. _inputs-1:
 
 Inputs
 ^^^^^^
 
-Valid ``targetValue``\ s for a NN input are:
-
--  A parameter in the parameter table.
--  An array input file (assigned an ID in the :ref:`YAML problem
-   file <YAML_file>`).
+Valid ``targetValue``\ s are expressions that may optionally depend on
+parameters defined in the parameter table.
 
 .. _outputs-1:
 
 Outputs
 ^^^^^^^
 
-Valid ``targetId``\ s for a NN output are:
+Valid ``targetId``\ s for an NN output are:
 
--  A non-estimated model parameter.
--  A species’ initial value (referenced by the species’ ID). In this
-   case, any other species initialization is overridden.
+- A non-estimated model parameter.
+- A species initial value (referenced by the species ID). In this case,
+   any other species initialization is overridden.
 
+.. _hybrid_condition_table:
 Condition and Hybridization Tables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-NN input variables are valid ``targetId``\ s for the condition table as
-long as, following the PEtab standard, they are NON_PARAMETER_TABLE_ID.
-**Importantly**, since the hybridization table defines assignments for
-all simulation conditions, any ``targetId`` value in the condition table
-cannot appear in the hybridization table, and vice versa.
+NN input variables are valid ``targetId``\ s in the condition table. For array
+inputs, values can be assigned to specific conditions via the
+:ref:`array input file <hdf5_array>`. Since static-hybridized NN models are
+evaluated before model simulation, NN inputs should only be assigned in initial
+PEtab conditions (the first condition per experiment in the experiment
+table). Any NN input ``targetId`` assigned to a non-initial condition is
+ignored, and the PEtab SciML Python linter will emit a warning.
 
-NN output variables can also appear in the ``targetValue`` column of the
-condition table.
+NN output variables may also appear in the ``targetValue`` column of the
+condition table. In that case, output values are computed using the NN inputs
+from the first condition of the corresponding experiment.
 
 Dynamic hybridization
 ~~~~~~~~~~~~~~~~~~~~~
