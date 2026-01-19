@@ -126,7 +126,7 @@ them across multiple array data files. The general structure is:
 For parameters, each NN model can have at most one parameter entry across all
 array files.
 
-As NN input data may be condition-specific arrays can be associated with specific
+As NN input data may be condition-specific, arrays can be associated with specific
 conditions in the array data files directly. A single input can have either one
 single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be
