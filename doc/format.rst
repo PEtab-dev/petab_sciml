@@ -120,15 +120,24 @@ them across multiple array data files. The general structure is:
        │   └── ...
        └── ...
 
-As NN input data may be condition-specific, arrays can be associated with specific
+For parameters, each NN model can have at most one parameter entry across all
+array files.
+
+As NN input data may be condition-specific arrays can be associated with specific
 conditions in the array data files directly. A single input can have either one
 single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be
-``0`` [STRING], which is required for static hybridization. In the condition-specific case, the name of the array must be a
+``0`` [STRING]. In the condition-specific case, the name of the array must be a
 semicolon-delimited list of all relevant condition IDs, and an array must be
-specified for all initial PEtab conditions (the first condition per PEtab v2
-experiment). Similarly to static hybridization in the :ref:`hybridization table <hybrid_condition_table>`, array inputs
-can only be assigned for initial PEtab conditions.
+provided for all initial PEtab conditions (the first condition per PEtab v2
+experiment). For :ref:`static hybridization <hybrid_types>`, array inputs can
+only be assigned for initial PEtab conditions (see explanation to why
+ :ref:`here <hybrid_condition_table>`)
+
+The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
+Currently, validation is only provided via the PEtab SciML library, and does
+not check the validity of framework-specific IDs (e.g. for inputs, parameters,
+and layers).
 
 The IDs of inputs or layer parameters are framework-specific or
 user-specified. For inputs:
@@ -323,17 +332,19 @@ Static hybridization
 Static hybridization NN inputs and outputs are constant targets, which
 are evaluated once before model simulation and do not change over time.
 
-If an input is provided via an array file (HDF5), leave the corresponding
-row empty and reference the array via the input ID as described in
-:ref:`array file <hdf5_array>`. For non-array inputs, the valid
-input/output specifications are listed below.
+For array inputs, the corresponding input row must be empty, and the input
+shall be assigned using the :ref:`HDF5 array file format <hdf5_array>`.
+Otherwise, inputs and outputs shall be specified as described below.
 
 .. _inputs-1:
 
 Inputs
 ^^^^^^
 
-Valid ``targetValue``\ s are expressions that can be evaluated pre-simulation, i.e., the expressions may contain parameters that are defined in the parameter table, but not species or state variables in the ODE model, since even their initial condition is not available pre-simulation.
+Valid ``targetValue``\ s are expressions that can be evaluated pre-simulation,
+i.e., the expressions may contain parameters that are defined in the parameter
+table, but not species or state variables in the ODE model, since even their
+initial condition is not available pre-simulation.
 
 .. _outputs-1:
 
@@ -355,12 +366,11 @@ inputs, values must instead be assigned to specific conditions via the
 :ref:`array input file <hdf5_array>`. Since static-hybridized NN models are
 evaluated before model simulation, NN inputs should only be assigned in initial
 PEtab conditions (the first condition per experiment in the experiment
-table). Any NN input ``targetId`` assigned to a non-initial condition is
-ignored, and the PEtab SciML Python linter will emit a warning.
+table). Any NN input ``targetId`` is considered undefined.
 
 NN output variables may also appear in the ``targetValue`` column of the
-condition table. In that case, output values are computed using the NN inputs
-from the first condition of the corresponding experiment.
+condition table. With static hybridization, NN outputs are computed
+pre-simulation, and are constant.
 
 Dynamic hybridization
 ~~~~~~~~~~~~~~~~~~~~~
@@ -418,12 +428,7 @@ Detailed Field Description
    - Empty/missing when parameters are provided via an array file following the
      required :ref:`structure <hdf5_ps_structure>` and specified in the problem
      :ref:`YAML file <YAML_file>`. If this field is empty, an array file must
-     exist. The PEtab SciML Python library provides a utility function to
-     interact with such a file, e.g., creating one filled with random values if
-     parameter values are not known. Note, for each ML model, there may be at
-     most one parameter entry across all array files. Therefore, even if a layer
-     is frozen, its values must be taken from the same entry as the other
-     parameters for that model.
+     exist.
    - A numeric value applied to all values under ``parameterId``. Overrides
      any potential values from an array file.
 
