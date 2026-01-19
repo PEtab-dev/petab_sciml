@@ -27,8 +27,9 @@ format for each file that is added or modified by the PEtab SciML
 extension.
 
 .. _hybrid_types:
+
 High Level Overview
---------------------------------------------
+------------------------------------------
 
 The PEtab SciML specification is designed to keep the mechanistic model,
 ML model, and PEtab problem as independent as possible while linking
@@ -55,6 +56,7 @@ considerations are required. Each additional ML model is included just as it
 would be in the single ML model case.
 
 .. _nn_format:
+
 NN Model YAML Format
 ------------------------------------------
 
@@ -87,6 +89,7 @@ SciML specification:
 
 
 .. _hdf5_array:
+
 Array data
 ---------------------------------
 
@@ -142,7 +145,7 @@ and layers).
 The IDs of inputs or layer parameters are framework-specific or
 user-specified. For inputs:
 
--  The PEtab SciML :ref:`NN model YAML format <NN_YAML>`` follows
+-  The PEtab SciML :ref:`NN model YAML format <NN_YAML>` follows
    PyTorch array dimension indexing. For example, if the first layer is
    ``Conv2d``, the input should be in ``(C, W, H)`` format.
 -  NN models in other framework-specific formats follow the indexing and
@@ -167,6 +170,7 @@ For parameters:
 
 
 .. _NN_YAML:
+
 NN model YAML format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -185,6 +189,7 @@ which enables validation with various third-party tools, and also as a
    of this.
 
 .. _mapping_table:
+
 Mapping Table
 ---------------------------------------
 
@@ -207,8 +212,9 @@ Detailed Field Description
    ``modelEntityId`` maps to.
 
 .. _nn_parameters:
+
 ``modelEntityId`` Syntax for Parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The model ID
 ``$nnId.parameters{[$layerId]}.{$arrayId}{[$parameterIndex]}}``
@@ -225,6 +231,7 @@ NN parameter PEtab identifiers can only be referenced in the parameters
 table.
 
 .. _nn_inputs:
+
 Inputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -274,6 +281,7 @@ are:
    hierarchy (e.g., ``nn1.parameters.weight``) are not valid.
 
 .. _mapping_table_indexing:
+
 Indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -294,11 +302,11 @@ For assignments to nested PEtab identifiers (in the ``parameters``,
 either:
 
 -  Refer to another PEtab identifier with the same nested structure, or
--  Follow the corresponding hierarchical HDF5
-   :ref:`input <hdf5_input_structure>` or
-   :ref:`parameter <hdf5_ps_structure>` structure.
+-  Follow the corresponding hierarchical HDF5 structure for
+   :ref:`inputs and parameters <hdf5_array>`.
 
 .. _hybrid_table:
+
 Hybridization Table
 --------------------------------------------
 
@@ -398,6 +406,7 @@ PEtab problem import, any assigned parameters are replaced by the NN
 output in the ODE RHS.
 
 .. _parameter_table:
+
 Parameter Table
 -------------------------------------------
 
@@ -426,7 +435,7 @@ Detailed Field Description
    This can be:
 
    - Empty/missing when parameters are provided via an array file following the
-     required :ref:`structure <hdf5_ps_structure>` and specified in the problem
+     required :ref:`structure <hdf5_array>` and specified in the problem
      :ref:`YAML file <YAML_file>`. If this field is empty, an array file must
      exist.
    - A numeric value applied to all values under ``parameterId``. Overrides
@@ -452,6 +461,7 @@ or for nested NN identifiers. The prior applies to all entities under the
 specified identifier.
 
 .. _YAML_file:
+
 Problem YAML File
 ---------------------------------------
 
