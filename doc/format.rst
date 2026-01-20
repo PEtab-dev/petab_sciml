@@ -123,8 +123,7 @@ them across multiple array data files. The general structure is:
        │   └── ...
        └── ...
 
-For parameters, each NN model can have at most one parameter entry across all
-array files.
+The parameters for a single NN model cannot be split across multiple array data files.
 
 As NN input data may be condition-specific, arrays can be associated with specific
 conditions in the array data files directly. A single input can have either one
@@ -135,7 +134,7 @@ semicolon-delimited list of all relevant condition IDs, and an array must be
 provided for all initial PEtab conditions (the first condition per PEtab v2
 experiment). For :ref:`static hybridization <hybrid_types>`, array inputs can
 only be assigned for initial PEtab conditions (see explanation to why
- :ref:`here <hybrid_condition_table>`)
+:ref:`here <hybrid_condition_table>`)
 
 The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
 Currently, validation is only provided via the PEtab SciML library, and does
@@ -341,8 +340,8 @@ Static hybridization NN inputs and outputs are constant targets, which
 are evaluated once before model simulation and do not change over time.
 
 For array inputs, the corresponding input row must be empty, and the input
-shall be assigned using the :ref:`HDF5 array file format <hdf5_array>`.
-Otherwise, inputs and outputs shall be specified as described below.
+must be assigned using the :ref:`HDF5 array file format <hdf5_array>`.
+Otherwise, inputs and outputs must be specified as described below.
 
 .. _inputs-1:
 
@@ -363,7 +362,7 @@ Valid ``targetId``\ s for an NN output are:
 
 - A non-estimated model parameter.
 - The initial value of a species (referenced by the species ID). In this case,
-   any other species initialization is overridden.
+  any other species initialization is overridden.
 
 .. _hybrid_condition_table:
 Condition and Hybridization Tables
@@ -374,11 +373,12 @@ inputs, values must instead be assigned to specific conditions via the
 :ref:`array input file <hdf5_array>`. Since static-hybridized NN models are
 evaluated before model simulation, NN inputs should only be assigned in initial
 PEtab conditions (the first condition per experiment in the experiment
-table). Any NN input ``targetId`` is considered undefined.
+table). NN inputs cannot be used in any expressions, including``targetValue``\ s.
 
 NN output variables may also appear in the ``targetValue`` column of the
 condition table. With static hybridization, NN outputs are computed
-pre-simulation, and are constant.
+pre-simulation, and are constant. NN outputs cannot appear in the
+``targetValue`` expressions of NN inputs.
 
 Dynamic hybridization
 ~~~~~~~~~~~~~~~~~~~~~
@@ -434,12 +434,12 @@ Detailed Field Description
 -  ``nominalValue`` [String \| NUMERIC, REQUIRED]: NN nominal values.
    This can be:
 
-   - Empty/missing when parameters are provided via an array file following the
-     required :ref:`structure <hdf5_array>` and specified in the problem
-     :ref:`YAML file <YAML_file>`. If this field is empty, an array file must
-     exist.
-   - A numeric value applied to all values under ``parameterId``. Overrides
-     any potential values from an array file.
+   - This may be empty (and is ignored) if the parameter is estimated.
+     If the parameter is not estimated, then the nominal value must
+     be specified either directly here, and/or via an
+     :ref:`array file <hdf5_array>`.
+     Any value here will override the array file.
+   - A numeric value applied to all values under ``parameterId``.
 
 -  ``estimate`` [0 \| 1, REQUIRED]: Indicates whether the parameters are
    estimated (``1``) or fixed (``0``).
