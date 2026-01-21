@@ -72,9 +72,9 @@ condition per experiment in the experiment table).
 Dynamic hybridization
 ~~~~~~~~~~~~~~~~~~~~~
 
-The ML model appears in the ODE right-hand side (RHS) and/or observable formula.
-Inputs and outputs are evaluated during simulation at the current simulation time.
-Thus, inputs can only be assigned in the hybridization table. Assigning inputs in
+The ML model appears in the ODE right-hand side (RHS) and/or observable formula,
+for which inputs and outputs are evaluated  at the current time-point. Consequently,
+inputs can only be assigned in the hybridization table. Assigning inputs in
 the condition table is invalid, since it can change the model structure between
 conditions, which is invalid in the PEtab standard. For example, if during a
 simulation the ML model input is ``X`` in one condition but ``X + 1`` in another,
