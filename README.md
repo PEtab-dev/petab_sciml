@@ -41,10 +41,17 @@ aspects enabling this are:
 
 ## Installation
 
-The PEtab SciML Python3 helper library can be installed with:
+The PEtab SciML Python 3 helper library can be installed with:
 
 ```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install petab-sciml
+```
+
+or
+
+```bash
+uv pip install petab-sciml[torch]
 ```
 
 ## Documentation

@@ -12,7 +12,6 @@ authors = [
 ]
 dependencies = [
   "mkstd>=0.0.10",
-  "torch",
   "pandas",
   "pydantic",
   "python-libsbml",
@@ -46,6 +45,9 @@ doc = [
 ]
 test = [
     "pytest"
+]
+torch = [
+    "torch"
 ]
 
 [project.urls]
