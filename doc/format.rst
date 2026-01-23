@@ -422,23 +422,20 @@ Detailed Field Description
 -  ``parameterId`` [String, REQUIRED]: The NN or a specific
    layer/parameter array id. The target of the ``parameterId`` must be
    assigned via the :ref:`mapping table <mapping_table>`.
--  ``nominalValue`` [String \| NUMERIC, REQUIRED]: NN nominal values.
-   This can be:
 
-   -  A PEtab variable that, via the problem :ref:`YAML
-      file <YAML_file>`, corresponds to an HDF5 file with the
-      required :ref:`structure <hdf5_array>`. If no file
-      exists at the given path when the problem is imported and the
-      parameters are set to be estimated, a file is created with
-      randomly sampled values. Unless a numeric value is provided,
-      all assignments for a NN must refer to the same file, since all NN
-      parameters should be collected in a single HDF5
-      file following the structure described
-      :ref:`here <hdf5_array>`.
-   -  A numeric value applied to all parameters under ``parameterId``.
+-  ``nominalValue`` [String \| NUMERIC, REQUIRED]: Nominal values for NN parameters.
+   If ``estimate = true``, this field can be empty. If ``estimate = false``, a
+   nominal value must be provided. Valid values are:
+
+   - Empty, in which case values are taken from an existing :ref:`array file <hdf5_array>`.
+   - A numeric value applied to all values under ``parameterId``. If values are
+     also provided via an :ref:`array file <hdf5_array>`, the array file is ignored.
+
 
 -  ``estimate`` [0 \| 1, REQUIRED]: Indicates whether the parameters are
-   estimated (``1``) or fixed (``0``).
+   estimated (``1``) or fixed (``0``). Setting ``0`` for a NN identifier
+   (e.g., ``nnId.parameters[layerId]``) freezes the parameters for the
+   identifier.
 
 Bounds for NN parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -448,6 +445,13 @@ However, most optimization algorithms used for NNs, such as ADAM, do not
 support parameter bounds in their standard implementations. Therefore,
 NN bounds are optional and default to ``-inf`` for the lower bound and
 ``inf`` for the upper bound.
+
+Priors for NN parameters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Priors following the standard PEtab syntax can be specified for an entire NN
+or for nested NN identifiers. The prior applies to all values under the
+specified identifier.
 
 .. _YAML_file:
 
