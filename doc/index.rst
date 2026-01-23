@@ -10,6 +10,7 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
 
    Introduction <introduction>
    Getting Started <examples/getting_started/getting_started.ipynb>
+   trouble
 
 .. toctree::
    :maxdepth: 3
