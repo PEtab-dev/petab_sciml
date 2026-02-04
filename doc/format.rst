@@ -97,12 +97,30 @@ Array data
 
 The standard PEtab format is unsuitable for incorporating large arrays
 of values into an estimation problem. This includes the large datasets
-used to train NNs, or the parameter values of wide or deep NNs.
+used to train NNs, or the parameter values of wide or deep NNs. Hence,
+we provide an HDF5-based file format to store and incorporate array data
+efficiently.
 
-Hence, we provide an HDF5-based file format to store and incorporate this
-array data efficiently. Users can choose to provide input data and
-parameter values in a single array data file, or to arbitrarily split
-them across multiple array data files. The general structure is:
+Referencing array data
+~~~~~~~~~~~~~~~~~~~~~~
+
+To indicate that a PEtab variable (e.g., NN parameters or an NN input) takes its
+values from an array data file, it must be explicitly assigned the reserved
+global value ``ARRAY_INPUT`` in the relevant PEtab table entry.
+
+Assigning ``ARRAY_INPUT`` is interpreted as a global assignment to an array
+variable whose potentially condition-specific values are provided in an array
+data file. Therefore, ``ARRAY_INPUT`` is only valid in the
+:ref:`hybridization table <hybrid_condition_table>` and the
+:ref:`Parameters Table <parameter_table>`, where assignments apply across all
+PEtab experiments.
+
+Array data file format
+~~~~~~~~~~~~~~~~~~~~~~
+
+Array data must be provided as HDF5. Input data and parameter values may be
+stored in a single array data file or split across multiple array data files.
+The general structure is:
 
 .. code::
 
@@ -306,7 +324,7 @@ either:
 Hybridization Table
 --------------------------------------------
 
-Assignments of NN inputs and outputs in this table apply to all simulation conditions.
+Assignments of NN inputs and outputs in this table apply to all PEtab experiments.
 The hybridization file is expected to be in tab-separated values format and to have,
 in any order, the following two columns:
 
@@ -344,8 +362,8 @@ Inputs
 Valid ``targetValue``\ s for a NN input are:
 
 -  A parameter in the parameter table.
--  An array input file (assigned an ID in the :ref:`YAML problem
-   file <YAML_file>`).
+- ``ARRAY_INPUT`` (values are read from an array data file; see
+  :ref:`Array data <hdf5_array>`)
 
 .. _outputs-1:
 
@@ -381,10 +399,14 @@ quantities (case 2 :ref:`here <hybrid_types>`).
 Inputs
 ^^^^^^
 
-A valid ``targetValue`` for a NN input is an expression that depends on
-model species, time, and/or parameters. Any model species or
-parameters in the expression are expected to be evaluated at the given
-time-value.
+A valid ``targetValue`` for an NN input is:
+
+- An expression depending on model species, time, and/or parameters. Species and
+   parameter references are evaluated at the current simulation time.
+- ``ARRAY_INPUT`` (values are read from an array data file; see
+  :ref:`Array data <hdf5_array>`). If PEtab condition-specific values are provided,
+  the input is updated following the semantics of the PEtab standard, implying input
+  may change during a PEtab experiment.
 
 .. _outputs-2:
 
