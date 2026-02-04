@@ -44,8 +44,9 @@ of ML inputs and outputs.
 PEtab SciML supports two classes of hybrid models:
 
 1. **Pre-initialization hybridization**: The ML model is evaluated during the
-   pre-initialization stage of each PEtab experiment (as defined in the PEtab v2
-   specification). This means ML model inputs are constant, and the ML model assigns
+   pre-initialization stage of each PEtab experiment (as defined in the
+   `PEtab v2 specification <https://petab.readthedocs.io/en/latest/v2/documentation_data_format.html#initialization-and-parameter-application>`__
+   ). This means ML model inputs are constant, and the ML model assigns
    parameter values and/or initial values in the ODE model prior to model initialization and
    simulation.
 2. **Simulation hybridization**: ML inputs and outputs are computed dynamically over the
@@ -472,7 +473,7 @@ hybridization tables, and array files. The general structure is:
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           pre-initialization: ...       # the hybridization type (bool).
+           pre_initialization: ...       # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
