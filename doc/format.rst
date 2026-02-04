@@ -46,7 +46,7 @@ PEtab SciML supports two classes of hybrid models:
 1. **Pre-initialization hybridization**: The ML model is evaluated during the
    pre-initialization stage of each PEtab experiment (as defined in the PEtab v2
    specification). This means ML model inputs are constant, and the ML model assigns
-   parameter values and/or initial values in the model prior to model initialization and
+   parameter values and/or initial values in the ODE model prior to model initialization and
    simulation.
 2. **Simulation hybridization**: ML inputs and outputs are computed dynamically over the
    course of a PEtab experiment (i.e., during simulation). This means the ML model appears
@@ -373,7 +373,7 @@ condition table.
 Simulation hybridization
 ~~~~~~~~~~~~~~~~~~~~~
 
-Simulation hybridization NN models depend on model simulated model
+Simulation hybridization NN models can depend on time-varying ODE model
 quantities (case 2 :ref:`here <hybrid_types>`).
 
 .. _inputs-2:
@@ -384,7 +384,9 @@ Inputs
 A valid ``targetValue`` for a NN input is an expression that depends on
 model species, time, and/or parameters. Any model species or
 parameters in the expression are expected to be evaluated at the given
-time-value.
+A valid ``targetValue`` for a NN input is an expression that depends on
+constant or time-varying model quantities such as species, time, and/or
+parameters.
 
 .. _outputs-2:
 
@@ -392,6 +394,8 @@ Outputs
 ^^^^^^^
 
 A valid ``targetId`` for a NN output is a constant model parameter. During
+PEtab problem import, any assigned parameters are replaced by the NN
+A valid ``targetId`` for a NN output is a model parameter. During
 PEtab problem import, any assigned parameters are replaced by the NN
 output in the ODE RHS.
 
