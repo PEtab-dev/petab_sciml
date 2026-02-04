@@ -506,7 +506,7 @@ The ``neural_networks`` section is required and must define the following:
    -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
       model YAML format (see :ref:`NN model YAML format <NN_YAML>`).
 
--  ``pre-initialization`` [BOOL, REQUIRED]: The hybridization type
+-  ``pre_initialization`` [BOOL, REQUIRED]: The hybridization type
    (see :ref:`hybridization types <hybrid_types>`). ``true`` indicates
    pre-initialization hybridization; ``false`` indicates simulation hybridization.
 
