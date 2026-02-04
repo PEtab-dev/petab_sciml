@@ -43,12 +43,14 @@ of ML inputs and outputs.
 
 PEtab SciML supports two classes of hybrid models:
 
-1. **Static hybridization**: For each experimental/simulation condition,
-   inputs are constant and the ML model sets constant parameters and/or
-   initial values in the ODE model prior to model simulation.
-2. **Dynamic hybridization**: The ML model appears in the ODE
-   right-hand-side (RHS) and/or observable formula. Inputs and outputs
-   are computed dynamically over the course of a simulation.
+1. **Pre-initialization hybridization**: The ML model is evaluated during the
+   pre-initialization stage of each PEtab experiment (as defined in the PEtab v2
+   specification). This means ML model inputs are constant, and the ML model assigns
+   parameter values and/or initial values in the model prior to model initialization and
+   simulation.
+2. **Simulation hybridization**: ML inputs and outputs are computed dynamically over the
+   course of a PEtab experiment (i.e., during simulation). This means the ML model appears
+   in the ODE right-hand side (RHS) and/or in observable formulas.
 
 A PEtab SciML problem can also include multiple ML models. Aside from ensuring
 that models do not conflict (e.g., by sharing the same output), no special
@@ -238,10 +240,10 @@ refers to specific inputs of the NN identified by ``$nnId``.
    (:ref:`syntax <mapping_table_indexing>`). This should be omitted
    if the input is a file.
 
-For :ref:`static hybridization <hybrid_types>` NN input PEtab
+For :ref:`pre-initialization hybridization <hybrid_types>` NN input PEtab
 identifiers are considered valid PEtab IDs without restrictions (e.g.,
 they may be referenced in the parameters table, condition table,
-hybridization table, etc.). For :ref:`dynamic
+hybridization table, etc.). For :ref:`simulation
 hybridization <hybrid_types>`, input PEtab identifiers can only
 be assigned an expression in the :ref:`hybridization
 table <hybrid_table>`.
@@ -322,16 +324,16 @@ Detailed Field Description
 
 -  ``targetId`` [STRING, REQUIRED]: The identifier of
    the non-estimated entity that will be modified. Restrictions depend
-   on hybridization type (see static and dynamic hybridization details below).
+   on hybridization type (see pre-initialization and simulation hybridization details below).
    The exact treatment of these entities by importers will also depend on whether
-   the ML model is statically or dynamically hybridized.
+   the ML model is pre-initialization or simulation hybridized.
 -  ``targetValue`` [STRING, REQUIRED]: The value or expression that will
    be used to change the target.
 
-Static hybridization
-~~~~~~~~~~~~~~~~~~~~
+Pre-initialization hybridization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Static hybridization NN model inputs and outputs are constant targets
+Pre-initialization hybridization NN model inputs and outputs are constant targets
 (case 1 :ref:`here <hybrid_types>`).
 
 .. _inputs-1:
@@ -368,10 +370,10 @@ cannot appear in the hybridization table, and vice versa.
 NN output variables can also appear in the ``targetValue`` column of the
 condition table.
 
-Dynamic hybridization
+Simulation hybridization
 ~~~~~~~~~~~~~~~~~~~~~
 
-Dynamic hybridization NN models depend on model simulated model
+Simulation hybridization NN models depend on model simulated model
 quantities (case 2 :ref:`here <hybrid_types>`).
 
 .. _inputs-2:
@@ -466,7 +468,7 @@ hybridization tables, and array files. The general structure is:
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           static: ...       # the hybridization type (bool).
+           pre-initialization: ...       # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
@@ -504,9 +506,9 @@ The ``neural_networks`` section is required and must define the following:
    -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
       model YAML format (see :ref:`NN model YAML format <NN_YAML>`).
 
--  ``static`` [BOOL, REQUIRED]: The hybridization type
+-  ``pre-initialization`` [BOOL, REQUIRED]: The hybridization type
    (see :ref:`hybridization types <hybrid_types>`). ``true`` indicates
-   static hybridization; ``false`` indicates dynamic hybridization.
+   pre-initialization hybridization; ``false`` indicates simulation hybridization.
 
 Notes for developers
 --------------------
