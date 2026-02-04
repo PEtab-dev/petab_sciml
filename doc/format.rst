@@ -44,9 +44,10 @@ of ML inputs and outputs.
 PEtab SciML supports two classes of hybrid models:
 
 1. **Pre-initialization hybridization**: The ML model is evaluated during the
-   pre-initialization stage of each PEtab experiment (as defined in the PEtab v2
-   specification). This means ML model inputs are constant, and the ML model assigns
-   parameter values and/or initial values in the model prior to model initialization and
+   pre-initialization stage of each PEtab experiment (as defined in the
+   `PEtab v2 specification <https://petab.readthedocs.io/en/latest/v2/documentation_data_format.html#initialization-and-parameter-application>`__
+   ). This means ML model inputs are constant, and the ML model assigns
+   parameter values and/or initial values in the ODE model prior to model initialization and
    simulation.
 2. **Simulation hybridization**: ML inputs and outputs are computed dynamically over the
    course of a PEtab experiment (i.e., during simulation). This means the ML model appears
@@ -391,7 +392,7 @@ condition table.
 Simulation hybridization
 ~~~~~~~~~~~~~~~~~~~~~
 
-Simulation hybridization NN models depend on model simulated model
+Simulation hybridization NN models can depend on time-varying ODE model
 quantities (case 2 :ref:`here <hybrid_types>`).
 
 .. _inputs-2:
@@ -414,6 +415,8 @@ Outputs
 ^^^^^^^
 
 A valid ``targetId`` for a NN output is a constant model parameter. During
+PEtab problem import, any assigned parameters are replaced by the NN
+A valid ``targetId`` for a NN output is a model parameter. During
 PEtab problem import, any assigned parameters are replaced by the NN
 output in the ODE RHS.
 
@@ -490,7 +493,7 @@ hybridization tables, and array files. The general structure is:
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           pre-initialization: ...       # the hybridization type (bool).
+           pre_initialization: ...       # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
