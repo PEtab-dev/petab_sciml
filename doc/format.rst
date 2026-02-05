@@ -449,7 +449,7 @@ Detailed Field Description
    If ``estimate = true``, this field can be empty. If ``estimate = false``, a
    nominal value must be provided. Valid values are:
 
-   - Empty, in which case values are taken from an existing :ref:`array file <hdf5_array>`.
+   - ``array``, in which case values are taken from an existing :ref:`array file <hdf5_array>`.
    - A numeric value applied to all values under ``parameterId``. If values are
      also provided via an :ref:`array file <hdf5_array>`, the array file is ignored.
 
