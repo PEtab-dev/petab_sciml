@@ -255,7 +255,7 @@ refers to specific inputs of the NN identified by ``$nnId``.
    function (uses zero-based indexing).
 -  ``$inputIndex`` Indexing into the input argument
    (:ref:`syntax <mapping_table_indexing>`). This should be omitted
-   if the input is provided as ``array``.
+   if the input is specified as ``array``.
 
 For :ref:`pre-initialization hybridization <hybrid_types>` NN input PEtab
 identifiers are considered valid PEtab IDs without restrictions (e.g.,
