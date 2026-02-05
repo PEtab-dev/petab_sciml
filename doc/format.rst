@@ -475,10 +475,9 @@ or for nested NN identifiers. The prior is duplicated for each value under the
 specified identifier, it does not specify a joint prior.
 
 In PEtab v2, if any parameter is assigned a prior, all parameters with unassigned
-priors are implicitly assigned a ``uniform(lowerBound, upperBound)`` prior. This also
-applies to NN parameters. In this case, setting ``lowerBound`` and/or
-``upperBound`` to ``-inf`` or ``inf`` is invalid, since it would result in an
-improper flat prior.
+priors are implicitly assigned a ``uniform(lowerBound, upperBound)`` prior. This
+also applies to NN parameters. In this case, NN parameters must have finite
+``lowerBound`` and ``upperBound`` so that the prior distribution is proper.
 
 .. _YAML_file:
 
