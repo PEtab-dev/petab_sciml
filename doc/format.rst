@@ -111,9 +111,9 @@ keyword ``array`` in the relevant PEtab table entry.
 
 Semantically, assigning ``array`` is interpreted as a global assignment to an array
 variable whose potentially condition-specific values are provided in an array
-data file. Therefore, providing ``array`` is only valid in the
-:ref:`hybridization table <hybrid_condition_table>` and the
-:ref:`Parameters Table <parameter_table>`, where assignments apply across all
+data file. Therefore, specifying ``array`` is only valid in the
+:ref:`hybridization table <_hybrid_table>` and the
+:ref:`parameter Table <parameter_table>`, where assignments apply across all
 PEtab experiments.
 
 Array data file format
