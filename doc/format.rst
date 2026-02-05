@@ -107,11 +107,11 @@ Referencing array data
 
 To indicate that a PEtab variable (e.g., NN parameters or an NN input) takes its
 values from an array data file, it must be explicitly assigned the reserved
-global value ``ARRAY_INPUT`` in the relevant PEtab table entry.
+global value ``array`` in the relevant PEtab table entry.
 
-Assigning ``ARRAY_INPUT`` is interpreted as a global assignment to an array
+Semantically, assigning ``array`` is interpreted as a global assignment to an array
 variable whose potentially condition-specific values are provided in an array
-data file. Therefore, ``ARRAY_INPUT`` is only valid in the
+data file. Therefore, providing ``array`` is only valid in the
 :ref:`hybridization table <hybrid_condition_table>` and the
 :ref:`Parameters Table <parameter_table>`, where assignments apply across all
 PEtab experiments.
@@ -215,8 +215,6 @@ valid PEtab identifier in order to avoid confusion about what it refers to
 parameter, and output referenced in the PEtab problem must be defined
 under ``modelEntityId`` and mapped to a PEtab identifier. For the
 ``petabEntityId`` column the same rules as in PEtab v2 apply.
-Additionally array file IDs defined in the :ref:`YAML <YAML_file>`
-file are considered valid PEtab entities.
 
 Detailed Field Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -257,7 +255,7 @@ refers to specific inputs of the NN identified by ``$nnId``.
    function (uses zero-based indexing).
 -  ``$inputIndex`` Indexing into the input argument
    (:ref:`syntax <mapping_table_indexing>`). This should be omitted
-   if the input is a file.
+   if the input is provided as ``array``.
 
 For :ref:`pre-initialization hybridization <hybrid_types>` NN input PEtab
 identifiers are considered valid PEtab IDs without restrictions (e.g.,
@@ -363,7 +361,7 @@ Inputs
 Valid ``targetValue``\ s for a NN input are:
 
 -  A parameter in the parameter table.
-- ``ARRAY_INPUT`` (values are read from an array data file; see
+- ``array`` (values are read from an array data file; see
   :ref:`Array data <hdf5_array>`)
 
 .. _outputs-1:
@@ -404,10 +402,10 @@ A valid ``targetValue`` for an NN input is:
 
 - An expression depending on model species, time, and/or parameters. Species and
    parameter references are evaluated at the current simulation time.
-- ``ARRAY_INPUT`` (values are read from an array data file; see
+- ``array`` (values are read from an array data file; see
   :ref:`Array data <hdf5_array>`). If PEtab condition-specific values are provided,
   the input is updated following the semantics of the PEtab standard, implying input
-  may change during a PEtab experiment.
+  values may change during a PEtab experiment.
 
 .. _outputs-2:
 
