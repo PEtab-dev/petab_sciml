@@ -461,18 +461,24 @@ Detailed Field Description
 Bounds for NN parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Bounds can be specified for an entire NN or its nested identifiers.
-However, most optimization algorithms used for NNs, such as ADAM, do not
-support parameter bounds in their standard implementations. Therefore,
-NN bounds are optional and default to ``-inf`` for the lower bound and
-``inf`` for the upper bound.
+Parameter bounds can be specified for an entire NN or for nested NN identifiers.
+For NN parameters, unbounded estimation is common. Therefore, for NN parameters
+``lowerBound`` and ``upperBound`` can be set to ``-inf`` and ``inf`` respectively,
+which following the PEtab standard is invalid for other PEtab parameters. The bounds
+fields may also be left empty, in which case they default to ``-inf`` and ``inf``.
 
 Priors for NN parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Priors following the standard PEtab syntax can be specified for an entire NN
 or for nested NN identifiers. The prior is duplicated for each value under the
-specified identifier, it does not specify a joint prior
+specified identifier, it does not specify a joint prior.
+
+In PEtab v2, if any parameter is assigned a prior, all parameters with unassigned
+priors are implicitly assigned a ``uniform(lowerBound, upperBound)`` prior. This also
+applies to NN parameters. In this case, setting ``lowerBound`` and/or
+``upperBound`` to ``-inf`` or ``inf`` is invalid, since it would result in an
+improper flat prior.
 
 .. _YAML_file:
 
