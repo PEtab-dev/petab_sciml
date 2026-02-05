@@ -401,7 +401,7 @@ Inputs
 A valid ``targetValue`` for an NN input is:
 
 - An expression depending on model species, time, and/or parameters. Species and
-   parameter references are evaluated at the current simulation time.
+  parameter references are evaluated at the current simulation time.
 - ``array`` (values are read from an array data file; see
   :ref:`Array data <hdf5_array>`). If PEtab condition-specific values are provided,
   the input is updated following the semantics of the PEtab standard, implying input
