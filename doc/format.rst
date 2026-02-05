@@ -43,12 +43,15 @@ of ML inputs and outputs.
 
 PEtab SciML supports two classes of hybrid models:
 
-1. **Static hybridization**: For each experimental/simulation condition,
-   inputs are constant and the ML model sets constant parameters and/or
-   initial values in the ODE model prior to model simulation.
-2. **Dynamic hybridization**: The ML model appears in the ODE
-   right-hand-side (RHS) and/or observable formula. Inputs and outputs
-   are computed dynamically over the course of a simulation.
+1. **Pre-initialization hybridization**: The ML model is evaluated during the
+   pre-initialization stage of each PEtab experiment (as defined in the
+   `PEtab v2 specification <https://petab.readthedocs.io/en/latest/v2/documentation_data_format.html#initialization-and-parameter-application>`__
+   ). This means ML model inputs are constant, and the ML model assigns
+   parameter values and/or initial values in the ODE model prior to model initialization and
+   simulation.
+2. **Simulation hybridization**: ML inputs and outputs are computed dynamically over the
+   course of a PEtab experiment (i.e., during simulation). This means the ML model appears
+   in the ODE right-hand side (RHS) and/or in observable formulas.
 
 A PEtab SciML problem can also include multiple ML models. Aside from ensuring
 that models do not conflict (e.g., by sharing the same output), no special
@@ -95,12 +98,30 @@ Array data
 
 The standard PEtab format is unsuitable for incorporating large arrays
 of values into an estimation problem. This includes the large datasets
-used to train NNs, or the parameter values of wide or deep NNs.
+used to train NNs, or the parameter values of wide or deep NNs. Hence,
+we provide an HDF5-based file format to store and incorporate array data
+efficiently.
 
-Hence, we provide an HDF5-based file format to store and incorporate this
-array data efficiently. Users can choose to provide input data and
-parameter values in a single array data file, or to arbitrarily split
-them across multiple array data files. The general structure is:
+Referencing array data
+~~~~~~~~~~~~~~~~~~~~~~
+
+To indicate that a PEtab variable (e.g., NN parameters or an NN input) takes its
+values from an array data file, it must be explicitly assigned the reserved
+keyword ``array`` in the relevant PEtab table entry.
+
+Semantically, assigning ``array`` is interpreted as a global assignment to an array
+variable whose potentially condition-specific values are provided in an array
+data file. Therefore, specifying ``array`` is only valid in the
+:ref:`hybridization table <_hybrid_table>` and the
+:ref:`parameter Table <parameter_table>`, where assignments apply across all
+PEtab experiments.
+
+Array data file format
+~~~~~~~~~~~~~~~~~~~~~~
+
+Array data must be provided as HDF5. Input data and parameter values may be
+stored in a single array data file or split across multiple array data files.
+The general structure is:
 
 .. code::
 
@@ -194,8 +215,6 @@ valid PEtab identifier in order to avoid confusion about what it refers to
 parameter, and output referenced in the PEtab problem must be defined
 under ``modelEntityId`` and mapped to a PEtab identifier. For the
 ``petabEntityId`` column the same rules as in PEtab v2 apply.
-Additionally array file IDs defined in the :ref:`YAML <YAML_file>`
-file are considered valid PEtab entities.
 
 Detailed Field Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -236,12 +255,12 @@ refers to specific inputs of the NN identified by ``$nnId``.
    function (uses zero-based indexing).
 -  ``$inputIndex`` Indexing into the input argument
    (:ref:`syntax <mapping_table_indexing>`). This should be omitted
-   if the input is a file.
+   if the input is specified as ``array``.
 
-For :ref:`static hybridization <hybrid_types>` NN input PEtab
+For :ref:`pre-initialization hybridization <hybrid_types>` NN input PEtab
 identifiers are considered valid PEtab IDs without restrictions (e.g.,
 they may be referenced in the parameters table, condition table,
-hybridization table, etc.). For :ref:`dynamic
+hybridization table, etc.). For :ref:`simulation
 hybridization <hybrid_types>`, input PEtab identifiers can only
 be assigned an expression in the :ref:`hybridization
 table <hybrid_table>`.
@@ -304,7 +323,7 @@ either:
 Hybridization Table
 --------------------------------------------
 
-Assignments of NN inputs and outputs in this table apply to all simulation conditions.
+Assignments of NN inputs and outputs in this table apply to all PEtab experiments.
 The hybridization file is expected to be in tab-separated values format and to have,
 in any order, the following two columns:
 
@@ -322,16 +341,16 @@ Detailed Field Description
 
 -  ``targetId`` [STRING, REQUIRED]: The identifier of
    the non-estimated entity that will be modified. Restrictions depend
-   on hybridization type (see static and dynamic hybridization details below).
+   on hybridization type (see pre-initialization and simulation hybridization details below).
    The exact treatment of these entities by importers will also depend on whether
-   the ML model is statically or dynamically hybridized.
+   the ML model is pre-initialization or simulation hybridized.
 -  ``targetValue`` [STRING, REQUIRED]: The value or expression that will
    be used to change the target.
 
-Static hybridization
-~~~~~~~~~~~~~~~~~~~~
+Pre-initialization hybridization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Static hybridization NN model inputs and outputs are constant targets
+Pre-initialization hybridization NN model inputs and outputs are constant targets
 (case 1 :ref:`here <hybrid_types>`).
 
 .. _inputs-1:
@@ -342,8 +361,8 @@ Inputs
 Valid ``targetValue``\ s for a NN input are:
 
 -  A parameter in the parameter table.
--  An array input file (assigned an ID in the :ref:`YAML problem
-   file <YAML_file>`).
+- ``array`` (values are read from an array data file; see
+  :ref:`Array data <hdf5_array>`)
 
 .. _outputs-1:
 
@@ -368,10 +387,10 @@ cannot appear in the hybridization table, and vice versa.
 NN output variables can also appear in the ``targetValue`` column of the
 condition table.
 
-Dynamic hybridization
+Simulation hybridization
 ~~~~~~~~~~~~~~~~~~~~~
 
-Dynamic hybridization NN models depend on model simulated model
+Simulation hybridization NN models can depend on time-varying ODE model
 quantities (case 2 :ref:`here <hybrid_types>`).
 
 .. _inputs-2:
@@ -379,10 +398,14 @@ quantities (case 2 :ref:`here <hybrid_types>`).
 Inputs
 ^^^^^^
 
-A valid ``targetValue`` for a NN input is an expression that depends on
-model species, time, and/or parameters. Any model species or
-parameters in the expression are expected to be evaluated at the given
-time-value.
+A valid ``targetValue`` for an NN input is:
+
+- An expression depending on model species, time, and/or parameters. Species and
+  parameter references are evaluated at the current simulation time.
+- ``array`` (values are read from an array data file; see
+  :ref:`Array data <hdf5_array>`). If PEtab condition-specific values are provided,
+  the input is updated following the semantics of the PEtab standard, implying input
+  values may change during a PEtab experiment.
 
 .. _outputs-2:
 
@@ -390,6 +413,8 @@ Outputs
 ^^^^^^^
 
 A valid ``targetId`` for a NN output is a constant model parameter. During
+PEtab problem import, any assigned parameters are replaced by the NN
+A valid ``targetId`` for a NN output is a model parameter. During
 PEtab problem import, any assigned parameters are replaced by the NN
 output in the ODE RHS.
 
@@ -469,7 +494,7 @@ hybridization tables, and array files. The general structure is:
          netId1:
            location: ...     # location of NN model file (string).
            format: ...       # equinox | lux.jl | pytorch | yaml
-           static: ...       # the hybridization type (bool).
+           pre_initialization: ...       # the hybridization type (bool).
          ...
        hybridization_files:  # (required) list of location of hybridization table files
          - ...
@@ -507,9 +532,9 @@ The ``neural_networks`` section is required and must define the following:
    -  ``yaml``: the file contains an NN model specified in the PEtab SciML NN
       model YAML format (see :ref:`NN model YAML format <NN_YAML>`).
 
--  ``static`` [BOOL, REQUIRED]: The hybridization type
+-  ``pre_initialization`` [BOOL, REQUIRED]: The hybridization type
    (see :ref:`hybridization types <hybrid_types>`). ``true`` indicates
-   static hybridization; ``false`` indicates dynamic hybridization.
+   pre-initialization hybridization; ``false`` indicates simulation hybridization.
 
 Notes for developers
 --------------------
