@@ -12,7 +12,6 @@ authors = [
 ]
 dependencies = [
   "mkstd>=0.0.10",
-  "torch",
   "pandas",
   "pydantic",
   "python-libsbml",
@@ -44,11 +43,20 @@ doc = [
     "ipython>=7.21.0",
     "sphinx-autodoc-typehints",
 ]
-
 test = [
     "pytest"
+]
+torch = [
+    "torch"
 ]
 
 [project.urls]
 Repository = "https://github.com/sebapersson/petab_sciml"
 "Bug Tracker" = "https://github.com/sebapersson/petab_sciml/issues"
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
