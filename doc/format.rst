@@ -445,7 +445,7 @@ Detailed Field Description
    layer/parameter array id. The target of the ``parameterId`` must be
    assigned via the :ref:`mapping table <mapping_table>`.
 
--  ``nominalValue`` [String \| NUMERIC, REQUIRED]: Nominal values for NN parameters.
+-  ``nominalValue`` [``array`` \| NUMERIC, REQUIRED]: Nominal values for NN parameters.
    If ``estimate = true``, this field can be empty. If ``estimate = false``, a
    nominal value must be provided. Valid values are:
 
