@@ -453,8 +453,8 @@ Detailed Field Description
    - A numeric value applied to all values under ``parameterId``. If values are
      also provided via an :ref:`array file <hdf5_array>`, the array file is ignored.
 
--  ``estimate`` [0 \| 1, REQUIRED]: Indicates whether the parameters are
-   estimated (``1``) or fixed (``0``). Setting ``0`` for a NN identifier
+-  ``estimate`` [``false`` \| ``true``, REQUIRED]: Indicates whether the parameters are
+   estimated (``true``) or fixed (``false``). Setting ``false`` for a NN identifier
    (e.g., ``nnId.parameters[layerId]``) freezes the parameters for the
    identifier.
 
@@ -471,8 +471,8 @@ Priors for NN parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Priors following the standard PEtab syntax can be specified for an entire NN
-or for nested NN identifiers. The prior applies to all values under the
-specified identifier.
+or for nested NN identifiers. The prior is duplicated for each value under the
+specified identifier, it does not specify a joint prior
 
 .. _YAML_file:
 
