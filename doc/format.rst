@@ -107,7 +107,7 @@ Referencing array data
 
 To indicate that a PEtab variable (e.g., NN parameters or an NN input) takes its
 values from an array data file, it must be explicitly assigned the reserved
-global value ``array`` in the relevant PEtab table entry.
+keyword ``array`` in the relevant PEtab table entry.
 
 Semantically, assigning ``array`` is interpreted as a global assignment to an array
 variable whose potentially condition-specific values are provided in an array
