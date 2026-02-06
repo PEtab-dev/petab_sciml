@@ -150,7 +150,8 @@ single global array to specify the input's data in all conditions, or multiple
 condition-specific arrays. In the global case, the name of the array must be
 ``0`` [STRING]. In the condition-specific case, the name of the array must be a
 semicolon-delimited list of all relevant condition IDs and an array must be
-specified for all simulated conditions.
+specified for all initial PEtab conditions (the first condition per PEtab
+experiment).
 
 The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
 Currently, validation is only provided via the PEtab SciML library, and does
@@ -375,14 +376,20 @@ Valid ``targetId``\ s for a NN output are:
 -  A species’ initial value (referenced by the species’ ID). In this
    case, any other species initialization is overridden.
 
-Condition and Hybridization Tables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Condition-specific inputs
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 NN input variables are valid ``targetId``\ s for the condition table as
 long as, following the PEtab standard, they are NON_PARAMETER_TABLE_ID.
-**Importantly**, since the hybridization table defines assignments for
-all simulation conditions, any ``targetId`` value in the condition table
-cannot appear in the hybridization table, and vice versa.
+Similarly, array inputs can be assigned condition-specific values using
+the :ref:`Array data <hdf5_array>` format. In both cases, two restrictions
+apply. Firstly, values can only be assigned for initial PEtab conditions (the
+first condition per PEtab experiment) because, with pre-initialization hybridization,
+the NN model is evaluated prior to model initialization and simulation. Assignments
+to non-initial conditions are ignored. Secondly, since the hybridization table
+defines assignments for all simulation conditions, any ``targetId`` value in
+the condition table (or input ID in an array file) cannot appear in the hybridization
+table, and vice versa.
 
 NN output variables can also appear in the ``targetValue`` column of the
 condition table.
