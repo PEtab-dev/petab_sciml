@@ -376,7 +376,7 @@ Valid ``targetId``\ s for a NN output are:
 -  A species’ initial value (referenced by the species’ ID). In this
    case, any other species initialization is overridden.
 
-Condition specific inputs
+Condition-specific inputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 NN input variables are valid ``targetId``\ s for the condition table as
