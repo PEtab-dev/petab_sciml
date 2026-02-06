@@ -383,12 +383,13 @@ NN input variables are valid ``targetId``\ s for the condition table as
 long as, following the PEtab standard, they are NON_PARAMETER_TABLE_ID.
 Similarly, array inputs can be assigned condition-specific values using
 the :ref:`Array data <hdf5_array>` format. In both cases, two restrictions
-apply. First, values can only be assigned for initial PEtab conditions (the
-first condition  per PEtab experiment) as for pre-initialization hybridization
-the NN models is evaluated  prior to model initialization and simulation. Assignments
-to non-initial conditions are ignored. Second, since the hybridization table
+apply. Firstly, values can only be assigned for initial PEtab conditions (the
+first condition per PEtab experiment) because, with pre-initialization hybridization,
+the NN model is evaluated prior to model initialization and simulation. Assignments
+to non-initial conditions are ignored. Secondly, since the hybridization table
 defines assignments for all simulation conditions, any ``targetId`` value in
-the condition table cannot appear in the hybridization table, and vice versa.
+the condition table (or input ID in an array file) cannot appear in the hybridization
+table, and vice versa.
 
 NN output variables can also appear in the ``targetValue`` column of the
 condition table.
