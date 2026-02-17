@@ -26,7 +26,7 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
 
    format
    layers
-   tutorial
+   development
 
 .. toctree::
    :caption: Python package
