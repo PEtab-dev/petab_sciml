@@ -6,19 +6,17 @@ A PEtab SciML problem extends the version 2 PEtab standard to accommodate hybrid
 SciML, the only supported ML models are neural networks (NNs). Three new file types are
 introduced by the extension:
 
-1. :ref:`Neural Network Files <nn_format>`: Files
-   describing NN models.
-2. :ref:`Hybridization Table <hybrid_table>`: Table for assigning NN
-   inputs and outputs.
-3. :ref:`Array Data Files <hdf5_array>`: HDF5 files for storing NN
-   input data or parameter values.
+1. :ref:`Neural Network Files <nn_format>`: Files describing NN models.
+2. :ref:`Hybridization Table <hybrid_table>`: Table for assigning NN inputs and outputs.
+3. :ref:`Array Data Files <hdf5_array>`: HDF5 files for storing NN input data and/or
+   parameter values.
 
 PEtab SciML further extends the following standard PEtab files:
 
 1. :ref:`Mapping Table <mapping_table>`: Extended to describe how NN
    inputs, outputs and parameters map to PEtab entities.
 2. :ref:`Parameters Table <parameter_table>`: Extended to describe
-   nominal values for NN parameters.
+   nominal values and priors for NN parameters.
 3. :ref:`Problem YAML File <YAML_file>`: Extended to include a new
    SciML field for NN models and (optionally) array data.
 
@@ -63,14 +61,12 @@ would be in the single ML model case.
 NN Model YAML Format
 ------------------------------------------
 
-The NN model format is flexible, meaning models can be provided in any
-format compatible with the PEtab SciML specification (see
-:ref:`supported layers <layers_activation>` page).
-Additionally, the ``petab_sciml`` library provides a NN model YAML format that
-can be imported by tools across various programming languages.
+The NN model format is flexible, meaning models can be provided in any format compatible
+with the PEtab SciML specification. Additionally, the ``petab_sciml`` library provides a
+NN model YAML format that can be imported by tools across various programming languages.
 
-A NN model must consist of two parts to be compatible with the PEtab
-SciML specification:
+Regardless of format, a NN model must consist of two parts to be compatible with PEtab
+SciML:
 
 -  **layers**: Defines the NN layers, each with a unique identifier.
 -  **forward**: A forward pass function that, given input arguments,
@@ -99,7 +95,7 @@ Array data
 The standard PEtab format is unsuitable for incorporating large arrays
 of values into an estimation problem. This includes the large datasets
 used to train NNs, or the parameter values of wide or deep NNs. Hence,
-we provide an HDF5-based file format to store and incorporate array data
+PEtab SciML supports an HDF5-based file format to store and incorporate array data
 efficiently.
 
 Referencing array data
@@ -144,46 +140,48 @@ The general structure is:
        │   └── ...
        └── ...
 
-As NN input data may be condition-specific, arrays can be associated with specific
-conditions in the array data files directly. A single input can have either one
-single global array to specify the input's data in all conditions, or multiple
-condition-specific arrays. In the global case, the name of the array must be
-``0`` [STRING]. In the condition-specific case, the name of the array must be a
-semicolon-delimited list of all relevant condition IDs and an array must be
-specified for all initial PEtab conditions (the first condition per PEtab
-experiment).
-
 The schema is provided as a :download:`JSON schema <standard/array_data_schema.json>`.
-Currently, validation is only provided via the PEtab SciML library, and does
-not check the validity of framework-specific IDs (e.g. for inputs, parameters,
-and layers).
+Currently, validation is only provided via the PEtab SciML library and does not
+check the validity of framework-specific IDs (e.g., input, parameter, and layer
+IDs).
 
-The IDs of inputs or layer parameters are framework-specific or
-user-specified. For inputs:
+Inputs
+^^^^^^
 
--  The PEtab SciML :ref:`NN model YAML format <NN_YAML>` follows
-   PyTorch array dimension indexing. For example, if the first layer is
-   ``Conv2d``, the input should be in ``(C, W, H)`` format.
--  NN models in other framework-specific formats follow the indexing and
-   naming conventions of the respective framework.
+The optional ``inputs`` group stores NN input datasets. For a given input ID,
+either a single global dataset (used for all PEtab conditions) or multiple
+condition-specific datasets may be provided. In the global case, the dataset
+name must be ``0`` (string). In the condition-specific case, the dataset name
+must be a semicolon-delimited list of the relevant condition IDs. In either case,
+a dataset  must be specified for **all initial PEtab conditions** (the first
+condition per PEtab experiment).
 
-For parameters:
+The required dataset shape depends on the NN model format:
 
--  The PEtab SciML :ref:`NN model YAML format <NN_YAML>` follows
-   PyTorch indexing and naming conventions. For example, in a PyTorch
-   ``Linear`` layer, the parameter array IDs are ``weight`` and/or
-   ``bias``
--  NN models in other framework-specific formats follow the indexing and
-   naming conventions of the respective framework.
-
+- If the model is provided in the PEtab SciML :ref:`NN model YAML format <NN_YAML>`,
+  datasets must follow the PyTorch dimension ordering. For example, if the first
+  layer is ``Conv2d``, the input should be in ``(C, W, H)`` format.
+- For NN models in other framework-specific formats, input datasets must follow
+  the dimension ordering of the respective framework.
 
 .. tip::
 
-   **Multiple NNs may share the same input array data**: Like PEtab
-   parameters, NN inputs are global variables. Hence, shared input array
-   data for multiple NNs can be specified by using the same input ID in each NN.
-   Thus, be careful to only intentionally assign multiple inputs the same ID.
+   Multiple NNs may share the same input array data: Like PEtab parameters, NN
+   inputs are global variables. Shared input data for multiple NNs can be
+   specified by using the same input ID in each NN.
 
+Parameters
+^^^^^^^^^^
+
+The optional ``parameters`` group stores NN parameter datasets in a hierarchical
+structure: ``parameters/<netId>/<layerId>/<parameterId>``. ``parameterId`` and required
+dataset shape depend on the NN model format:
+
+- For NN models in the PEtab SciML :ref:`NN model YAML format <NN_YAML>`, ``parameterId``
+  name and dataset dimension ordering follow PyTorch conventions. For example, in a PyTorch
+  ``Linear`` layer, ``parameterId``s are ``weight`` and/or ``bias``.
+- For NN models in other framework-specific formats, ``parameterId`` and datasets shape
+  follow the conventions of the respective framework.
 
 .. _NN_YAML:
 
@@ -209,122 +207,75 @@ which enables validation with various third-party tools, and also as a
 Mapping Table
 ---------------------------------------
 
-All NNs are assigned an identifier in the PEtab problem
-:ref:`YAML <YAML_file>` file. A NN identifier is not considered a
-valid PEtab identifier in order to avoid confusion about what it refers to
-(e.g. parameters, inputs, outputs). Consequently, every NN input,
-parameter, and output referenced in the PEtab problem must be defined
-under ``modelEntityId`` and mapped to a PEtab identifier. For the
-``petabEntityId`` column the same rules as in PEtab v2 apply.
+Each NN is assigned an identifier in the PEtab problem :ref:`YAML file <YAML_file>`.
+The NN identifier itself is not a valid PEtab identifier, to avoid ambiguity about
+what it refers to (inputs, parameters, outputs). Consequently, every NN input,
+parameter, and output referenced in the PEtab problem must be defined under
+``modelEntityId`` and mapped to a PEtab identifier in ``petabEntityId``. For
+``petabEntityId``, the same rules as in PEtab v2 apply.
 
-Detailed Field Description
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+``modelEntityId`` syntax
+~~~~~~~~~~~~~~~~~~~~~~~~
 
--  ``modelEntityId`` [STRING, REQUIRED]: A modeling-language-independent syntax (see below)
-   which refers to inputs, outputs, and parameters of NNs.
--  ``petabEntityId`` [STRING, REQUIRED]: Valid PEtab identifier that the
-   ``modelEntityId`` maps to.
+The valid ``modelEntityId`` syntax depends on whether it refers to NN parameters, inputs,
+or outputs.
 
-.. _nn_parameters:
+Parameters
+^^^^^^^^^^
 
-``modelEntityId`` Syntax for Parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For a NN model with ID ``nnId``, a parameter reference has the form
+``nnId.parameters[<layerId>].<arrayId>[<parameterIndex>]``:
 
-The model ID
-``$nnId.parameters{[$layerId]}.{$arrayId}{[$parameterIndex]}}``
-(e.g. ``$nnId.parameters[conv1].weight[0]``) refers to
-the parameters of a NN identified by ``$nnId``.
+- ``<layerId>``: Layer identifier (e.g., ``conv1``).
+- ``<arrayId>``: Parameter array name (e.g., ``weight``).
+- ``<parameterIndex>``: Index into the parameter array (:ref:`Indexing <mapping_table_indexing>`).
 
--  ``$layerId``: The unique identifier of the layer (e.g., ``conv1``).
--  ``$arrayId``: The parameter array name specific to that layer (e.g.,
-   ``weight``).
--  ``$parameterIndex``: The indexing into the parameter array
-   (:ref:`syntax <mapping_table_indexing>`).
-
-NN parameter PEtab identifiers can only be referenced in the parameters
-table.
-
-.. _nn_inputs:
+NN parameter PEtab identifiers may only be referenced in the parameter table.
 
 Inputs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
 
-The model ID ``$nnId.inputs{[$inputArgumentIndex]{[$inputIndex]}}``
-refers to specific inputs of the NN identified by ``$nnId``.
+For a NN model with ID ``nnId``, an input reference has the form
+``nnId.inputs[<inputArgumentIndex>][<inputIndex>]``:
 
--  ``$inputArgumentIndex``: The input argument number in the NN forward
-   function (uses zero-based indexing).
--  ``$inputIndex`` Indexing into the input argument
-   (:ref:`syntax <mapping_table_indexing>`). This should be omitted
-   if the input is specified as ``array``.
+- ``<inputArgumentIndex>``: Input argument index in the NN forward function.
+- ``<inputIndex>``: Index into the input argument (:ref:`Indexing <mapping_table_indexing>`).
+  Should be omitted if ``[<inputIndex>]`` when the input is provided via an array file.
 
-For :ref:`pre-initialization hybridization <hybrid_types>` NN input PEtab
-identifiers are considered valid PEtab IDs without restrictions (e.g.,
-they may be referenced in the parameters table, condition table,
-hybridization table, etc.). For :ref:`simulation
-hybridization <hybrid_types>`, input PEtab identifiers can only
-be assigned an expression in the :ref:`hybridization
-table <hybrid_table>`.
+For restrictions on where NN inputs may be assigned values for different hybridization modes,
+see :ref:`Hybridization types <hybrid_types>`.
 
 Outputs
 ^^^^^^^
 
-The model ID ``$nnId.outputs{[outputArgumentIndex]{[$outputIndex]}}``
-refers to specific outputs of a NN identified by ``$nnId``.
+For a NN model with ID ``nnId``, an output reference has the form
+``nnId.outputs[<inputArgumentIndex>][<inputIndex>]``:
 
--  ``$outputId``: The output argument number in the NN forward function
-   (uses zero-based indexing).
--  ``$outputIndex``: Indexing into the output argument
-   (:ref:`syntax <mapping_table_indexing>`)
+- ``<outputArgumentIndex>``: Output argument index in the NN forward function (zero-based).
+- ``<outputIndex>``: Index into the output argument (:ref:`Indexing <mapping_table_indexing>`).
 
-Nested Identifiers
-^^^^^^^^^^^^^^^^^^
-
-The PEtab SciML extension supports nested identifiers for mapping
-structured or hierarchical elements. Identifiers are expressed in the
-hierarchy indicated above using nested curly brackets. Valid examples
-are:
-
--  ``nn1.parameters``
--  ``nn1.parameters[conv1]``
--  ``nn1.parameters[conv1].weight``
-
-.. warning::
-
-   **Do not break the hierarchy**: Identifiers that break the
-   hierarchy (e.g., ``nn1.parameters.weight``) are not valid.
+For restrictions on where NN outputs may be assigned for different hybridization modes,
+see :ref:`Hybridization types <hybrid_types>`.
 
 .. _mapping_table_indexing:
 
 Indexing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~
 
-Indexing into arrays follows the format ``[i0, i1, ...]``, and indexing
-notation depends on the NN library:
+For both NN inputs and outputs, indexing into arrays uses the format ``[i0, i1, ...]`` and
+depends on the NN model format:
 
--  NN models in the PEtab SciML :ref:`NN model YAML
-   format <NN_YAML>` follow PyTorch indexing. Consequently,
-   indexing is zero-based.
--  NN models in other formats follow the indexing and naming conventions
-   of the respective package and programming language.
-
-Assigning Values
-^^^^^^^^^^^^^^^^
-
-For assignments to nested PEtab identifiers (in the ``parameters``,
-``hybridization``, or ``conditions`` tables), assigned values must
-either:
-
--  Refer to another PEtab identifier with the same nested structure, or
--  Follow the corresponding hierarchical HDF5 structure for
-   :ref:`inputs and parameters <hdf5_array>`.
+- Models in the PEtab SciML :ref:`NN model YAML format <NN_YAML>` follow PyTorch
+  conventions and use zero-based indexing.
+- Models in other formats follow the indexing and naming conventions of the
+  respective framework.
 
 .. _hybrid_table:
 
 Hybridization Table
 --------------------------------------------
 
-Assignments of NN inputs and outputs in this table apply to all PEtab experiments.
+The hybridization table assign NN inputs and outputs across all PEtab experiments.
 The hybridization file is expected to be in tab-separated values format and to have,
 in any order, the following two columns:
 
@@ -343,16 +294,13 @@ Detailed Field Description
 -  ``targetId`` [STRING, REQUIRED]: The identifier of
    the non-estimated entity that will be modified. Restrictions depend
    on hybridization type (see pre-initialization and simulation hybridization details below).
-   The exact treatment of these entities by importers will also depend on whether
-   the ML model is pre-initialization or simulation hybridized.
 -  ``targetValue`` [STRING, REQUIRED]: The value or expression that will
    be used to change the target.
 
 Pre-initialization hybridization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pre-initialization hybridization NN model inputs and outputs are constant targets
-(case 1 :ref:`here <hybrid_types>`).
+Pre-initialization hybridization NN model inputs and outputs are constant targets.
 
 .. _inputs-1:
 
@@ -362,8 +310,7 @@ Inputs
 Valid ``targetValue``\ s for a NN input are:
 
 -  A parameter in the parameter table.
-- ``array`` (values are read from an array data file; see
-  :ref:`Array data <hdf5_array>`)
+- ``array`` (values are read from an array data file; see :ref:`Array data <hdf5_array>`)
 
 .. _outputs-1:
 
@@ -395,10 +342,10 @@ NN output variables can also appear in the ``targetValue`` column of the
 condition table.
 
 Simulation hybridization
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Simulation hybridization NN models can depend on time-varying ODE model
-quantities (case 2 :ref:`here <hybrid_types>`).
+quantities.
 
 .. _inputs-2:
 
