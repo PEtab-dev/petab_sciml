@@ -8,6 +8,15 @@ import inspect
 
 import sphinx
 
+# Copy CONTRIBUTING file here to avoid access issues.
+import shutil
+from pathlib import Path
+
+doc_path = Path(__file__).resolve().parent
+tmp_path = doc_path / "_tmp"
+tmp_path.mkdir(exist_ok=True, parents=True)
+shutil.copy(doc_path.parent / "CONTRIBUTING.md", tmp_path / "CONTRIBUTING.md")
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -28,8 +37,9 @@ extensions = [
     "sphinx.ext.mathjax",
     "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
-    "recommonmark",
     "sphinx_autodoc_typehints",
+    # markdown files
+    "myst_parser",
 ]
 
 templates_path = ["_templates"]
