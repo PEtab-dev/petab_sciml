@@ -37,7 +37,7 @@ Code contributions:
 
 Documentation contributions:
 
-- Wrap lines at 92 characters where practical (long links may exceed this)
+- Wrap lines at 79 characters where practical (long links may exceed this)
 - Use US English spelling.
 
 To contribute to this repository:
