@@ -249,7 +249,7 @@ Outputs
 ^^^^^^^
 
 For a NN model with ID ``nnId``, an output reference has the form
-``nnId.outputs[<inputArgumentIndex>][<inputIndex>]``:
+``nnId.outputs[<outputArgumentIndex>][<outputIndex>]``:
 
 - ``<outputArgumentIndex>``: Output argument index in the NN forward function (zero-based).
 - ``<outputIndex>``: Index into the output argument (:ref:`Indexing <mapping_table_indexing>`).
@@ -275,7 +275,7 @@ depends on the NN model format:
 Hybridization Table
 --------------------------------------------
 
-The hybridization table assign NN inputs and outputs across all PEtab experiments.
+The hybridization table assigns NN inputs and outputs across all PEtab experiments.
 The hybridization file is expected to be in tab-separated values format and to have,
 in any order, the following two columns:
 
