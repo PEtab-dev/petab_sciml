@@ -8,9 +8,9 @@ epochs) fail to find a good minimum or require many training epochs.
 Several training strategies have been developed to address this. These include
 curriculum learning, multiple shooting, and combined curriculum multiple
 shooting, all of which can be implemented at the PEtab abstraction level for
-ODE models as well as hybrid SciML problems. This page describes these
-PEtab-level abstractions to allow tool developers to implement them. The PEtab
-SciML library also provides a reference implementation.
+ODE models as well as hybrid PEtab SciML problems. This page describes these
+PEtab-level abstractions for tool developers. The PEtab SciML library also
+provides reference implementations.
 
 Curriculum learning
 -------------------
@@ -30,15 +30,15 @@ Inputs:
 
 1. Sort the measurement table in the input PEtab problem by the ``time``
    column.
-2. Create ``nStages`` PEtab sub-problems. For stage ``i``, copy the original
-   PEtab problem and filter the time-sorted measurement table to keep the
-   first ``n_i`` measurements.
+2. Create ``nStages`` PEtab sub-problems by copying the input problem. For
+   stage ``i``, filter the time-sorted measurement table to keep the first
+   ``n_i`` measurements.
 3. Optionally filter the condition and experiment tables to only include
    entries required by the filtered measurement table for each sub-problem.
 
 A practical consideration for tools implementing and/or importing curriculum
 problems is to keep parameter ordering consistent across stages, which
-simplifies transferring parameter values between stages.
+simplifies transferring parameters between stages.
 
 .. _multiple_shooting:
 
@@ -70,7 +70,7 @@ Inputs:
       and set the initial time to ``t0_i`` for window ``i = 1..nWindows``.
    2. In the experiment table, remove the original experiment IDs and keep
       only the windowed experiments. Assign each PEtab condition to the
-      corresponding window experiment(s). If a PEtab condition occurs at a
+      corresponding window experiment. If a PEtab condition occurs at a
       time point that lies in the overlap of windows ``i-1`` and ``i``, assign
       the condition to experiment ``WINDOW{i-1}_{expId}``.
    3. In the measurement table, assign all measurements in the time interval
@@ -107,13 +107,14 @@ Naive multiple shooting can perform poorly when states have different scales,
 since a single penalty weight may be impossible to tune. In this case, a
 log-scale penalty such as
 
-``sqrt(lambda) * (log(stateId{j}) - log(WINDOW{i}_{expId}_init_stateId{j}))``
+``sqrt(lambda) * (log(abs(stateId{j})) - log(WINDOW{i}_{expId}_init_stateId{j}))``
 
-can be effective.
+can be effective, where ``abs`` avoid potential problems with states going
+below zero due to numerical errors.
 
 From a runtime performance perspective, the number of initial-window
 parameters scales with the number of windows, states, and PEtab experiments,
-which can be impractical for larger problems. Finally, since initial-window
+which can be impractical for larger problems. Moreover, since initial-window
 parameters must be estimated, this approach typically performs poorly for
 partially observed systems; this is addressed by the curriculum multiple
 shooting approach.
@@ -179,13 +180,12 @@ Inputs:
 A practical consideration for tools implementing and/or importing CL+MS is that
 the number of window-initial parameters to estimate changes between stages. To
 support transferring parameter values between stages, it can be beneficial to
-provide a utility function for mapping parameters from one stage problem to
-the next.
+provide a utility function for mapping parameters between stage problems.
 
 Partitioning measurements and time windows
 ------------------------------------------
 
-The training approaches above require either splitting measurements into
+The above training approaches above require either splitting measurements into
 curriculum stages (curriculum learning) or partitioning the simulation time
 span into windows (multiple shooting and curriculum multiple shooting). We
 recommend that tools supporting these methods provide the splitting schemes
@@ -196,8 +196,9 @@ chosen in two ways: (i) split by unique measurement time points and allocate
 ``n_i`` accordingly, or (ii) split by the total number of measurements, which
 can be effective when there are few unique time points but many repeated
 measurements. We recommend supporting both modes, as well as automatic
-splitting (e.g., given ``nStages``, compute ``n_i``) and user-defined
-schedules (e.g., explicit ``n_i`` per stage or a maximum time point per stage).
+splitting (e.g., given ``nStages``, compute ``n_i`` for the user) and
+user-defined schedules (e.g., explicit ``n_i`` per stage or a maximum time
+point per stage).
 
 For multiple shooting, window intervals ``[t0_i, tf_i]`` must be defined. We
 recommend supporting automatic window construction (e.g., take ``nWindows`` as
