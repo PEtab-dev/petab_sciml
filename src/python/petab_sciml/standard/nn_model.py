@@ -4,11 +4,16 @@ import ast
 import inspect
 import re
 
-import torch.fx
-import torch.nn as nn
 from pydantic import BaseModel, Field
 
 from mkstd import YamlStandard
+
+# For PyTorch import/export support
+try:
+    import torch.fx
+    import torch.nn as nn
+except ImportError:
+    pass
 
 
 __all__ = ["Input", "Layer", "Node", "NNModel", "NNModelStandard"]
