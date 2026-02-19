@@ -1,5 +1,5 @@
-Training strategies at the PEtab level
-======================================
+SciML Training strategies at the PEtab level
+============================================
 
 Training (parameter estimating) SciML models can be challenging, and often
 standard ML training workflows (e.g., training with Adam for a fixed number of
@@ -15,7 +15,7 @@ provides reference implementations.
 Curriculum learning
 -------------------
 
-Curriculum learning is a training strategy where the optimization problem is
+Curriculum learning is a training strategy where the training problem is
 made progressively harder over successive curriculum stages. For PEtab
 problems, a curriculum can be defined by gradually increasing the number of
 measurement time points (and typically the simulation end time) over a fixed
@@ -33,8 +33,8 @@ Inputs:
 2. Create ``nStages`` PEtab sub-problems by copying the input problem. For
    stage ``i``, filter the time-sorted measurement table to keep the first
    ``n_i`` measurements.
-3. Optionally filter the condition and experiment tables to only include
-   entries required by the filtered measurement table for each sub-problem.
+3. Optionally filter the condition, observable and experiment tables to only
+   include entries required by the measurement table for each sub-problem.
 
 A practical consideration for tools implementing and/or importing curriculum
 problems is to keep parameter ordering consistent across stages, which
@@ -173,9 +173,9 @@ Inputs:
         not possible to define a continuity penalty over the full overlap
         interval between two windows.
 
-3. The final stage (``nWindows = 1``) corresponds to the original PEtab
-   problem. Use the parameter estimate from stage ``nStages-1`` to initialize
-   optimization for the final stage.
+3. The final stage corresponds to the original PEtab problem. Use the parameter
+   estimate from stage ``nStages-1`` to initialize optimization for the final
+   stage.
 
 A practical consideration for tools implementing and/or importing CL+MS is that
 the number of window-initial parameters to estimate changes between stages. To
@@ -204,4 +204,4 @@ For multiple shooting, window intervals ``[t0_i, tf_i]`` must be defined. We
 recommend supporting automatic window construction (e.g., take ``nWindows`` as
 input and allocate windows based on unique measurement time points) as well as
 user-specified intervals. As a basic sanity check, tools should ensure that
-each window contains at least one measurement time point.
+each window contains at least one measurement.
