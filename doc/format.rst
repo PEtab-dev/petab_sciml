@@ -58,7 +58,7 @@ would be in the single ML model case.
 
 .. _nn_format:
 
-NN Model YAML Format
+NN Model Format
 ------------------------------------------
 
 The NN model format is flexible, meaning models can be provided in any format compatible
@@ -78,14 +78,26 @@ SciML:
    as ``self``) is referred to as ``inputArgumentIndex{n-1}``. Similar
    holds for the output. Aside from the NN output values, every
    component that should be visible to other parts of the PEtab SciML
-   problem must be defined elsewhere (e.g. in **layers**).
+   problem must be defined elsewhere (e.g. in **layers**). If input argument
+   names can be extracted, they are considered valid PEtab identifiers
+   provided they satisfy the PEtab identifier syntax.
+
+.. _NN_YAML:
+
+NN model YAML format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``petab_sciml`` library provides an NN model YAML format for model
+exchange. This format follows PyTorch conventions for layer names and
+arguments. The schema is provided as a :download:`JSON schema <standard/nn_model_schema.json>`,
+which enables validation with various third-party tools, and also as a
+:download:`YAML-formatted JSON Schema <standard/nn_model_schema.yaml>` for readability.
 
 .. tip::
 
    **Use the NN model YAML format for interoperability**. The NN model specification format
    in PEtab SciML is flexible, to ensure all architectures can be used. However, where
    possible, the NN model YAML format should be used, to facilitate model exchange.
-
 
 .. _hdf5_array:
 
@@ -125,7 +137,7 @@ The general structure is:
    ├── metadata                           # [GROUP]
    │   └── perm                           # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
    ├── inputs                             # (optional) [GROUP] reserved keyword
-   │   ├── inputId1                       # [GROUP] an input ID
+   │   ├── inputId1                       # [GROUP] an input ID, must be a valid PEtab ID
    │   │   ├── conditionId1;conditionId2  # [DATASET, FLOAT ARRAY] the input data. The name is a semicolon-delimited list of relevant conditions, or "0" for all conditions.
    │   │   ├── conditionId3
    │   │   └── ...
@@ -183,25 +195,6 @@ dataset shape depend on the NN model format:
 - For NN models in other framework-specific formats, ``parameterId`` and datasets shape
   follow the conventions of the respective framework.
 
-.. _NN_YAML:
-
-NN model YAML format
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``petab_sciml`` library provides a NN model YAML format for model
-exchange. This format follows PyTorch conventions for layer names and
-arguments. The schema is provided as a :download:`JSON schema <standard/nn_model_schema.json>`,
-which enables validation with various third-party tools, and also as a
-:download:`YAML-formatted JSON Schema <standard/nn_model_schema.yaml>` for readability.
-
-.. tip::
-
-   **For users: Define models in PyTorch**. The recommended approach
-   to create a NN model YAML file is to first define a PyTorch model
-   (``torch.nn.Module``) and use the Python ``petab_sciml`` library to
-   export this to YAML. See the "Getting Started" and "How-to" guides for examples
-   of this.
-
 .. _mapping_table:
 
 Mapping Table
@@ -211,8 +204,16 @@ Each NN is assigned an identifier in the PEtab problem :ref:`YAML file <YAML_fil
 The NN identifier itself is not a valid PEtab identifier, to avoid ambiguity about
 what it refers to (inputs, parameters, outputs). Consequently, every NN input,
 parameter, and output referenced in the PEtab problem must be defined under
-``modelEntityId`` and mapped to a PEtab identifier in ``petabEntityId``. For
-``petabEntityId``, the same rules as in PEtab v2 apply.
+``modelEntityId`` and mapped to a PEtab identifier in ``petabEntityId``.
+
+An exception applies if the NN model format supports extracting names for
+inputs to the forward function. If such input names are valid PEtab
+identifiers, they may be used directly as NN input IDs (e.g., for assigning
+``array`` in the :ref:`hybridization table <hybrid_table>`). However, any
+indexing into an input must still be expressed via the
+:ref:`mapping table <mapping_table>`.
+
+For ``petabEntityId``, the same rules as in PEtab v2 apply.
 
 ``modelEntityId`` syntax
 ~~~~~~~~~~~~~~~~~~~~~~~~
