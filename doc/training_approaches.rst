@@ -66,6 +66,7 @@ Inputs:
    parameter table as a non-estimated parameter and set an appropriate nominal
    value.
 3. For each PEtab experiment with ID ``expId`` in the MS PEtab problem:
+
    1. Create ``nWindows`` new PEtab experiments with IDs ``WINDOW{i}_{expId}``
       and set the initial time to ``t0_i`` for window ``i = 1..nWindows``.
    2. In the experiment table, remove the original experiment IDs and keep
@@ -82,6 +83,7 @@ Inputs:
       measurement for ``expId`` at time ``t >= t0_i`` in the original problem
       (i.e., at least one subsequent window contains measurements), assign
       initial window values and a continuity penalty:
+
       1. In the parameter table, create parameters
          ``WINDOW{i}_{expId}_init_stateId{j}`` for each model state
          ``stateId{j}``. Mark them as estimated and choose appropriate bounds.
@@ -151,12 +153,15 @@ Inputs:
    ``nWindows = nStages`` using the procedure in
    :ref:`Multiple shooting <multiple_shooting>`.
 2. For curriculum stage ``k = 2..(nStages-1)``:
+
    1. Set the number of windows to ``nWindows = nStages - k + 1``.
    2. Define the MS window time spans for stage ``k`` by merging adjacent
       windows from the previous stage:
+
       - For ``i = 1..nWindows`` set ``t0_i^{(k)} = t0_i^{(k-1)}`` and
         ``tf_i^{(k)} = tf_{i+1}^{(k-1)}``.
       - Drop the last window of stage ``k-1``.
+
    3. Create the PEtab problem for stage ``k`` by applying the
       :ref:`Multiple shooting <multiple_shooting>` construction with the
       updated window partition. In particular:
@@ -185,7 +190,7 @@ provide a utility function for mapping parameters between stage problems.
 Partitioning measurements and time windows
 ------------------------------------------
 
-The above training approaches above require either splitting measurements into
+The above training approaches require either splitting measurements into
 curriculum stages (curriculum learning) or partitioning the simulation time
 span into windows (multiple shooting and curriculum multiple shooting). We
 recommend that tools supporting these methods provide the splitting schemes
@@ -203,5 +208,5 @@ point per stage).
 For multiple shooting, window intervals ``[t0_i, tf_i]`` must be defined. We
 recommend supporting automatic window construction (e.g., take ``nWindows`` as
 input and allocate windows based on unique measurement time points) as well as
-user-specified intervals. As a basic sanity check, tools should ensure that
+user-specified intervals. As a basic sense check, tools should ensure that
 each window contains at least one measurement.
