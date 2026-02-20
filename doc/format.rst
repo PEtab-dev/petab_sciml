@@ -528,14 +528,20 @@ Dealing with arrays
 
 For array handling, it is recommended to:
 
-- **Respect memory/axis order.**
-   For computational efficiency, reorder input data and any layer-parameter arrays to the
-   target language’s native indexing and memory layout. For example, PEtab.jl permutes
-   image inputs to Julia’s ``(H, W, C)`` convention.
+- **Respect memory layout and dimension ordering.**
+  For computational efficiency, reorder input data and layer-parameter
+  datasets to the target language’s native memory layout and dimension
+  ordering when importing PEtab SciML problems. For example, PEtab.jl
+  permutes image inputs to Julia’s ``(H, W, C)``convention instead of using
+  the PyTorch ``(C, H, W)`` ordering.
 
-- **Allow export of parameters in PEtab SciML format**.
-   If a NN model is not provided in the PEtab SciML YAML format for an importer, HDF5
-   parameter files are generally not portable across tools. Because, In that case,
-   parameters should follow the importer's framework native indexing and memory layout.
-   To enable exchange, it it recommended for importers to implement a function that can
-   export NN parameters PEtab SciML array format using PyTorch indexing.
+- **Support exporting parameters to the PEtab SciML array format.**
+  If a NN model is not provided in the PEtab SciML YAML format, HDF5 parameter
+  datasets are generally not portable across tools, since they should follow
+  the importer’s framework-native dimension ordering and memory layout. For
+  example, highlighting differences in dimension ordering, a PyTorch tensor
+  created as ``torch.zeros(2, 3, 3)`` would typically correspond to a Julia
+  tensor created as ``zeros(3, 3, 2)``. To enable exchange, we therefore
+  recommend that importers provide a utility to export NN parameters to the
+  PEtab SciML array format (PyTorch conventions) and document the dimension
+  ordering used when exporting arrays.
