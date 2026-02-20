@@ -209,8 +209,9 @@ parameter, and output referenced in the PEtab problem must be defined under
 An exception applies if the NN model format supports extracting names for
 inputs to the forward function. If such input names are valid PEtab
 identifiers, they may be used directly as NN input IDs (e.g., for assigning
-``array`` in the :ref:`hybridization table <hybrid_table>`). However, any
-indexing into an input must still be expressed via the
+``array`` in the :ref:`hybridization table <hybrid_table>`). However,
+the only way to assign the values of a subset of an input is to first
+map the input subset to a new PEtab ID in the
 :ref:`mapping table <mapping_table>`.
 
 For ``petabEntityId``, the same rules as in PEtab v2 apply.
