@@ -11,14 +11,14 @@
                     "title": "Perm",
                     "type": "string"
                 },
-                "pytorch_dimension_ordering": {
-                    "title": "Pytorch Dimension Ordering",
+                "pytorch_dimension_order": {
+                    "title": "Pytorch Dimension Order",
                     "type": "boolean"
                 }
             },
             "required": [
                 "perm",
-                "pytorch_dimension_ordering"
+                "pytorch_dimension_order"
             ],
             "title": "Metadata",
             "type": "object"

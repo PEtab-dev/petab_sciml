@@ -47,7 +47,7 @@ class Metadata(BaseModel):
     i.e., row-major or column-major arrays.
     """
 
-    pytorch_dimension_ordering: bool
+    pytorch_dimension_order: bool
     """The order of the dimensions of arrays.
 
     i.e., a weight matrix could be stored as `in_features x out_features` in
