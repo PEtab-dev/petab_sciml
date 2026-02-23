@@ -42,9 +42,19 @@ class Metadata(BaseModel):
     """Metadata for array(s)."""
 
     perm: Literal[ROW, COLUMN]
-    """The order of the dimensions of arrays.
+    """The order of the storage of arrays.
 
     i.e., row-major or column-major arrays.
+    """
+
+    pytorch_dimension_ordering: bool
+    """The order of the dimensions of arrays.
+
+    i.e., a weight matrix could be stored as `in_features x out_features` in
+    one framework, and `out_features x in_features` in another framework.
+
+    `True` indicates that the order of the dimensions of arrays matches the
+    order used by PyTorch. `False` indicates an unspecified ordering.
     """
 
 

@@ -10,10 +10,15 @@
                     ],
                     "title": "Perm",
                     "type": "string"
+                },
+                "pytorch_dimension_ordering": {
+                    "title": "Pytorch Dimension Ordering",
+                    "type": "boolean"
                 }
             },
             "required": [
-                "perm"
+                "perm",
+                "pytorch_dimension_ordering"
             ],
             "title": "Metadata",
             "type": "object"
