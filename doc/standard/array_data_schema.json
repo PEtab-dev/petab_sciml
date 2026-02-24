@@ -3,22 +3,13 @@
         "Metadata": {
             "description": "Metadata for array(s).",
             "properties": {
-                "perm": {
-                    "enum": [
-                        "row",
-                        "column"
-                    ],
-                    "title": "Perm",
-                    "type": "string"
-                },
-                "pytorch_dimension_order": {
-                    "title": "Pytorch Dimension Order",
+                "pytorch_format": {
+                    "title": "Pytorch Format",
                     "type": "boolean"
                 }
             },
             "required": [
-                "perm",
-                "pytorch_dimension_order"
+                "pytorch_format"
             ],
             "title": "Metadata",
             "type": "object"

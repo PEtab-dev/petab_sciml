@@ -41,20 +41,14 @@ Array = get_array_type()
 class Metadata(BaseModel):
     """Metadata for array(s)."""
 
-    perm: Literal[ROW, COLUMN]
-    """The order of the storage of arrays.
+    pytorch_format: bool
+    """Whether the arrays match the default PyTorch format.
 
-    i.e., row-major or column-major arrays.
-    """
+    For example, PyTorch uses row-major arrays, and the weight matrix
+    of its "Linear layer" is `out_features x in_features`.
 
-    pytorch_dimension_order: bool
-    """The order of the dimensions of arrays.
-
-    i.e., a weight matrix could be stored as `in_features x out_features` in
-    one framework, and `out_features x in_features` in another framework.
-
-    `True` indicates that the order of the dimensions of arrays matches the
-    order used by PyTorch. `False` indicates an unspecified ordering.
+    True indicates that the arrays can be directly used in PyTorch.
+    False indicates that some array operations are first required.
     """
 
 

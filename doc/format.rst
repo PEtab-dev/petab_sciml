@@ -135,8 +135,7 @@ The general structure is:
 
    arrays.hdf5                            # (arbitrary filename)
    ├── metadata                           # [GROUP]
-   │   ├── perm                           # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
-   │   └── pytorch_dimension_order        # [DATASET, BOOL] reserved keyword. Order of array dimensions.
+   │   └── pytorch_format                 # [DATASET, BOOL] reserved keyword. Whether arrays can directly be used in PyTorch.
    ├── inputs                             # (optional) [GROUP] reserved keyword
    │   ├── inputId1                       # [GROUP] an input ID, must be a valid PEtab ID
    │   │   ├── conditionId1;conditionId2  # [DATASET, FLOAT ARRAY] the input data. The name is a semicolon-delimited list of relevant conditions, or "0" for all conditions.
@@ -158,9 +157,12 @@ Currently, validation is only provided via the PEtab SciML library and does not
 check the validity of framework-specific IDs (e.g., input, parameter, and layer
 IDs).
 
-The ``pytorch_dimension_order`` metadata specifies whether the order of the
-dimensions of the stored arrays is according to PyTorch. For
-example, the weight matrix of a "Linear" layer in PyTorch is
+Multi-dimensional arrays can be stored in a variety of ways, e.g. with
+row- or column-major order, and with different ordering of the dimensions.
+If ``pytorch_format`` is set to true, this means the arrays in the file
+are stored according to PyTorch defaults, whereas false indicates that some
+array operations are first required.
+For example, the weight matrix of a "Linear" layer in PyTorch is
 "out_features x in_features", unlike other frameworks that may use
 "in_features x out_features".
 
@@ -545,7 +547,7 @@ For array handling, it is recommended to:
   the PyTorch ``(C, H, W)`` ordering.
 
 - **Support exporting parameters to the array format with PyTorch array conventions.**
-  One difference between frameworks is their array dimension order. For example, PyTorch
+  One difference between frameworks is how they store arrays. For example, PyTorch
   may use a weight matrix with shape "out_features x in_features", whereas another
   framework may use "in_features x out_features". For portability, export arrays to the
-  array format with PyTorch dimension ordering and use ``pytorch_dimension_order:=True``.
+  array format according to PyTorch default arrays and set ``pytorch_format`` to true.
