@@ -135,7 +135,7 @@ The general structure is:
 
    arrays.hdf5                            # (arbitrary filename)
    ├── metadata                           # [GROUP]
-   │   └── perm                           # [DATASET, STRING] reserved keyword. "row" for row-major, "column" for column-major
+   │   └── pytorch_format                 # [DATASET, BOOL] reserved keyword. Whether arrays can directly be used in PyTorch.
    ├── inputs                             # (optional) [GROUP] reserved keyword
    │   ├── inputId1                       # [GROUP] an input ID, must be a valid PEtab ID
    │   │   ├── conditionId1;conditionId2  # [DATASET, FLOAT ARRAY] the input data. The name is a semicolon-delimited list of relevant conditions, or "0" for all conditions.
@@ -156,6 +156,15 @@ The schema is provided as a :download:`JSON schema <standard/array_data_schema.j
 Currently, validation is only provided via the PEtab SciML library and does not
 check the validity of framework-specific IDs (e.g., input, parameter, and layer
 IDs).
+
+Multi-dimensional arrays can be stored in a variety of ways, e.g. with
+row- or column-major order, and with different ordering of the dimensions.
+If ``pytorch_format`` is set to true, this means the arrays in the file
+are stored according to PyTorch defaults, whereas false indicates that some
+array operations are first required.
+For example, the weight matrix of a "Linear" layer in PyTorch is
+"out_features x in_features", unlike other frameworks that may use
+"in_features x out_features".
 
 Inputs
 ^^^^^^
@@ -537,13 +546,8 @@ For array handling, it is recommended to:
   permutes image inputs to Julia’s ``(H, W, C)``convention instead of using
   the PyTorch ``(C, H, W)`` ordering.
 
-- **Support exporting parameters to the PEtab SciML array format.**
-  If a NN model is not provided in the PEtab SciML YAML format, HDF5 parameter
-  datasets are generally not portable across tools, since they should follow
-  the importer’s framework-native dimension ordering and memory layout. For
-  example, highlighting differences in dimension ordering, a PyTorch tensor
-  created as ``torch.zeros(2, 3, 3)`` would typically correspond to a Julia
-  tensor created as ``zeros(3, 3, 2)``. To enable exchange, we therefore
-  recommend that importers provide a utility to export NN parameters to the
-  PEtab SciML array format (PyTorch conventions) and document the dimension
-  ordering used when exporting arrays.
+- **Support exporting parameters to the array format with PyTorch array conventions.**
+  One difference between frameworks is how they store arrays. For example, PyTorch
+  may use a weight matrix with shape "out_features x in_features", whereas another
+  framework may use "in_features x out_features". For portability, export arrays to the
+  array format according to PyTorch default arrays and set ``pytorch_format`` to true.
