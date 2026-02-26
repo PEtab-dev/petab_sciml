@@ -62,11 +62,10 @@ Nevertheless, for efficiency, PEtab SciML has a set of core maintainers
 responsible for maintaining the software and specification, and for approving
 changes.
 
-Since PEtab SciML is a PEtab extension, core maintainers are selected by the
+New maintainers are welcome, but a track record is expected
+(e.g., contributions to PEtab SciML or related standards such as PEtab, SBML, etc.).
+New maintainers are approved by the current maintainers or, if necessary, by the
 `PEtab editorial board <https://petab.readthedocs.io/en/latest/editorial_board.html/>`_.
-The PEtab editors ensure that the format has maintainers. New maintainers are
-welcome, but a track record is expected (e.g., contributions to PEtab SciML or
-related standards such as PEtab, SBML, etc.).
 
 Values
 ------
