@@ -30,10 +30,11 @@ before release.
 Release requirements
 --------------------
 
-For each new release, the following must be updated:
+For each new release, the following must be updated when appropriate:
 
 - Format specification
 - Validator (linter)
+- The PEtab SciML Python library
 - Test suite
 - Changelog
 
@@ -63,8 +64,9 @@ responsible for maintaining the software and specification, and for approving
 changes.
 
 New maintainers are welcome, but a track record is expected
-(e.g., contributions to PEtab SciML or related standards such as PEtab, SBML, etc.).
-New maintainers are approved by the current maintainers or, if necessary, by the
+(e.g., contributions to PEtab SciML or related standards such as PEtab, SBML,
+etc.). New maintainers are approved by the current maintainers or, if
+necessary, by the
 `PEtab editorial board <https://petab.readthedocs.io/en/latest/editorial_board.html/>`_.
 
 Values
