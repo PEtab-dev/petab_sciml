@@ -30,6 +30,12 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
    tutorial
 
 .. toctree::
+   :caption: Tool developer guide
+   :maxdepth: 3
+
+   training_approaches
+
+.. toctree::
    :caption: Python package
    :maxdepth: 3
 
