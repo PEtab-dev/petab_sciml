@@ -531,7 +531,7 @@ provides a Julia interface to create the PEtab tables and can accept a
 `DifferentialEquations.jl <https://diffeq.sciml.ai/>`_ ``ODEProblem`` as the model together
 with NNs defined in `Lux.jl <https://lux.csail.mit.edu/>`_. If adding support for other
 formats, to **thoroughly test correctness**, the PEtab SciML
-`test suite <https://github.com/sebapersson/petab_sciml_testsuite>`_ can be adapted by
+`test suite <https://github.com/PEtab-dev/petab_sciml_testsuite>`_ can be adapted by
 replacing the NN and/or model files to match the formats any importer targets.
 
 Dealing with arrays

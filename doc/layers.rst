@@ -12,7 +12,7 @@ details for any specific layer or activation function.
 
 If support is lacking for a layer or activation function you would like
 to see, please file an issue on
-`GitHub <https://github.com/sebapersson/petab_sciml/issues>`__.
+`GitHub <https://github.com/PEtab-dev/petab_sciml/issues>`__.
 
 The table below lists the supported and tested neural network layers
 along with links to their respective PyTorch documentation.

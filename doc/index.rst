@@ -2,7 +2,7 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
 ============================================================
 
 | Version: |version|
-| Source code: https://github.com/sebapersson/petab_sciml
+| Source code: https://github.com/PEtab-dev/petab_sciml
 
 .. toctree::
    :maxdepth: 3
