@@ -24,7 +24,7 @@ A proposal is considered accepted for inclusion in the next PEtab SciML
 version if it is endorsed by a majority of the maintainers and at least one
 tool supporting PEtab SciML provides a prototype implementation. For accepted
 changes, corresponding test cases should when relevant be added to the
-`PEtab SciML test suite <https://github.com/sebapersson/petab_sciml_testsuite>`_
+`PEtab SciML test suite <https://github.com/PEtab-dev/petab_sciml_testsuite>`_
 before release.
 
 Release requirements

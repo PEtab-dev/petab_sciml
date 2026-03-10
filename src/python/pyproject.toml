@@ -52,8 +52,8 @@ torch = [
 ]
 
 [project.urls]
-Repository = "https://github.com/sebapersson/petab_sciml"
-"Bug Tracker" = "https://github.com/sebapersson/petab_sciml/issues"
+Repository = "https://github.com/PEtab-dev/petab_sciml"
+"Bug Tracker" = "https://github.com/PEtab-dev/petab_sciml/issues"
 
 [tool.uv.sources]
 torch = { index = "pytorch" }
