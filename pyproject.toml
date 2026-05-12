@@ -20,7 +20,7 @@ dependencies = [
 requires-python = ">=3.8"
 description = "Specify parameter estimation problems and hybrid models."
 readme = "README.md"
-license = {file = "LICENSE.txt"}  # TODO
+license = {file = "LICENSE"}
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python"
@@ -45,7 +45,8 @@ doc = [
     "myst_parser",
 ]
 test = [
-    "pytest"
+    "pytest",
+    "torch"
 ]
 torch = [
     "torch"
@@ -57,6 +58,11 @@ Repository = "https://github.com/PEtab-dev/petab_sciml"
 
 [tool.uv.sources]
 torch = { index = "pytorch" }
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
 
 [[tool.uv.index]]
 name = "pytorch"
