@@ -1,16 +1,18 @@
-from contextlib import chdir
 import csv
+import os
+from contextlib import chdir
+
+import torch
+import torch.nn.functional as F
+from libsbml import readSBML
+from torch import nn
+from yaml import safe_load
+
 from petab_sciml.problem_utils.neural_ode import (
-    create_neural_ode, 
+    create_neural_ode,
     create_neural_ode_problem,
 )
-from petab_sciml.standard.nn_model import NNModelStandard, NNModel, Input
-import os
-import torch
-from torch import nn
-import torch.nn.functional as F
-from yaml import safe_load
-from libsbml import readSBML
+from petab_sciml.standard.nn_model import Input, NNModel, NNModelStandard
 
 
 def test_create_neural_ode(tmp_path):
@@ -67,6 +69,7 @@ def test_create_neural_ode(tmp_path):
             parameters = list(csv.DictReader(f, delimiter="\t"))
             assert parameters == parameters_expected
 
+
 def test_create_neural_ode_with_options(tmp_path):
     """create_neural_ode"""
 
@@ -77,10 +80,10 @@ def test_create_neural_ode_with_options(tmp_path):
         os.mkdir("petab_problem")
         species = {"prey": 1.0, "predator": 2.0}
         create_neural_ode(
-            species, 
-            model_filename="lv.xml", 
+            species,
+            model_filename="lv.xml",
             network_name="mynet",
-            save_directory="./petab_problem"
+            save_directory="./petab_problem",
         )
 
         expected_files = [
@@ -91,11 +94,11 @@ def test_create_neural_ode_with_options(tmp_path):
         ]
         for fname in expected_files:
             assert os.path.isfile(fname)
-            
+
         document = readSBML("petab_problem/lv.xml")
         model = document.getModel()
         species_list = model.getListOfSpecies()
-        
+
         assert species_list.get("prey").getInitialAmount() == 1.0
         assert species_list.get("predator").getInitialAmount() == 2.0
 
@@ -133,7 +136,7 @@ def test_create_neural_ode_problem(tmp_path):
             measurements_filename,
             observables_filename,
             network_filename,
-            array_filenames
+            array_filenames,
         )
 
         expected_files = [
@@ -154,31 +157,48 @@ def test_create_neural_ode_problem(tmp_path):
                 problem["problems"][0]["model_files"]["model"]["location"]
                 == "model.xml"
             )
-            assert (
-                problem["problems"][0]["measurement_files"][0]
-                == "measurements.tsv"
-            )
-            assert (
-                "net1" in problem["extensions"]["sciml"]["neural_nets"].keys()
-            )
+            assert problem["problems"][0]["measurement_files"][0] == "measurements.tsv"
+            assert "net1" in problem["extensions"]["sciml"]["neural_nets"].keys()
             assert (
                 problem["extensions"]["sciml"]["neural_nets"]["net1"]["location"]
                 == "net1.yaml"
             )
             assert problem["extensions"]["sciml"]["array_files"] == array_filenames
 
+
 def _write_test_measurements_file():
     """Write a simple measurements file for testing purposes."""
     measurements = [
-        {"observableId": "prey_o", "simulationConditionId": "cond1", "time": "1.0", "measurement": "0.1"},
-        {"observableId": "prey_o", "simulationConditionId": "cond1", "time": "2.0", "measurement": "0.5"},
-        {"observableId": "predator_o", "simulationConditionId": "cond1", "time": "1.0", "measurement": "0.8"},
-        {"observableId": "predator_o", "simulationConditionId": "cond1", "time": "1.0", "measurement": "0.2"},
+        {
+            "observableId": "prey_o",
+            "simulationConditionId": "cond1",
+            "time": "1.0",
+            "measurement": "0.1",
+        },
+        {
+            "observableId": "prey_o",
+            "simulationConditionId": "cond1",
+            "time": "2.0",
+            "measurement": "0.5",
+        },
+        {
+            "observableId": "predator_o",
+            "simulationConditionId": "cond1",
+            "time": "1.0",
+            "measurement": "0.8",
+        },
+        {
+            "observableId": "predator_o",
+            "simulationConditionId": "cond1",
+            "time": "1.0",
+            "measurement": "0.2",
+        },
     ]
     with open("measurements.tsv", "w") as f:
         writer = csv.DictWriter(f, fieldnames=measurements[0].keys(), delimiter="\t")
         writer.writeheader()
         writer.writerows(measurements)
+
 
 def _write_test_network_file():
     """Write a simple network yaml file for testing purposes."""
@@ -202,6 +222,4 @@ def _write_test_network_file():
     nn_model1 = NNModel.from_pytorch_module(
         module=net1, nn_model_id="net1", inputs=[Input(input_id="input0")]
     )
-    NNModelStandard.save_data(
-        data=nn_model1, filename="net1.yaml"
-    )
+    NNModelStandard.save_data(data=nn_model1, filename="net1.yaml")

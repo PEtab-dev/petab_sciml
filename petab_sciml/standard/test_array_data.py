@@ -3,10 +3,17 @@
 TODO move to test suite for python package
 """
 
-import pytest
 
 import numpy as np
-from petab_sciml import ArrayData, ArrayDataStandard, METADATA, INPUTS, PARAMETERS, PERM, CONDITION_IDS, ROW, DATA, ALL_CONDITION_IDS
+
+from petab_sciml import (
+    ALL_CONDITION_IDS,
+    INPUTS,
+    METADATA,
+    PERM,
+    ROW,
+    ArrayDataStandard,
+)
 
 
 def test_array_data_dict():
