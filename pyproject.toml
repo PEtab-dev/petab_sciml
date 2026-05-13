@@ -17,7 +17,7 @@ dependencies = [
   "python-libsbml",
   "ruamel.yaml",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.13"
 description = "Specify parameter estimation problems and hybrid models."
 readme = "README.md"
 license = {file = "LICENSE"}
