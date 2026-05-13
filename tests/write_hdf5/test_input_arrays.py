@@ -1,10 +1,10 @@
 import os
 import shutil
 import tempfile
+import pytest
 
 import h5py
 import numpy as np
-import pytest
 import torch
 
 from petab_sciml.hdf5.write_hdf5 import write_input_hdf5

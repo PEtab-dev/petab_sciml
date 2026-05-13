@@ -5,6 +5,11 @@ from typing import Iterable, Literal
 import h5py
 from numpy.typing import ArrayLike
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import torch
+
 
 def write_input_hdf5(
     filename: str,
@@ -68,6 +73,7 @@ def write_input_hdf5(
         datasets = [_to_hdf5_data(x) for x in arrays]
 
     _ensure_parent_dir(filename)
+
     with h5py.File(filename, "a") as hdf5_file:
         _ensure_metadata(hdf5_file)
 
@@ -89,6 +95,73 @@ def write_input_hdf5(
             )
 
     # TODO Validate file with PEtab-SciML linter!
+    return filename
+
+
+def write_parameter_hdf5(
+    filename: str,
+    torch_module: "torch.nn.Module",
+    nn_model_id: str,
+    on_dataset_exists: Literal["raise", "overwrite"] = "raise",
+    validate: bool = True,
+) -> str:
+    """Write PyTorch parameters to PEtab-SciML HDF5 array file
+
+    Args:
+    filename:
+        Path to the HDF5 file. Created if it does not exist and appended to if
+        it already exists.
+    source:
+        PyTorch ``torch.nn.Module`` whose named parameters are written to the
+        HDF5 file. Parameter names are expected to follow the PyTorch
+        convention ``"<layer_id>.<parameter_id>"``, for example
+        ``"layer1.weight"`` or ``"layer1.bias"``.
+    nn_model_id:
+        Neural network model ID, as defined in the PEtab-SciML YAML file.
+    on_dataset_exists:
+        Handling target datasets that already exist.
+        - ``"raise"``: raise an error.
+        - ``"overwrite"``: delete and recreate the existing dataset.
+    validate:
+        Whether to validate the resulting HDF5 file with the PEtab-SciML
+        linter.
+
+    Returns:
+    Path:
+        Path to the written HDF5 file.
+    """
+    if on_dataset_exists not in {"raise", "overwrite"}:
+        raise ValueError("on_dataset_exists must be either 'raise' or 'overwrite'.")
+
+    if not hasattr(torch_module, "named_parameters"):
+        raise TypeError(
+            "source must be a PyTorch torch.nn.Module with a named_parameters() method."
+        )
+
+    _ensure_parent_dir(filename)
+
+    with h5py.File(filename, "a") as hdf5_file:
+        _ensure_metadata(hdf5_file)
+
+        parameters_dict = _np_arrays_from_torch_module(torch_module)
+        for layer_id, layer_dict in parameters_dict.items():
+            layer_group = hdf5_file.require_group(
+                f"parameters/{nn_model_id}/{layer_id}"
+            )
+
+            for array_id, array in layer_dict.items():
+                if array_id in layer_group:
+                    if on_dataset_exists == "raise":
+                        raise ValueError(
+                            f"Dataset 'parameters/{nn_model_id}/{layer_id}/{array_id}' "
+                            "already exists. Set "
+                            "on_dataset_exists='overwrite' to replace it."
+                        )
+                    del layer_group[array_id]
+
+                layer_group.create_dataset(array_id, data=array)
+
+    # TODO Validate file with linter!
     return filename
 
 
@@ -134,3 +207,30 @@ def _ensure_metadata(hdf5_file: h5py.File) -> None:
             "Existing HDF5 file has metadata/pytorch_format=False. "
             "This writer currently writes PyTorch-format arrays."
         )
+
+
+def _np_arrays_from_torch_module(
+    torch_module: "torch.nn.Module",
+) -> dict[str, dict[str, np.ndarray]]:
+    """Extract PyTorch module parameters grouped by layer and parameter ID."""
+    parameters = {}
+
+    for name, value in torch_module.named_parameters():
+        if value.numel() == 0:
+            continue
+
+        try:
+            layer_id, parameter_id = name.rsplit(".", maxsplit=1)
+        except ValueError as exc:
+            raise ValueError(
+                f"Expected PyTorch parameter name of the form "
+                f"'<layer_id>.<parameter_id>', got {name!r}."
+            ) from exc
+
+        if hasattr(value, "detach"):
+            array = value.detach().numpy()
+        else:
+            array = _to_hdf5_data(value)
+        parameters.setdefault(layer_id, {})[parameter_id] = array
+
+    return parameters
