@@ -1,6 +1,4 @@
 import os
-import shutil
-import tempfile
 import pytest
 
 import torch
@@ -37,14 +35,6 @@ class NetTest(nn.Module):
 
     def forward(self, net_input: torch.Tensor) -> torch.Tensor:
         return net_input
-
-
-@pytest.fixture
-def dir_tmp():
-    """Create and remove a temporary directory for each test."""
-    directory = tempfile.mkdtemp()
-    yield directory
-    shutil.rmtree(directory)
 
 
 def test_write_parameters(dir_tmp):

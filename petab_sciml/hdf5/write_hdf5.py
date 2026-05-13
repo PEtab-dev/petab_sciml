@@ -4,6 +4,7 @@ from typing import Iterable, Literal
 
 import h5py
 from numpy.typing import ArrayLike
+from ruamel.yaml import YAML
 
 from typing import TYPE_CHECKING
 
@@ -163,6 +164,78 @@ def write_parameter_hdf5(
 
     # TODO Validate file with linter!
     return filename
+
+
+def add_array_files_to_yaml(
+    yaml_file: str,
+    array_files: str | Iterable[str],
+    on_existing: Literal["ignore", "raise"] = "ignore",
+    validate: bool = True,
+) -> str:
+    """Add PEtab-SciML HDF5 array files to a PEtab problem YAML file.
+
+    Args:
+    yaml_file:
+        Path to the PEtab problem YAML file to update in place.
+    array_files:
+        Array file path or array file paths to add to the YAML file. Files must be
+        located in the same directory as ``yaml_file`` and are stored by file name
+        only.
+    on_existing:
+        How to handle array files that are already listed.
+        - ``"ignore"``: keep the existing entry and do not add a duplicate.
+        - ``"raise"``: raise an error if an array file is already listed.
+    validate:
+        Whether to validate the resulting YAML file with the PEtab-SciML
+        linter.
+
+    Returns:
+    str:
+        Path to the updated YAML file.
+    """
+    if on_existing not in {"ignore", "raise"}:
+        raise ValueError("on_existing must be either 'ignore' or 'raise'.")
+
+    if isinstance(array_files, str):
+        array_files = [array_files]
+
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    with open(yaml_file, "r") as f:
+        data = yaml.load(f)
+
+    yaml_dir = os.path.abspath(os.path.dirname(yaml_file) or ".")
+
+    extensions = data.setdefault("extensions", {})
+    petab_sciml = extensions.setdefault("petab_sciml", {})
+    existing_array_files = petab_sciml.setdefault("array_files", [])
+
+    for array_file in array_files:
+        array_dir = os.path.abspath(os.path.dirname(array_file))
+        if array_dir != yaml_dir:
+            raise ValueError(
+                "Array files must be located in the same directory as the "
+                "YAML file. Got array file "
+                f"{array_file!r}, but YAML directory is {yaml_dir!r}."
+            )
+
+        array_file_name = os.path.basename(array_file)
+        if array_file_name in existing_array_files:
+            if on_existing == "raise":
+                raise ValueError(
+                    f"Array file {array_file_name!r} is already listed in "
+                    "'extensions.petab_sciml.array_files'."
+                )
+            continue
+
+        existing_array_files.append(array_file_name)
+
+    with open(yaml_file, "w") as f:
+        yaml.dump(data, f)
+
+    # TODO: Lint the YAML-file
+
+    return yaml_file
 
 
 def _to_hdf5_data(array: ArrayLike) -> np.ndarray:

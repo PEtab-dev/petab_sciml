@@ -1,6 +1,4 @@
 import os
-import shutil
-import tempfile
 import pytest
 
 import h5py
@@ -8,14 +6,6 @@ import numpy as np
 import torch
 
 from petab_sciml.hdf5.write_hdf5 import write_input_hdf5
-
-
-@pytest.fixture
-def dir_tmp():
-    """Create and remove a temporary directory for each test."""
-    directory = tempfile.mkdtemp()
-    yield directory
-    shutil.rmtree(directory)
 
 
 def test_write_global_input(dir_tmp):
