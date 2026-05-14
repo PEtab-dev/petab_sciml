@@ -1,12 +1,15 @@
 import os
-import pytest
 
 import torch
 import numpy as np
 import h5py
 from torch import nn
 
-from petab_sciml.hdf5.write_hdf5 import write_parameter_hdf5
+from petab_sciml.standard.array_data import (
+    ArrayData,
+    ArrayDataStandard,
+    extract_torch_parameters,
+)
 
 
 class NetTest(nn.Module):
@@ -40,9 +43,13 @@ class NetTest(nn.Module):
 def test_write_parameters(dir_tmp):
     """Test writing all named PyTorch parameters grouped by layer and name."""
     file1 = os.path.join(dir_tmp, "file1.hdf5")
+
     net_test = NetTest()
 
-    file1 = write_parameter_hdf5(file1, net_test, "net1")
+    net_ps = extract_torch_parameters(net_test, "net1")
+    array_data = ArrayData.model_validate(net_ps)
+    ArrayDataStandard.save_data(array_data, file1)
+
     with h5py.File(file1, "r") as hdf5_file:
         assert "metadata" in hdf5_file
         assert "pytorch_format" in hdf5_file["metadata"]
@@ -61,17 +68,3 @@ def test_write_parameters(dir_tmp):
             written_data = hdf5_file["parameters"]["net1"][layer_id][parameter_id][()]
             expected_data = parameter.detach().cpu().numpy()
             np.testing.assert_array_equal(written_data, expected_data)
-
-
-def test_write_over(dir_tmp):
-    """Test raising on existing parameter datasets and explicit overwriting."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
-    net_test = NetTest()
-    file1 = write_parameter_hdf5(file1, net_test, "net1")
-
-    with pytest.raises(ValueError, match="already exists"):
-        write_parameter_hdf5(file1, net_test, "net1")
-
-    # Test can over-write
-    file1 = write_parameter_hdf5(file1, net_test, "net1", on_dataset_exists="overwrite")
-    assert os.path.isfile(file1)

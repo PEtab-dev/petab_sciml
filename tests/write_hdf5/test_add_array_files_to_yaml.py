@@ -3,7 +3,7 @@ import os
 import pytest
 from ruamel.yaml import YAML
 
-from petab_sciml.hdf5.write_hdf5 import add_array_files_to_yaml
+from petab_sciml.standard.array_data import add_array_files_to_yaml
 
 
 def _write_yaml(filename, data):
@@ -90,6 +90,7 @@ def test_add_existing_array_file_raises(dir_tmp):
             array_file,
             on_existing="raise",
         )
+
 
 def test_add_array_file_outside_yaml_directory_raises(dir_tmp):
     """Test that array files outside the YAML directory are rejected."""

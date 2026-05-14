@@ -3,150 +3,87 @@ import pytest
 
 import h5py
 import numpy as np
-import torch
+from pydantic import ValidationError
 
-from petab_sciml.hdf5.write_hdf5 import write_input_hdf5
+from petab_sciml.standard.array_data import (
+    ArrayData,
+    ArrayDataStandard,
+    ALL_CONDITION_IDS,
+)
 
 
-def test_write_global_input(dir_tmp):
-    """Test writing a global input array under the condition key 0."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
-    input_data = np.random.rand(10)
+def test_array_data_requires_pytorch_format_metadata():
+    """Test validation works"""
+    data = {
+        "metadata": {"pytorch": True},
+        "inputs": {
+            "inputId2": {
+                ALL_CONDITION_IDS: np.eye(3),
+            },
+        },
+    }
 
-    result = write_input_hdf5(file1, "input1", input_data)
+    with pytest.raises(ValidationError, match="pytorch_format"):
+        ArrayData.model_validate(data)
 
-    assert result == file1
-    assert os.path.isfile(file1)
 
-    with h5py.File(file1, "r") as hdf5_file:
+def test_array_data_input_data(dir_tmp):
+    """ "Test writing input array data"""
+    input1 = np.random.rand(10)
+    input2 = np.random.rand(10, 10)
+    input3 = np.eye(3)
+
+    data = {
+        "metadata": {"pytorch_format": True},
+        "inputs": {
+            "inputId1": {
+                "cond1;cond2": input1,
+                "cond3;cond4": input2,
+            },
+            "inputId2": {
+                ALL_CONDITION_IDS: input3,
+            },
+        },
+    }
+
+    array_data = ArrayData.model_validate(data)
+
+    filename = os.path.join(dir_tmp, "array_data.hdf5")
+    ArrayDataStandard.save_data(array_data, filename=filename)
+
+    assert os.path.isfile(filename)
+
+    with h5py.File(filename, "r") as hdf5_file:
+        # Metadata
         assert "metadata" in hdf5_file
         assert "pytorch_format" in hdf5_file["metadata"]
         assert bool(hdf5_file["metadata"]["pytorch_format"][()]) is True
 
+        # Top-level input group
         assert "inputs" in hdf5_file
-        assert "input1" in hdf5_file["inputs"]
-        assert "0" in hdf5_file["inputs"]["input1"]
 
-        written_data = hdf5_file["inputs"]["input1"]["0"][()]
-        np.testing.assert_array_equal(written_data, input_data)
+        # inputId1: condition-specific arrays
+        assert "inputId1" in hdf5_file["inputs"]
+        input_group1 = hdf5_file["inputs"]["inputId1"]
 
+        assert "cond1;cond2" in input_group1
+        assert "cond3;cond4" in input_group1
 
-def test_existing_dataset_raises(dir_tmp):
-    """Test that writing an existing dataset raises by default."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
-    input_data = np.random.rand(10)
+        np.testing.assert_array_equal(
+            input_group1["cond1;cond2"][()],
+            input1,
+        )
+        np.testing.assert_array_equal(
+            input_group1["cond3;cond4"][()],
+            input2,
+        )
 
-    write_input_hdf5(file1, "input1", input_data)
+        # inputId2: global input array
+        assert "inputId2" in hdf5_file["inputs"]
+        input_group2 = hdf5_file["inputs"]["inputId2"]
 
-    with pytest.raises(ValueError, match="already exists"):
-        write_input_hdf5(file1, "input1", input_data)
-
-
-def test_append_additional_input_to_existing_file(dir_tmp):
-    """Test appending a new input dataset to an existing HDF5 file."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
-
-    input_data1 = np.random.rand(10)
-    input_data2 = np.random.rand(10, 10)
-
-    write_input_hdf5(file1, "input1", input_data1)
-    write_input_hdf5(
-        file1,
-        "input2",
-        input_data2,
-        condition_ids="cond2",
-    )
-
-    with h5py.File(file1, "r") as hdf5_file:
-        assert bool(hdf5_file["metadata"]["pytorch_format"][()]) is True
-
-        written_data1 = hdf5_file["inputs"]["input1"]["0"][()]
-        np.testing.assert_array_equal(written_data1, input_data1)
-
-        assert "input2" in hdf5_file["inputs"]
-        assert "cond2" in hdf5_file["inputs"]["input2"]
-
-        written_data2 = hdf5_file["inputs"]["input2"]["cond2"][()]
-        np.testing.assert_array_equal(written_data2, input_data2)
-
-
-def test_overwrite_existing_dataset(dir_tmp):
-    """Test overwriting an existing dataset when explicitly requested."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
-
-    input_data1 = np.random.rand(10, 10)
-    input_data2 = np.random.rand(10, 10)
-
-    write_input_hdf5(
-        file1,
-        "input1",
-        input_data1,
-        condition_ids="cond1",
-    )
-
-    write_input_hdf5(
-        file1,
-        "input1",
-        input_data2,
-        condition_ids="cond1",
-        on_dataset_exists="overwrite",
-    )
-
-    with h5py.File(file1, "r") as hdf5_file:
-        written_data = hdf5_file["inputs"]["input1"]["cond1"][()]
-        np.testing.assert_array_equal(written_data, input_data2)
-
-
-def test_write_multiple_conditions(dir_tmp):
-    """Test writing condition-specific input arrays for multiple conditions."""
-    file2 = os.path.join(dir_tmp, "file2.hdf5")
-    input_data = [np.random.rand(10), np.random.rand(10)]
-
-    write_input_hdf5(
-        file2,
-        "input1",
-        input_data,
-        condition_ids=["cond1", "cond2"],
-    )
-
-    assert os.path.isfile(file2)
-
-    with h5py.File(file2, "r") as hdf5_file:
-        assert bool(hdf5_file["metadata"]["pytorch_format"][()]) is True
-
-        assert "inputs" in hdf5_file
-        assert "input1" in hdf5_file["inputs"]
-        assert "cond1" in hdf5_file["inputs"]["input1"]
-        assert "cond2" in hdf5_file["inputs"]["input1"]
-
-        assert "0" not in hdf5_file["inputs"]["input1"]
-
-        written_cond1 = hdf5_file["inputs"]["input1"]["cond1"][()]
-        written_cond2 = hdf5_file["inputs"]["input1"]["cond2"][()]
-
-        np.testing.assert_array_equal(written_cond1, input_data[0])
-        np.testing.assert_array_equal(written_cond2, input_data[1])
-
-
-def test_write_torch_tensor_input(dir_tmp):
-    """Test writing a PyTorch tensor as an input array."""
-    file3 = os.path.join(dir_tmp, "file3.hdf5")
-    input_data = torch.rand(10, 10)
-
-    write_input_hdf5(file3, "input1", input_data)
-
-    assert os.path.isfile(file3)
-
-    with h5py.File(file3, "r") as hdf5_file:
-        written_data = hdf5_file["inputs"]["input1"]["0"][()]
-        expected_data = input_data.detach().cpu().numpy()
-
-        np.testing.assert_array_equal(written_data, expected_data)
-
-
-def test_write_string_array(dir_tmp):
-    """Test that non-numeric input arrays are rejected."""
-    file4 = os.path.join(dir_tmp, "file4.hdf5")
-    input_data = np.asarray(["1", "2"])
-    with pytest.raises(TypeError, match="must be numeric"):
-        write_input_hdf5(file4, "input1", input_data)
+        assert ALL_CONDITION_IDS in input_group2
+        np.testing.assert_array_equal(
+            input_group2[ALL_CONDITION_IDS][()],
+            input3,
+        )
