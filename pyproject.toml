@@ -11,7 +11,9 @@ authors = [
   {name = "Branwen Snelling"},
 ]
 dependencies = [
+  "h5py>=3.12",
   "mkstd>=0.0.10",
+  "numpy>=2.1",
   "pandas",
   "pydantic",
   "python-libsbml",
