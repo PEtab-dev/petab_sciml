@@ -20,38 +20,39 @@ def write_input_hdf5(
     on_dataset_exists: Literal["raise", "overwrite"] = "raise",
     validate: bool = True,
 ) -> str:
-    """Write PEtab-SciML input arrays to an HDF5 array file.
+    """Write neural network input arrays to PEtab-SciML HDF5 array file.
 
     Args:
-    filename:
-        Path to the HDF5 file. Created if it does not exist and appended to if
-        it already exists.
-    input_id:
-        PEtab identifier that refers to an input of a neural network model.
-    arrays:
-        Input array or input arrays to write.
+        filename:
+            Path to the HDF5 file. Created if it does not exist and appended to
+            if it already exists.
+        input_id:
+            PEtab identifier referring to a neural network input
+        arrays:
+            Input array or input arrays to write. Individual arrays can be
+            numpy, torch or Jax.numpy arrays.
 
-        If ``condition_ids`` is ``None``, ``arrays`` must be a single array
-        that applies to all PEtab conditions.
+            If ``condition_ids`` is ``None``, ``arrays`` must be a single
+            array.
 
-        If ``condition_ids`` is provided, the input is condition-specific.
-        For a single condition ID, ``arrays`` must be a single array. For
-        multiple condition IDs, ``arrays`` must be an iterable of arrays with
-        the same length as ``condition_ids``.
-    condition_ids:
-        Condition ID or condition IDs for condition-specific input arrays. If
-        provided, must match the length of ``arrays``.
-    on_dataset_exists:
-        Handling target datasets that already exist.
-        - ``"raise"``: raise an error.
-        - ``"overwrite"``: delete and recreate the existing dataset.
-    validate:
-        Whether to validate the resulting HDF5 file structure with the
-        PEtab-SciML linter
+            If ``condition_ids`` is provided, the input arrays are assigned to
+            the specified PEtab condition IDs. For a single condition ID,
+            ``arrays`` must be a single array. For multiple condition IDs,
+            ``arrays`` must be an iterable of arrays with the same length as
+            ``condition_ids``.
+        condition_ids:
+            Condition ID or condition IDs for condition-specific input arrays.
+        on_dataset_exists:
+            Handling target datasets that already exist in the HDF5-file
+            - ``"raise"``: raise an error.
+            - ``"overwrite"``: delete and recreate the existing dataset.
+        validate:
+            Whether to validate the resulting HDF5 file structure with the
+            PEtab-SciML linter
 
     Returns:
-    Path:
-        Path to the written HDF5 file.
+        str:
+            Path to the written HDF5 file.
     """
     if on_dataset_exists not in {"raise", "overwrite"}:
         raise ValueError("on_dataset_exists must be either 'raise' or 'overwrite'.")
@@ -90,10 +91,7 @@ def write_input_hdf5(
                     )
                 del input_group[condition_id]
 
-            input_group.create_dataset(
-                condition_id,
-                data=array,
-            )
+            input_group.create_dataset(condition_id, data=array)
 
     # TODO Validate file with PEtab-SciML linter!
     return filename
@@ -106,30 +104,30 @@ def write_parameter_hdf5(
     on_dataset_exists: Literal["raise", "overwrite"] = "raise",
     validate: bool = True,
 ) -> str:
-    """Write PyTorch parameters to PEtab-SciML HDF5 array file
+    """Write PyTorch module parameters to PEtab-SciML HDF5 array file
 
     Args:
-    filename:
-        Path to the HDF5 file. Created if it does not exist and appended to if
-        it already exists.
-    source:
-        PyTorch ``torch.nn.Module`` whose named parameters are written to the
-        HDF5 file. Parameter names are expected to follow the PyTorch
-        convention ``"<layer_id>.<parameter_id>"``, for example
-        ``"layer1.weight"`` or ``"layer1.bias"``.
-    nn_model_id:
-        Neural network model ID, as defined in the PEtab-SciML YAML file.
-    on_dataset_exists:
-        Handling target datasets that already exist.
-        - ``"raise"``: raise an error.
-        - ``"overwrite"``: delete and recreate the existing dataset.
-    validate:
-        Whether to validate the resulting HDF5 file with the PEtab-SciML
-        linter.
+        filename:
+            Path to the HDF5 file. Created if it does not exist and appended to
+            if it already exists.
+        source:
+            PyTorch ``torch.nn.Module`` whose named parameters are written to
+            the HDF5 file. Parameter names are expected to follow the PyTorch
+            convention ``"<layer_id>.<array_id>"``, for example
+            ``"layer1.weight"``.
+        nn_model_id:
+            Neural network model ID, as defined in the PEtab-SciML YAML file.
+        on_dataset_exists:
+            Handling target datasets that already exist in the HDF5 file.
+            - ``"raise"``: raise an error.
+            - ``"overwrite"``: delete and recreate the existing dataset.
+        validate:
+            Whether to validate the resulting HDF5 file with the PEtab-SciML
+            linter.
 
     Returns:
-    Path:
-        Path to the written HDF5 file.
+        str:
+            Path to the written HDF5 file.
     """
     if on_dataset_exists not in {"raise", "overwrite"}:
         raise ValueError("on_dataset_exists must be either 'raise' or 'overwrite'.")
@@ -175,23 +173,23 @@ def add_array_files_to_yaml(
     """Add PEtab-SciML HDF5 array files to a PEtab problem YAML file.
 
     Args:
-    yaml_file:
-        Path to the PEtab problem YAML file to update in place.
-    array_files:
-        Array file path or array file paths to add to the YAML file. Files must be
-        located in the same directory as ``yaml_file`` and are stored by file name
-        only.
-    on_existing:
-        How to handle array files that are already listed.
-        - ``"ignore"``: keep the existing entry and do not add a duplicate.
-        - ``"raise"``: raise an error if an array file is already listed.
-    validate:
-        Whether to validate the resulting YAML file with the PEtab-SciML
-        linter.
+        yaml_file:
+            Path to the PEtab problem YAML file to update in place.
+        array_files:
+            Array file path or array file paths to add to the YAML file. Files
+            must be located in the same directory as ``yaml_file`` and are
+            stored by file name only.
+        on_existing:
+            How to handle array files that are already listed.
+            - ``"ignore"``: keep the existing entry and do not add a duplicate.
+            - ``"raise"``: raise an error if an array file is already listed.
+        validate:
+            Whether to validate the resulting YAML file with the PEtab-SciML
+            linter.
 
     Returns:
-    str:
-        Path to the updated YAML file.
+        str:
+            Path to the updated YAML file.
     """
     if on_existing not in {"ignore", "raise"}:
         raise ValueError("on_existing must be either 'ignore' or 'raise'.")
@@ -234,19 +232,21 @@ def add_array_files_to_yaml(
         yaml.dump(data, f)
 
     # TODO: Lint the YAML-file
-
     return yaml_file
 
 
 def _to_hdf5_data(array: ArrayLike) -> np.ndarray:
     """Convert supported array-like objects to data accepted by h5py."""
-    try:
-        array = np.asarray(array)
-    except (TypeError, ValueError) as exc:
-        raise TypeError(
-            "Input array could not be converted to a \
-                        NumPy array."
-        ) from exc
+    if hasattr(array, "detach"):
+        array = array.detach().numpy()
+    else:
+        try:
+            array = np.asarray(array)
+        except (TypeError, ValueError) as exc:
+            raise TypeError(
+                "Input array could not be converted to a \
+                            NumPy array."
+            ) from exc
 
     if array.ndim == 0:
         raise ValueError("Input array must not be scalar.")
@@ -289,6 +289,7 @@ def _np_arrays_from_torch_module(
     parameters = {}
 
     for name, value in torch_module.named_parameters():
+        # Layer with no parameters to estimate
         if value.numel() == 0:
             continue
 
@@ -300,10 +301,7 @@ def _np_arrays_from_torch_module(
                 f"'<layer_id>.<parameter_id>', got {name!r}."
             ) from exc
 
-        if hasattr(value, "detach"):
-            array = value.detach().numpy()
-        else:
-            array = _to_hdf5_data(value)
+        array = _to_hdf5_data(value)
         parameters.setdefault(layer_id, {})[parameter_id] = array
 
     return parameters
