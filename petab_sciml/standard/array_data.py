@@ -216,8 +216,8 @@ def _to_numpy_array(array: ArrayLike) -> np.ndarray:
             array = np.asarray(array)
         except (TypeError, ValueError) as exc:
             raise TypeError(
-                "Input array could not be converted to a \
-                            NumPy array."
+                f"Input array of type {type(array).__name__} could not be "
+                "converted to a NumPy array."
             ) from exc
     return array
 
