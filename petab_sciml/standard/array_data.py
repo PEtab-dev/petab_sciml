@@ -10,6 +10,8 @@ from numpy.typing import ArrayLike
 from pydantic import BaseModel, field_validator
 from ruamel.yaml import YAML
 
+from petab_sciml.standard.nn_model import NNModelStandard
+
 if TYPE_CHECKING:
     import torch
 
@@ -139,6 +141,28 @@ def extract_torch_parameters(torch_module: "torch.nn.Module", nn_model_id: str) 
         parameters_net_dict.setdefault(layer_id, {})[parameter_id] = array
 
     return array_dict
+
+
+def extract_nn_yaml_parameters(yaml_file: str) -> dict:
+    """Extract parameters as NumPy arrays from a PEtab-SciML YAML file
+
+    This function loads a PEtab-SciML neural-network YAML file, reconstructs
+    the corresponding PyTorch module, and extracts the initialized module
+    parameters as NumPy arrays that can be exported to the PEtab-SciML HDF5
+    array-file format.
+
+    Args:
+        yaml_file:
+            Path to a PEtab-SciML neural-network YAML file.
+
+    Returns:
+        A nested dictionary compatible with ArrayData for exporting to
+        PEtab-SciML HDF5-file format
+    """
+    nn_model = NNModelStandard.load_data(yaml_file)
+    torch_module = nn_model.to_pytorch_module()
+
+    return extract_torch_parameters(torch_module, nn_model.nn_model_id)
 
 
 def add_array_files_to_yaml(
