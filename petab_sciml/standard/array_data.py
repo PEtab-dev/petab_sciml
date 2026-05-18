@@ -137,8 +137,8 @@ def extract_torch_parameters(torch_module: "torch.nn.Module", nn_model_id: str) 
                 f"'<layer_id>.<parameter_id>', got {name!r}."
             ) from exc
 
-        array = _to_numpy_array(value)
-        parameters_net_dict.setdefault(layer_id, {})[parameter_id] = array
+        val_as_array = _to_numpy_array(value)
+        parameters_net_dict.setdefault(layer_id, {})[parameter_id] = val_as_array
 
     return array_dict
 
