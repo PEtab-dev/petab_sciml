@@ -1,5 +1,5 @@
-import os
 import pytest
+from pathlib import Path
 
 import h5py
 import numpy as np
@@ -27,7 +27,7 @@ def test_array_data_requires_pytorch_format_metadata():
         ArrayData.model_validate(data)
 
 
-def test_array_data_input_data(dir_tmp):
+def test_array_data_input_data(dir_tmp: Path):
     """Test writing input array data"""
     input1 = np.random.rand(10)
     input2 = np.random.rand(10, 10)
@@ -48,10 +48,10 @@ def test_array_data_input_data(dir_tmp):
 
     array_data = ArrayData.model_validate(data)
 
-    filename = os.path.join(dir_tmp, "array_data.hdf5")
+    filename = dir_tmp / "array_data.hdf5"
     ArrayDataStandard.save_data(array_data, filename=filename)
 
-    assert os.path.isfile(filename)
+    assert filename.is_file()
 
     with h5py.File(filename, "r") as hdf5_file:
         # Metadata

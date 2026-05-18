@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import torch
 import torch.nn.functional as F
@@ -66,9 +66,9 @@ class NetTest2(nn.Module):
         return output
 
 
-def test_write_parameters_torch(dir_tmp):
+def test_write_parameters_torch(dir_tmp: Path):
     """Test writing all named PyTorch parameters grouped by layer and name."""
-    file1 = os.path.join(dir_tmp, "file1.hdf5")
+    file1 = dir_tmp / "file1.hdf5"
 
     net_test = NetTest1()
 
@@ -92,14 +92,14 @@ def test_write_parameters_torch(dir_tmp):
             assert parameter_id in hdf5_file["parameters"]["net1"][layer_id]
 
             written_data = hdf5_file["parameters"]["net1"][layer_id][parameter_id][()]
-            expected_data = parameter.detach().cpu().numpy()
+            expected_data = parameter.detach().numpy()
             np.testing.assert_array_equal(written_data, expected_data)
 
 
-def test_write_parameters_nn_yaml(dir_tmp):
+def test_write_parameters_nn_yaml(dir_tmp: Path):
     """Test writing parameters for NN YAML file"""
-    path_yaml = os.path.join(dir_tmp, "file1.yaml")
-    path_hdf5 = os.path.join(dir_tmp, "file1.hdf5")
+    path_yaml = dir_tmp / "file1.yaml"
+    path_hdf5 = dir_tmp / "file1.hdf5"
 
     torch.manual_seed(1)
     net_test = NetTest2()
@@ -127,5 +127,5 @@ def test_write_parameters_nn_yaml(dir_tmp):
             assert parameter_id in hdf5_file["parameters"]["net1"][layer_id]
 
             written_data = hdf5_file["parameters"]["net1"][layer_id][parameter_id][()]
-            expected_data = parameter.detach().cpu().numpy()
+            expected_data = parameter.detach().numpy()
             np.testing.assert_array_equal(written_data, expected_data)
