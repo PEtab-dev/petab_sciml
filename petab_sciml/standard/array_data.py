@@ -168,7 +168,7 @@ def extract_nn_yaml_parameters(yaml_file: str) -> dict:
 def add_array_files_to_yaml(
     yaml_file: str,
     array_files: str | Iterable[str],
-    on_existing: Literal["ignore", "raise"] = "ignore",
+    overwrite: bool = True,
 ) -> str:
     """Add PEtab-SciML HDF5 array file(s) to a PEtab problem YAML file.
 
@@ -235,15 +235,7 @@ def _to_numpy_array(array: ArrayLike) -> np.ndarray:
     """Convert supported array-like objects to data accepted by h5py."""
     if hasattr(array, "detach"):
         array = array.detach().numpy()
-    else:
-        try:
-            array = np.asarray(array)
-        except (TypeError, ValueError) as exc:
-            raise TypeError(
-                f"Input array of type {type(array).__name__} could not be "
-                "converted to a NumPy array."
-            ) from exc
-    return array
+    return np.asarray(array)
 
 
 ArrayDataStandard = Hdf5Standard(model=ArrayData)

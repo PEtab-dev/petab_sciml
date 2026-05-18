@@ -28,7 +28,7 @@ def test_array_data_requires_pytorch_format_metadata():
 
 
 def test_array_data_input_data(dir_tmp):
-    """ "Test writing input array data"""
+    """Test writing input array data"""
     input1 = np.random.rand(10)
     input2 = np.random.rand(10, 10)
     input3 = np.eye(3)

@@ -16,7 +16,7 @@ from petab_sciml.standard.nn_model import NNModel, NNModelStandard
 
 
 class NetTest1(nn.Module):
-    """ "Module with all PEtab-SciML supported layers"""
+    """Module with all PEtab-SciML supported layers"""
 
     def __init__(self) -> None:
         super().__init__()
@@ -44,7 +44,7 @@ class NetTest1(nn.Module):
 
 
 class NetTest2(nn.Module):
-    """ "Testing writing parameters from YAML"""
+    """Testing writing parameters from YAML"""
 
     def __init__(self) -> None:
         super().__init__()
@@ -97,7 +97,7 @@ def test_write_parameters_torch(dir_tmp):
 
 
 def test_write_parameters_nn_yaml(dir_tmp):
-    """ "Test writing parameters for NN YAML file"""
+    """Test writing parameters for NN YAML file"""
     path_yaml = os.path.join(dir_tmp, "file1.yaml")
     path_hdf5 = os.path.join(dir_tmp, "file1.hdf5")
 
