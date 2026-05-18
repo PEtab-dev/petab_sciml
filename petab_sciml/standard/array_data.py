@@ -181,8 +181,9 @@ def add_array_files_to_yaml(
             Path to the PEtab problem YAML file to update in place.
         array_files:
             Array file path or array file paths to add to the YAML file. Files
-            must be located in the same directory as ``yaml_file`` and are
-            stored by file name only.
+            may be given as absolute paths or as paths relative to the current
+            working directory. They are stored in the YAML file as paths
+            relative to the directory containing ``yaml_file``.
         overwrite:
             If ``True``, replace any existing list in
             ``extensions.petab_sciml.array_files`` with the provided files.
@@ -210,16 +211,19 @@ def add_array_files_to_yaml(
     petab_sciml = extensions.setdefault("petab_sciml", {})
     existing_array_files = petab_sciml.setdefault("array_files", [])
 
-    for array_file in array_files:
-        array_dir = array_file.parent.resolve()
-        if array_dir != yaml_dir:
-            raise ValueError(
-                "Array files must be located in the same directory as the "
-                "YAML file. Got array file "
-                f"{array_file!r}, but YAML directory is {yaml_dir!r}."
-            )
+    # Convert existing YAML entries to absolute paths for duplicate checking.
+    existing_array_file_paths = set()
+    for array_file in existing_array_files:
+        array_file = Path(array_file)
+        if array_file.is_absolute():
+            existing_array_file_paths.add(array_file.resolve())
+        else:
+            existing_array_file_paths.add((yaml_dir / array_file).resolve())
 
-        if array_file.name in existing_array_files:
+    for array_file in array_files:
+        array_file = array_file.resolve()
+
+        if array_file in existing_array_file_paths:
             if overwrite is False:
                 raise ValueError(
                     f"Array file {array_file.name!r} is already listed in "
@@ -227,7 +231,8 @@ def add_array_files_to_yaml(
                 )
             continue
 
-        existing_array_files.append(array_file.name)
+        array_file_relative = array_file.relative_to(yaml_dir, walk_up=True).as_posix()
+        existing_array_files.append(array_file_relative)
 
     with open(yaml_file, "w") as f:
         yaml.dump(data, f)
