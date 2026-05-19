@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -97,10 +97,10 @@ class Net5(nn.Module):
         return output1, output2
 
 
-def test_nn_model_yaml_round_trip(dir_tmp):
+def test_nn_model_yaml_round_trip(dir_tmp: Path):
     """Test PyTorch module to PEtab-SciML YAML to PyTorch module round-trip."""
-    filename_original = os.path.join(dir_tmp, "nn_model_original.yaml")
-    filename_loaded = os.path.join(dir_tmp, "nn_model_loaded.yaml")
+    filename_original = dir_tmp / "nn_model_original.yaml"
+    filename_loaded = dir_tmp / "nn_model_loaded.yaml"
 
     _test_roundtrip(filename_original, filename_loaded, Net1())
     _test_roundtrip(filename_original, filename_loaded, Net2())
