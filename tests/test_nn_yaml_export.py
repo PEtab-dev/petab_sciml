@@ -46,7 +46,7 @@ class Net2(nn.Module):
 
 
 class Net3(nn.Module):
-    """Example network with LayerNorm and tuple argument."""
+    """Example network with LayerNormt."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -63,38 +63,19 @@ class Net3(nn.Module):
 
 
 class Net4(nn.Module):
-    """Example network with LayerNorm and tuple argument."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.fc1 = nn.Linear(5, 10)  # 5*5 from image dimension
-        self.fc2 = nn.Linear(10, 10)
-        self.fc3 = nn.Linear(10, 2)
-
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        """Execute the computational graph."""
-        x = F.tanh(self.fc1(input))
-        x = F.tanh(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-
-class Net5(nn.Module):
-    """Network with `torch.cat` and multiple inputs and outputs."""
+    """Network with `torch.cat` and multiple inputs."""
 
     def __init__(self) -> None:
         super().__init__()
         self.fc1 = nn.Linear(120, 84)
-        self.fc2 = nn.Linear(120, 10)
+        self.fc2 = nn.Linear(84, 10)
 
     def forward(self, input1: torch.Tensor, input2: torch.Tensor) -> torch.Tensor:
         input = torch.cat([input1, input2])
 
         f1 = F.relu(self.fc1(input))
         f2 = F.relu(self.fc2(f1))
-        output1 = f1
-        output2 = f2
-        return output1, output2
+        return f2
 
 
 def test_nn_model_yaml_round_trip(dir_tmp: Path):
@@ -102,14 +83,19 @@ def test_nn_model_yaml_round_trip(dir_tmp: Path):
     filename_original = dir_tmp / "nn_model_original.yaml"
     filename_loaded = dir_tmp / "nn_model_loaded.yaml"
 
-    _test_roundtrip(filename_original, filename_loaded, Net1())
-    _test_roundtrip(filename_original, filename_loaded, Net2())
-    _test_roundtrip(filename_original, filename_loaded, Net3())
-    _test_roundtrip(filename_original, filename_loaded, Net4())
-    _test_roundtrip(filename_original, filename_loaded, Net5())
+    test_cases = [
+        ("net1", Net1, lambda: torch.rand(1, 1, 32, 32)),
+        ("net2", Net2, lambda: torch.rand(1, 1, 32, 32)),
+        ("net3", Net3, lambda: torch.rand(1, 4, 10, 11, 12)),
+        ("net4", Net4, lambda: (torch.rand(60), torch.rand(60))),
+    ]
+
+    for name, net_cls, make_input in test_cases:
+        torch.manual_seed(1)
+        _test_roundtrip(filename_original, filename_loaded, net_cls(), make_input())
 
 
-def _test_roundtrip(filename_original, filename_loaded, net_module):
+def _test_roundtrip(filename_original, filename_loaded, net_module, torch_inputs):
     """Helper function to test roundtrip"""
     # Convert PyTorch module to PEtab-SciML model and save to YAML.
     nn_model_original = NNModel.from_pytorch_module(
@@ -123,8 +109,12 @@ def _test_roundtrip(filename_original, filename_loaded, net_module):
     )
 
     # Load YAML and reconstruct the PyTorch module.
+    torch.manual_seed(1)
     loaded_model = NNModelStandard.load_data(filename_original)
     loaded_pytorch_module = loaded_model.to_pytorch_module()
+
+    # Check that original and reconstructed modules have consistent output
+    _assert_same_output(net_module, loaded_pytorch_module, torch_inputs)
 
     # Convert the reconstructed PyTorch module back to PEtab-SciML and save.
     nn_model_loaded = NNModel.from_pytorch_module(
@@ -145,3 +135,15 @@ def _test_roundtrip(filename_original, filename_loaded, net_module):
         data_loaded = f.read()
 
     assert data_original == data_loaded
+
+
+def _assert_same_output(module_a, module_b, torch_inputs):
+    """Assert that two PyTorch modules give the same output for fixed inputs."""
+    if isinstance(torch_inputs, tuple):
+        output_a = module_a.forward(torch_inputs[0], torch_inputs[1])
+        output_b = module_b.forward(torch_inputs[0], torch_inputs[1])
+    else:
+        output_a = module_a.forward(torch_inputs)
+        output_b = module_b.forward(torch_inputs)
+
+    assert torch.equal(output_a, output_b)
