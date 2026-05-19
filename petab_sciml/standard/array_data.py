@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import os
-from typing import TYPE_CHECKING, Iterable, Literal
+from pathlib import Path
+from typing import TYPE_CHECKING, Iterable
 
 import numpy as np
 from mkstd import Hdf5Standard
@@ -9,6 +9,8 @@ from mkstd.types.array import get_array_type
 from numpy.typing import ArrayLike
 from pydantic import BaseModel, field_validator
 from ruamel.yaml import YAML
+
+from petab_sciml.standard.nn_model import NNModelStandard
 
 if TYPE_CHECKING:
     import torch
@@ -118,9 +120,13 @@ def extract_torch_parameters(torch_module: "torch.nn.Module", nn_model_id: str) 
         A nested dictionary compatible with ArrayData for exporting to
         PEtab-SciML HDF5-file format
     """
-    array_dict = {METADATA: {"pytorch_format": True}}
-    parameters_dict = array_dict.setdefault(PARAMETERS, {})
-    parameters_net_dict = parameters_dict.setdefault(nn_model_id, {})
+    array_dict = {
+        METADATA: {"pytorch_format": True},
+        PARAMETERS: {
+            nn_model_id: {},
+        },
+    }
+    parameters_net_dict = array_dict[PARAMETERS][nn_model_id]
 
     for name, value in torch_module.named_parameters():
         # Layer with no parameters to estimate
@@ -135,17 +141,39 @@ def extract_torch_parameters(torch_module: "torch.nn.Module", nn_model_id: str) 
                 f"'<layer_id>.<parameter_id>', got {name!r}."
             ) from exc
 
-        array = _to_numpy_array(value)
-        parameters_net_dict.setdefault(layer_id, {})[parameter_id] = array
+        val_as_array = _to_numpy_array(value)
+        parameters_net_dict.setdefault(layer_id, {})[parameter_id] = val_as_array
 
     return array_dict
 
 
+def extract_nn_yaml_parameters(yaml_file: str | Path) -> dict:
+    """Extract parameters as NumPy arrays from a PEtab-SciML YAML file
+
+    This function loads a PEtab-SciML neural-network YAML file, reconstructs
+    the corresponding PyTorch module, and extracts the initialized module
+    parameters as NumPy arrays that can be exported to the PEtab-SciML HDF5
+    array-file format.
+
+    Args:
+        yaml_file:
+            Path to a PEtab-SciML neural-network YAML file.
+
+    Returns:
+        A nested dictionary compatible with ArrayData for exporting to
+        PEtab-SciML HDF5-file format
+    """
+    nn_model = NNModelStandard.load_data(yaml_file)
+    torch_module = nn_model.to_pytorch_module()
+
+    return extract_torch_parameters(torch_module, nn_model.nn_model_id)
+
+
 def add_array_files_to_yaml(
-    yaml_file: str,
-    array_files: str | Iterable[str],
-    on_existing: Literal["ignore", "raise"] = "ignore",
-) -> str:
+    yaml_file: str | Path,
+    array_files: str | Path | Iterable[str | Path],
+    overwrite: bool = False,
+) -> Path:
     """Add PEtab-SciML HDF5 array file(s) to a PEtab problem YAML file.
 
     Args:
@@ -153,53 +181,55 @@ def add_array_files_to_yaml(
             Path to the PEtab problem YAML file to update in place.
         array_files:
             Array file path or array file paths to add to the YAML file. Files
-            must be located in the same directory as ``yaml_file`` and are
-            stored by file name only.
-        on_existing:
-            How to handle array files that are already listed.
-            - ``"ignore"``: keep the existing entry and do not add a duplicate.
-            - ``"raise"``: raise an error if an array file is already listed.
+            may be given as absolute paths or as paths relative to the current
+            working directory. They are stored in the YAML file as paths
+            relative to the directory containing ``yaml_file``.
+        overwrite:
+            If ``True``, replace any existing list in
+            ``extensions.petab_sciml.array_files`` with the provided files.
+            If ``False``, append any files not already present (duplicates
+            are ignored).
 
     Returns:
-        str:
-            Path to the updated YAML file.
+        Path: Path to the updated YAML file.
     """
-    if on_existing not in {"ignore", "raise"}:
-        raise ValueError("on_existing must be either 'ignore' or 'raise'.")
+    yaml_file = Path(yaml_file)
 
-    if isinstance(array_files, str):
-        array_files = [array_files]
+    if isinstance(array_files, (str, Path)):
+        array_files = [Path(array_files)]
+    else:
+        array_files = [Path(array_file) for array_file in array_files]
 
     yaml = YAML()
     yaml.preserve_quotes = True
     with open(yaml_file, "r") as f:
         data = yaml.load(f)
 
-    yaml_dir = os.path.abspath(os.path.dirname(yaml_file) or ".")
+    yaml_dir = yaml_file.parent.resolve()
 
     extensions = data.setdefault("extensions", {})
     petab_sciml = extensions.setdefault("petab_sciml", {})
     existing_array_files = petab_sciml.setdefault("array_files", [])
 
-    for array_file in array_files:
-        array_dir = os.path.abspath(os.path.dirname(array_file))
-        if array_dir != yaml_dir:
-            raise ValueError(
-                "Array files must be located in the same directory as the "
-                "YAML file. Got array file "
-                f"{array_file!r}, but YAML directory is {yaml_dir!r}."
-            )
+    existing_array_file_paths = {
+        # Handles both absolute and relative `array_file` correctly
+        (yaml_dir / Path(array_file)).resolve()
+        for array_file in existing_array_files
+    }
 
-        array_file_name = os.path.basename(array_file)
-        if array_file_name in existing_array_files:
-            if on_existing == "raise":
+    for array_file in array_files:
+        array_file = array_file.resolve()
+
+        if array_file in existing_array_file_paths:
+            if overwrite is False:
                 raise ValueError(
-                    f"Array file {array_file_name!r} is already listed in "
+                    f"Array file {array_file.name!r} is already listed in "
                     "'extensions.petab_sciml.array_files'."
                 )
             continue
 
-        existing_array_files.append(array_file_name)
+        array_file_relative = array_file.relative_to(yaml_dir, walk_up=True).as_posix()
+        existing_array_files.append(array_file_relative)
 
     with open(yaml_file, "w") as f:
         yaml.dump(data, f)
@@ -211,15 +241,7 @@ def _to_numpy_array(array: ArrayLike) -> np.ndarray:
     """Convert supported array-like objects to data accepted by h5py."""
     if hasattr(array, "detach"):
         array = array.detach().numpy()
-    else:
-        try:
-            array = np.asarray(array)
-        except (TypeError, ValueError) as exc:
-            raise TypeError(
-                "Input array could not be converted to a \
-                            NumPy array."
-            ) from exc
-    return array
+    return np.asarray(array)
 
 
 ArrayDataStandard = Hdf5Standard(model=ArrayData)

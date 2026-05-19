@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import pytest
 from ruamel.yaml import YAML
@@ -20,12 +20,12 @@ def _read_yaml(filename):
         return yaml.load(f)
 
 
-def test_add_array_files_to_yaml(dir_tmp):
+def test_add_array_files_to_yaml(dir_tmp: Path):
     """Test adding one and then multiple array files to a PEtab YAML file."""
-    yaml_file = os.path.join(dir_tmp, "problem.yaml")
-    array_file1 = os.path.join(dir_tmp, "arrays1.hdf5")
-    array_file2 = os.path.join(dir_tmp, "arrays2.hdf5")
-    array_file3 = os.path.join(dir_tmp, "arrays3.hdf5")
+    yaml_file = dir_tmp / "problem.yaml"
+    array_file1 = dir_tmp / "arrays1.hdf5"
+    array_file2 = dir_tmp / "arrays2.hdf5"
+    array_file3 = dir_tmp / "arrays3.hdf5"
 
     _write_yaml(
         yaml_file,
@@ -35,9 +35,9 @@ def test_add_array_files_to_yaml(dir_tmp):
     )
 
     # Create empty files so paths exist in the YAML directory.
-    open(array_file1, "a").close()
-    open(array_file2, "a").close()
-    open(array_file3, "a").close()
+    array_file1.touch()
+    array_file2.touch()
+    array_file3.touch()
 
     result = add_array_files_to_yaml(yaml_file, array_file1)
 
@@ -50,10 +50,7 @@ def test_add_array_files_to_yaml(dir_tmp):
         "arrays1.hdf5",
     ]
 
-    result = add_array_files_to_yaml(
-        yaml_file,
-        [array_file2, array_file3],
-    )
+    result = add_array_files_to_yaml(yaml_file, [array_file2, array_file3])
 
     assert result == yaml_file
 
@@ -65,10 +62,11 @@ def test_add_array_files_to_yaml(dir_tmp):
     ]
 
 
-def test_add_existing_array_file_raises(dir_tmp):
-    """Test that adding an existing array file raises when requested."""
-    yaml_file = os.path.join(dir_tmp, "problem.yaml")
-    array_file = os.path.join(dir_tmp, "arrays.hdf5")
+def test_add_existing_array_file_when_not_overwrite(dir_tmp: Path):
+    """Test that adding an existing array file is ignored when not overwriting."""
+    yaml_file = dir_tmp / "problem.yaml"
+    array_file = dir_tmp / "arrays.hdf5"
+    array_file.touch()
 
     _write_yaml(
         yaml_file,
@@ -82,26 +80,40 @@ def test_add_existing_array_file_raises(dir_tmp):
         },
     )
 
-    open(array_file, "a").close()
+    with pytest.raises(ValueError, match="is already listed in"):
+        _ = add_array_files_to_yaml(yaml_file, array_file, overwrite=False)
 
-    with pytest.raises(ValueError, match="already listed"):
-        add_array_files_to_yaml(
-            yaml_file,
-            array_file,
-            on_existing="raise",
-        )
+    # Test can deal with sub-directories
+    _write_yaml(
+        yaml_file,
+        {
+            "format_version": 2,
+            "extensions": {
+                "petab_sciml": {
+                    "array_files": ["array_files/arrays.hdf5"],
+                },
+            },
+        },
+    )
+
+    array_dir = dir_tmp / "array_files"
+    array_dir.mkdir(parents=True, exist_ok=True)
+    array_file = array_dir / "arrays.hdf5"
+    with pytest.raises(ValueError, match="is already listed in"):
+        _ = add_array_files_to_yaml(yaml_file, array_file, overwrite=False)
 
 
-def test_add_array_file_outside_yaml_directory_raises(dir_tmp):
+def test_add_array_file_outside_yaml_directory(dir_tmp: Path):
     """Test that array files outside the YAML directory are rejected."""
-    yaml_dir = os.path.join(dir_tmp, "yaml_dir")
-    array_dir = os.path.join(dir_tmp, "array_dir")
+    yaml_dir = dir_tmp / "yaml_dir"
+    array_dir = dir_tmp / "array_dir"
 
-    os.makedirs(yaml_dir)
-    os.makedirs(array_dir)
+    yaml_dir.mkdir(parents=True, exist_ok=True)
+    array_dir.mkdir(parents=True, exist_ok=True)
 
-    yaml_file = os.path.join(yaml_dir, "problem.yaml")
-    array_file = os.path.join(array_dir, "arrays.hdf5")
+    yaml_file = yaml_dir / "problem.yaml"
+    array_file = array_dir / "arrays.hdf5"
+    array_file.touch()
 
     _write_yaml(
         yaml_file,
@@ -110,7 +122,9 @@ def test_add_array_file_outside_yaml_directory_raises(dir_tmp):
         },
     )
 
-    open(array_file, "a").close()
+    result = add_array_files_to_yaml(yaml_file, array_file)
 
-    with pytest.raises(ValueError, match="same directory"):
-        add_array_files_to_yaml(yaml_file, array_file)
+    data = _read_yaml(result)
+    assert data["extensions"]["petab_sciml"]["array_files"] == [
+        "../array_dir/arrays.hdf5",
+    ]
