@@ -211,14 +211,11 @@ def add_array_files_to_yaml(
     petab_sciml = extensions.setdefault("petab_sciml", {})
     existing_array_files = petab_sciml.setdefault("array_files", [])
 
-    # Convert existing YAML entries to absolute paths for duplicate checking.
-    existing_array_file_paths = set()
-    for array_file in existing_array_files:
-        array_file = Path(array_file)
-        if array_file.is_absolute():
-            existing_array_file_paths.add(array_file.resolve())
-        else:
-            existing_array_file_paths.add((yaml_dir / array_file).resolve())
+    existing_array_file_paths = {
+        # Handles both absolute and relative `array_file` correctly
+        (yaml_dir / Path(array_file)).resolve()
+        for array_file in existing_array_files
+    }
 
     for array_file in array_files:
         array_file = array_file.resolve()
