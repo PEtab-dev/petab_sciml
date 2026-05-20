@@ -36,4 +36,11 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest
+          python -m pytest --cov=petab_sciml --cov-report=xml --cov-report=term-missing
+
+      - name: Coverage
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: matrix.os == 'ubuntu-latest'
+      
