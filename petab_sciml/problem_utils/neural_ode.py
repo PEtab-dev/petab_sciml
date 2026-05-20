@@ -1,19 +1,22 @@
-from libsbml import parseL3Formula, SBMLDocument, writeSBML
-import os
-import pandas as pd
-from petab_sciml.standard.nn_model import NNModelStandard
+from pathlib import Path
 from typing import Iterable
+
+import pandas as pd
+from libsbml import SBMLDocument, parseL3Formula, writeSBML
 from ruamel.yaml import YAML
 
+from petab_sciml.standard.nn_model import NNModelStandard
+
+
 def create_neural_ode(
-    species_all: Iterable[str] | dict, 
+    species_all: Iterable[str] | dict,
     model_filename: str = "model.xml",
     network_name: str = "net1",
-    save_directory: str = ".",
+    save_directory: str | Path = ".",
 ) -> None:
     """Generate the PEtab files for a neural ODE problem with the given species.
-    
-    This function will generate the model, hybridization, mapping and parameter 
+
+    This function will generate the model, hybridization, mapping and parameter
     files.
 
     Args:
@@ -30,14 +33,17 @@ def create_neural_ode(
     Returns:
         None
     """
-    model_path = os.path.join(save_directory, model_filename)
+    save_directory = _ensure_directory(save_directory)
+    model_path = save_directory / model_filename
     document = _write_sbml(species_all, model_path)
     _write_petab(document, network_name, save_directory)
 
 
-def _write_sbml(species_all: Iterable[str] | dict, model_filename: str) -> SBMLDocument:
+def _write_sbml(
+    species_all: Iterable[str] | dict, model_filename: Path
+) -> SBMLDocument:
     """
-    Write the SBML model file with the given filename for a neural ODE PEtab 
+    Write the SBML model file with the given filename for a neural ODE PEtab
     problem and return the created SBML document.
     """
     document = SBMLDocument(3, 1)
@@ -74,7 +80,7 @@ def _write_sbml(species_all: Iterable[str] | dict, model_filename: str) -> SBMLD
         math_ast = parseL3Formula(param_name)
         r.setMath(math_ast)
 
-    writeSBML(document, model_filename)
+    writeSBML(document, str(model_filename))
 
     return document
 
@@ -82,14 +88,14 @@ def _write_sbml(species_all: Iterable[str] | dict, model_filename: str) -> SBMLD
 def _write_petab(
     document: SBMLDocument,
     network_name: str,
-    save_directory: str,
+    save_directory: Path,
 ) -> None:
     """
     Write the PEtab files for a neural ODE PEtab problem with the given SBML
     document and referencing the network provided.
     """
     model = document.getModel()
-    
+
     # hybridization
     species = [sp.id for sp in model.species]
     params = [param.id for param in model.parameters]
@@ -100,9 +106,7 @@ def _write_petab(
         "targetValue": species + target_values,
     }
     pd.DataFrame(hybridization).to_csv(
-        os.path.join(save_directory, "hybridization.tsv"), 
-        sep="\t", 
-        index=False
+        save_directory / "hybridization.tsv", sep="\t", index=False
     )
 
     # mapping
@@ -112,10 +116,7 @@ def _write_petab(
         "petabEntityId": target_ids + target_values + [f"{network_name}_ps"],
         "modelEntityId": inputs + outputs + [f"{network_name}.parameters"],
     }
-    pd.DataFrame(mapping).to_csv(
-        os.path.join(save_directory, "mapping.tsv"), 
-        sep="\t", 
-        index=False)
+    pd.DataFrame(mapping).to_csv(save_directory / "mapping.tsv", sep="\t", index=False)
 
     # parameters
     parameters = {
@@ -127,10 +128,9 @@ def _write_petab(
         "estimate": [1],
     }
     pd.DataFrame(parameters).to_csv(
-        os.path.join(save_directory, "parameters.tsv"), 
-        sep="\t", 
-        index=False
+        save_directory / "parameters.tsv", sep="\t", index=False
     )
+
 
 def create_neural_ode_problem(
     model_filename: str,
@@ -141,13 +141,13 @@ def create_neural_ode_problem(
     mapping_filenames: Iterable[str] = ["mapping.tsv"],
     parameters_filename: str = "parameters.tsv",
     hybridization_filenames: Iterable[str] = ["hybridization.tsv"],
-    save_directory: str = ".",
+    save_directory: str | Path = ".",
 ) -> None:
     """Write the PEtab files needed for the neural ODE PEtab problem.
 
-    The mappings, parameters and hybridization files can be created using the 
-    create_neural_ode function. This function will create the conditions and 
-    problem.yaml files. The measurements and observables files need to be 
+    The mappings, parameters and hybridization files can be created using the
+    create_neural_ode function. This function will create the conditions and
+    problem.yaml files. The measurements and observables files need to be
     provided by the user.
 
     Args:
@@ -158,8 +158,8 @@ def create_neural_ode_problem(
             This file should be located in the same directory where the remaining PEtab
             files are to be generated.
         observables_filename:
-            Name of the observables TSV file to be created. This file should be 
-            located in the same directory where the remaining PEtab files are to be 
+            Name of the observables TSV file to be created. This file should be
+            located in the same directory where the remaining PEtab files are to be
             generated.
         network_filename:
             Name of the neural network YAML file defining the network architecture.
@@ -177,15 +177,15 @@ def create_neural_ode_problem(
     Returns:
         None
     """
-    measurements = pd.read_csv(measurements_filename, sep="\t")
+    save_directory = _ensure_directory(save_directory)
+
+    measurements = pd.read_csv(save_directory / measurements_filename, sep="\t")
     condition_ids = measurements["simulationConditionId"].unique()
-    
+
     # conditions
     conditions = {"conditionId": condition_ids}
     pd.DataFrame(conditions).to_csv(
-        os.path.join(save_directory, "conditions.tsv"), 
-        sep="\t", 
-        index=False
+        save_directory / "conditions.tsv", sep="\t", index=False
     )
 
     # get network name from network yaml file
@@ -193,37 +193,42 @@ def create_neural_ode_problem(
 
     # problem.yaml
     problem = {
-        "problems": [
-            {
-                "model_files": {
-                    "model": {
-                        "location": model_filename,
-                        "language": "sbml",
-                    },    
-                },
-                "measurement_files": [measurements_filename],
-                "observable_files": [observables_filename],
-                "condition_files": ["conditions.tsv"],
-                "mapping_files": mapping_filenames,
-            }
-        ],
         "format_version": "2.0.0",
+        "model_files": {
+            "model": {
+                "location": model_filename,
+                "language": "sbml",
+            },
+        },
+        "measurement_files": [measurements_filename],
+        "observable_files": [observables_filename],
+        "parameter_files": [parameters_filename],
+        "mapping_files": mapping_filenames,
         "extensions": {
             "sciml": {
-                "array_files": array_filenames,
-                "hybridization_files": hybridization_filenames,
+                "version": "0.1.0",
+                "required": True,
                 "neural_nets": {
                     network_name: {
                         "location": network_filename,
-                        "static": False,
+                        "pre_initialization": False,
                         "format": "YAML",
-                    }
+                    },
                 },
-            }
+                "array_files": array_filenames,
+                "hybridization_files": hybridization_filenames,
+            },
         },
-        "parameter_file": parameters_filename,
     }
-    with open(os.path.join(save_directory, "problem.yaml"), "w") as file:
+
+    with open((save_directory / "problem.yaml"), "w") as file:
         yaml = YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
         yaml.dump(problem, file)
+
+
+def _ensure_directory(path: str | Path) -> Path:
+    """Create a directory if needed and return it as a Path."""
+    directory = Path(path)
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
