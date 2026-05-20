@@ -189,7 +189,7 @@ def create_neural_ode_problem(
     )
 
     # get network name from network yaml file
-    network_name = NNModelStandard.load_data(network_filename).nn_model_id
+    network_name = NNModelStandard.load_data(save_directory / network_filename).nn_model_id
 
     # problem.yaml
     problem = {
