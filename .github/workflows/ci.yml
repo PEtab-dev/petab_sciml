@@ -3,12 +3,20 @@ name: Tests
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
 
     steps:
       - name: Check out repository
@@ -28,4 +36,12 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest
+          python -m pytest --cov=petab_sciml --cov-report=xml --cov-report=term-missing
+
+      - name: Coverage
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+        if: matrix.os == 'ubuntu-latest'
+      
