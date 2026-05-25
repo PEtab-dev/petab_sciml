@@ -10,7 +10,7 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
 
    Introduction <introduction>
    Getting Started <examples/getting_started/getting_started.ipynb>
-   trouble
+   software_support
    Contributing <_tmp/CONTRIBUTING>
 
 .. toctree::

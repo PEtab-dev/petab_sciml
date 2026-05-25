@@ -1,22 +1,22 @@
 .. _layers_activation:
 
-Supported Layers and Activation Functions
-=======================================================================
+Neural-network YAML format
+==========================
 
-The PEtab SciML NN model YAML format supports numerous
+The PEtab SciML neural network (NN) model YAML format supports numerous
 standard neural network layers and activation functions. Layer names and
-associated keyword arguments follow the PyTorch naming scheme. PyTorch
-is used because it is currently the most popular machine learning
-framework, and its comprehensive documentation makes it easy to look up
-details for any specific layer or activation function.
+associated keyword arguments follow the PyTorch naming scheme. PyTorch is used
+because it is currently the most popular machine learning framework, and its
+comprehensive documentation makes it easy to look up details for any specific
+layer or activation function.
 
-If support is lacking for a layer or activation function you would like
-to see, please file an issue on
+If support is lacking for a layer or activation function you would like to see,
+please file an issue on
 `GitHub <https://github.com/PEtab-dev/petab_sciml/issues>`__.
 
-The table below lists the supported and tested neural network layers
-along with links to their respective PyTorch documentation.
-Additionally, the table indicates which tools support each layer.
+The table below lists the supported and tested neural network layers along with
+links to their respective PyTorch documentation. Additionally, the table
+indicates which tools support each layer.
 
 +--------------------------------------------------------------+----+---+
 | layer                                                        | PE | A |
@@ -122,9 +122,9 @@ Additionally, the table indicates which tools support each layer.
 Supported Activation Function
 -----------------------------
 
-The table below lists the supported and tested activation functions
-along with links to their respective PyTorch documentation.
-Additionally, the table indicates which tools support each layer.
+The table below lists the supported and tested activation functions along with
+links to their respective PyTorch documentation. Additionally, the table
+indicates which tools support each layer.
 
 +--------------------------------------------------------------+----+---+
 | Function                                                     | PE | A |
