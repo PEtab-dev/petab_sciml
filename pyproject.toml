@@ -34,6 +34,7 @@ doc = [
     "sphinxcontrib-napoleon>=0.7",
     "sphinx-markdown-tables>=0.0.15",
     "sphinx-rtd-theme>=0.5.1",
+    "pydata-sphinx-theme>=0.18.0",
     # pin until ubuntu comes with newer pandoc:
     # site-packages/nbsphinx/__init__.py:1058: RuntimeWarning: You are using an unsupported version of pandoc (2.9.2.1).
     # Your version must be at least (2.14.2) but less than (4.0.0).
@@ -42,7 +43,7 @@ doc = [
     "nbconvert>=7.16.4",
     "ipykernel>= 6.23.1",
     "ipython>=7.21.0",
-    "sphinx-autodoc-typehints",
+    "sphinx-autodoc-typehints>=3.10",
     # markdown files
     "myst_parser",
 ]
