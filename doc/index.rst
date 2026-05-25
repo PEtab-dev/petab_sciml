@@ -17,9 +17,9 @@ PEtab SciML - Scientific Machine Learning Format and Tooling
    :maxdepth: 3
    :caption: How To Guides
 
-   Networks setting ODE parameters <examples/how_to_dmms/how_to_dmms.ipynb>
-   Observable Formulae <examples/how_to_observable/how_to_observable.ipynb>
-   Neural ODE <examples/how_to_neural_ode/how_to_neural_ode.ipynb>
+   Neural ODEs <examples/how_to_neural_ode/how_to_neural_ode.ipynb>
+   ML models in observables <examples/how_to_observable/how_to_observable.ipynb>
+   Pre-initialization ML models <examples/how_to_dmms/how_to_dmms.ipynb>
 
 .. toctree::
    :caption: PEtab SciML file format
