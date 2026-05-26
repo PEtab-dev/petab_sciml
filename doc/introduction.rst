@@ -1,5 +1,5 @@
-PEtab SciML
-===========
+PEtab SciML - Scientific Machine Learning Format and Tooling
+============================================================
 
 PEtab SciML is a table-based data format for creating training (parameter
 estimation) problems for **scientific machine learning (SciML)** models that
