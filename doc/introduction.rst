@@ -65,7 +65,7 @@ How to read the documentation
 If you are new to PEtab SciML, start with the
 :doc:`Getting Started tutorial <examples/getting_started/getting_started>`
 It is a prerequisite for the How-to guides, which cover different model
-scenarios (e.g., Neural ODEs, ML model upstream of the ODE). For a complete
+scenarios (e.g., Neural ODEs, or ML model upstream of the ODE). For a complete
 description of all options when defining a SciML problem, see the
 :doc:`Format specification <format>`.
 

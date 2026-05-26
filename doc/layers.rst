@@ -1,6 +1,6 @@
 .. _layers_activation:
 
-Neural-network YAML format
+Neural network YAML format
 ==========================
 
 The PEtab SciML neural network (NN) model YAML format supports numerous
