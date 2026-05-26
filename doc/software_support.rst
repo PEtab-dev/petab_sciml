@@ -7,7 +7,7 @@ Tools that support importing PEtab-SciML problems for downstream tasks (e.g.
 simulation and model training), listed alphabetically are:
 
 - `AMICI <https://github.com/AMICI-dev/AMICI>`__
-  (`Example <https://github.com/ICB-DCM/AMICI/blob/master/python/examples/example_petab/petab.ipynb>`__)
+  (`Example <https://amici.readthedocs.io/en/latest/examples/example_jax_petab/ExampleJaxPEtab.html>`__)
 - `PEtab.jl <https://github.com/sebapersson/PEtab.jl>`__
   (`Example <https://sebapersson.github.io/PEtab.jl/stable/tutorials/sciml/standard_format>`__)
 
