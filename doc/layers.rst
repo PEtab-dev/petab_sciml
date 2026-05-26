@@ -192,3 +192,6 @@ indicates which tools support each layer.
 | tmax <https://pytorch.org/docs/stable/generated/torch.nn.fun |    |    |
 | ctional.log_softmax.html#torch.nn.functional.log_softmax>`__ |    |    |
 +--------------------------------------------------------------+----+----+
+| `silu <https://docs.pytorch.org/docs/2.12/generated/torch.nn | ✔️ | ✔️ |
+| .functional.silu.html>`__                                    |    |    |
++--------------------------------------------------------------+----+----+
