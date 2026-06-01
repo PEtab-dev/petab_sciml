@@ -13,6 +13,21 @@ models.
   support for it has been implemented  in PEtab importers, though not yet
   released.  Documentation and utility functions are currently being added.
 
+.. container:: figure align-center
+
+   .. image:: assets/hybrid_types.png
+      :alt: Hybrid model types
+      :class: only-light
+
+   .. image:: assets/hybrid_types_dark.png
+      :alt: Hybrid model types
+      :class: only-dark
+
+   .. container:: caption
+
+      Hybridization patterns supported by PEtab SciML.
+
+
 Main features
 -------------
 
@@ -25,7 +40,7 @@ importable by downstream tools. The main features are:
    combined in three ways: (1) ML within the ODE dynamics (includes
    Neural ODEs), (2) ML in the observable/measurement model linking simulations
    to data, and (3) ML upstream of the ODE, mapping high-dimensional inputs
-   (e.g., images) to ODE model parameters.
+   (e.g., images) to ODE model parameters. See figure above.
 -  **Import across ecosystems.** PEtab SciML problems can be imported into
    state-of-the-art toolboxes for dynamic-model training in Julia
    (`PEtab.jl <https://github.com/sebapersson/PEtab.jl>`_) and Python/JAX
