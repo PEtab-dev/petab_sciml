@@ -11,3 +11,4 @@ contribute to the development of PEtab SciML.
    Format Specification <format>
    Supported Layers and Activation Functions <layers>
    Development process <development>
+   Maintainers <maintainers>
