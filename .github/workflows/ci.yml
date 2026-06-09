@@ -18,8 +18,8 @@ jobs:
           - macos-latest
           - windows-latest
         python-version:
-          - "3.11"
-          - "3.13"
+          - "3.12"
+          - "3.x"
 
     steps:
       - name: Check out repository
@@ -46,4 +46,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.x'
