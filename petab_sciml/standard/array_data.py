@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
@@ -229,7 +228,7 @@ def add_array_files_to_yaml(
                 )
             continue
 
-        array_file_relative = Path(os.path.relpath(array_file, yaml_dir)).as_posix()
+        array_file_relative = array_file.relative_to(yaml_dir, walk_up=True).as_posix()
         existing_array_files.append(array_file_relative)
 
     with open(yaml_file, "w") as f:
