@@ -1,3 +1,5 @@
+"""Curriculum learning export for PEtab problems."""
+
 import copy
 from pathlib import Path
 
@@ -80,21 +82,3 @@ def _export_curriculum_learning(
             stage_problem.validate()
 
     return None
-
-
-def _get_condition_ids_from_experiment_df(
-    experiment_df: pd.DataFrame,
-    problem: petab.v2.Problem,
-) -> set[str]:
-    """Collect all condition IDs referenced by the given experiment table.
-
-    Extracts condition IDs from all periods of each surviving experiment
-    using the typed experiment objects on the problem.
-    """
-    surviving_ids = set(experiment_df["experimentId"].unique())
-    condition_ids = set()
-    for experiment in problem.experiments:
-        if experiment.id in surviving_ids:
-            for period in experiment.periods:
-                condition_ids.update(period.condition_ids)
-    return condition_ids

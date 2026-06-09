@@ -6,6 +6,7 @@ import petab
 
 from .partition import Partition
 from .curriculum import _export_curriculum_learning
+from .multiple_shooting import _export_multiple_shooting
 
 
 @dataclass
@@ -102,7 +103,7 @@ class CurriculumMultipleShooting:
 
 Strategy = MultipleShooting | CurriculumLearning | CurriculumMultipleShooting
 
-
+# TODO: Fix dir logic!
 @dataclass
 class PEtabTrainingProblem:
     """A PEtab problem wrapped with a training strategy, ready for export.
@@ -169,3 +170,6 @@ class PEtabTrainingProblem:
 
         if isinstance(self.strategy, CurriculumLearning):
             _export_curriculum_learning(problem, self.strategy, output_dir, validate)
+
+        elif isinstance(self.strategy, MultipleShooting):
+            _export_multiple_shooting(problem, self.strategy, output_dir, validate)
