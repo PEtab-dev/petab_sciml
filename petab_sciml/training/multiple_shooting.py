@@ -158,10 +158,19 @@ def _add_per_experiment_ic_artifacts(
                 estimate=True,
             )
         )
+
+        if strategy.log_penalty:
+            _formula = (
+                f"(log(abs({specie_id})) - log(abs({prefix}_PARAMETER_{specie_id}))) * MS_PENALTY_SQRT"
+            )
+        else:
+            _formula = (
+                f"({specie_id} - {prefix}_PARAMETER_{specie_id}) * MS_PENALTY_SQRT"
+            )
         problem.observable_tables[0].elements.append(
             petab.v2.Observable(
                 id=f"{prefix}_PENALTY_{specie_id}",
-                formula=f"({specie_id} - {prefix}_PARAMETER_{specie_id}) * MS_PENALTY_SQRT",
+                formula=_formula,
                 noise_formula="1.0",
                 noise_distribution="normal",
             )

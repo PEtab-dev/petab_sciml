@@ -293,12 +293,8 @@ def test_multiple_shooting_partial_experiments(dir_tmp: Path) -> None:
     # UniformPartition(n=3) → end times [1.0, 3.0, 6.0], windows [0,1], [1,3], [3,6]
     # exp1 participates in all three windows; exp2 only in windows 0 and 1
     dir_uniform = dir_tmp / "dir_uniform"
-    strategy = MultipleShooting(UniformPartition(n=3), penalty=5.0)
+    strategy = MultipleShooting(UniformPartition(n=3), penalty=5.0, log_penalty=True)
     PEtabTrainingProblem(yaml=path_yaml, strategy=strategy).export(dir_uniform)
-
-    dir_tmp_tmp = Path("tests/training/ms_dir")
-    dir_tmp_tmp.mkdir(exist_ok=True)
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy).export(dir_tmp_tmp)
 
     windows = [(0.0, 1.0), (1.0, 3.0), (3.0, 6.0)]
     _assert_ms_structure(
