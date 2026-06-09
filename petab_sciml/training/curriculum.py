@@ -4,7 +4,6 @@ import copy
 from pathlib import Path
 
 import petab
-import pandas as pd
 
 from .partition import get_partition_time_points
 
