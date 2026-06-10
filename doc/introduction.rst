@@ -63,10 +63,11 @@ How to read the documentation
 -----------------------------
 
 If you are new to PEtab SciML, start with the
-:doc:`Getting Started tutorial <tutorial>`. It is a prerequisite for the
-How-to guides, which cover different model scenarios (e.g., Neural ODEs, ML
-model upstream of the ODE). For a complete description of all options when
-defining a SciML problem, see the :doc:`Format specification <format>`.
+:doc:`Getting Started tutorial <examples/getting_started/getting_started>`
+It is a prerequisite for the How-to guides, which cover different model
+scenarios (e.g., Neural ODEs, or ML model upstream of the ODE). For a complete
+description of all options when defining a SciML problem, see the
+:doc:`Format specification <format>`.
 
 Why a SciML data format?
 ------------------------
@@ -97,7 +98,6 @@ Getting Help with and Extending PEtab SciML
 
 If you run into problems:
 
-- Check the :doc:`Troubleshooting <trouble>` section of the documentation.
 - If you encounter unexpected behavior or a bug, please open an
   `issue <https://github.com/PEtab-dev/petab_sciml/issues/>`_ on GitHub
 
