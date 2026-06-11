@@ -1,83 +1,126 @@
 """Curriculum learning export for PEtab problems."""
 
 import copy
+from dataclasses import dataclass
 from pathlib import Path
 
 import petab
 
-from .partition import get_partition_time_points
+from .partition import Partition
+from .helper import _resolve_output_dir
 
 
-def _export_curriculum_learning(
-    problem: petab.v2.Problem, strategy, output_dir: Path, validate: bool
-) -> None:
-    """Export a PEtab problem as a curriculum learning training problem.
+@dataclass
+class CurriculumLearningProblem:
+    """Curriculum learning training problem.
 
-    Creates one sub-directory per curriculum stage under ``output_dir``,
-    each containing a self-contained PEtab problem with measurements filtered
-    to the stage's time horizon. Experiments and conditions not referenced
-    by the filtered measurement table are removed from each stage problem.
+    Training difficulty is progressively increased across stages by gradually
+    extending the measurement time horizon. Each stage is a self-contained
+    PEtab problem, containing all measurements up to the stage's end time point.
+
+    For training loops, the parameter estimate from stage ``i`` should be used
+    to initialise stage ``i+1``.
+
+    Parameters
+    ----------
+    yaml:
+        Path to the source PEtab YAML file.
+    partition:
+        How to split the time range in the PEtab measurement table into
+        curriculum stages. A ``UniformPartition(n)`` produces ``n`` stages by
+        dividing the unique time points in the measurement table into
+        equally-sized groups, where the end of each group defines the stage's
+        time horizon. A ``CustomPartition`` allows finer control by specifying
+        the end time point of each stage explicitly.
     """
-    measurement_df = problem.measurement_df
-    stage_end_times = get_partition_time_points(strategy.partition, measurement_df)
 
-    for i, t_end in enumerate(stage_end_times):
-        stage_dir = output_dir / f"stage{i + 1}"
-        stage_dir.mkdir(parents=True, exist_ok=True)
+    yaml: Path | str
+    partition: Partition
 
-        stage_problem = copy.deepcopy(problem)
+    def export(
+        self, output_dir: Path | str | None = None, validate: bool = True
+    ) -> None:
+        """Export this curriculum learning problem to disk.
 
-        stage_problem.measurement_tables = [
-            petab.v2.MeasurementTable(
-                elements=[m for m in table.measurements if m.time <= t_end],
-                rel_path=table.rel_path,
-            )
-            for table in stage_problem.measurement_tables
-        ]
+        Creates one sub-directory per curriculum stage under ``output_dir``, each
+        containing a self-contained PEtab problem with measurements filtered to
+        the stage's time horizon. Experiments and conditions not referenced by
+        the filtered measurement table are removed from each stage problem.
 
-        # Identify surviving condition and experiment IDs (if relevant)
-        if problem.experiment_df is not None:
-            surviving_experiment_ids = {
-                m.experiment_id
+        Parameters
+        ----------
+        output_dir:
+            Directory to write the exported stage problems to. Created if it
+            does not exist. If ``None``, defaults to a ``cl_prob`` subdirectory
+            of the source YAML's directory.
+        validate:
+            Whether to validate each exported stage problem before writing.
+        """
+        output_dir = _resolve_output_dir(
+            yaml=self.yaml, output_dir=output_dir, default_name="cl_prob"
+        )
+
+        problem = petab.v2.Problem.from_yaml(self.yaml)
+        measurement_df = problem.measurement_df
+        stage_end_times = self.partition.get_time_points(measurement_df)
+
+        for i, t_end in enumerate(stage_end_times):
+            stage_dir = output_dir / f"stage{i + 1}"
+            stage_dir.mkdir(parents=True, exist_ok=True)
+
+            stage_problem = copy.deepcopy(problem)
+
+            stage_problem.measurement_tables = [
+                petab.v2.MeasurementTable(
+                    elements=[m for m in table.measurements if m.time <= t_end],
+                    rel_path=table.rel_path,
+                )
                 for table in stage_problem.measurement_tables
-                for m in table.measurements
-            }
-            stage_problem.experiment_tables = [
-                petab.v2.ExperimentTable(
-                    elements=[
-                        petab.v2.Experiment(
-                            id=e.id,
-                            periods=[p for p in e.periods if p.time <= t_end],
-                        )
-                        for e in table.experiments
-                        if e.id in surviving_experiment_ids
-                    ],
-                    rel_path=table.rel_path,
-                )
-                for table in stage_problem.experiment_tables
             ]
 
-            surviving_condition_ids = {
-                cid
-                for table in stage_problem.experiment_tables
-                for experiment in table.experiments
-                for period in experiment.periods
-                if period.time <= t_end
-                for cid in period.condition_ids
-            }
-            stage_problem.condition_tables = [
-                petab.v2.ConditionTable(
-                    elements=[
-                        c for c in table.conditions if c.id in surviving_condition_ids
-                    ],
-                    rel_path=table.rel_path,
-                )
-                for table in stage_problem.condition_tables
-            ]
+            # Identify surviving condition and experiment IDs (if relevant)
+            if problem.experiment_df is not None:
+                surviving_experiment_ids = {
+                    m.experiment_id
+                    for table in stage_problem.measurement_tables
+                    for m in table.measurements
+                }
+                stage_problem.experiment_tables = [
+                    petab.v2.ExperimentTable(
+                        elements=[
+                            petab.v2.Experiment(
+                                id=e.id,
+                                periods=[p for p in e.periods if p.time <= t_end],
+                            )
+                            for e in table.experiments
+                            if e.id in surviving_experiment_ids
+                        ],
+                        rel_path=table.rel_path,
+                    )
+                    for table in stage_problem.experiment_tables
+                ]
 
-        stage_problem.to_files(base_path=stage_dir)
+                surviving_condition_ids = {
+                    cid
+                    for table in stage_problem.experiment_tables
+                    for experiment in table.experiments
+                    for period in experiment.periods
+                    if period.time <= t_end
+                    for cid in period.condition_ids
+                }
+                stage_problem.condition_tables = [
+                    petab.v2.ConditionTable(
+                        elements=[
+                            c
+                            for c in table.conditions
+                            if c.id in surviving_condition_ids
+                        ],
+                        rel_path=table.rel_path,
+                    )
+                    for table in stage_problem.condition_tables
+                ]
 
-        if validate:
-            stage_problem.validate()
+            stage_problem.to_files(base_path=stage_dir)
 
-    return None
+            if validate:
+                stage_problem.validate()

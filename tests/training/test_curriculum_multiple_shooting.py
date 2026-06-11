@@ -2,15 +2,15 @@
 
 from pathlib import Path
 
-from petab_sciml.training.partition import CustomPartition, UniformPartition
-from petab_sciml.training.strategies import (
-    CurriculumMultipleShooting,
-    MultipleShooting,
-    PEtabTrainingProblem,
+from petab_sciml.training import (
+    CurriculumMultipleShootingProblem,
+    CustomPartition,
+    UniformPartition,
 )
+
 from tests.training.petab_problems import (
     get_prob_no_experiment,
-    get_prob_partial_experiments_ms
+    get_prob_partial_experiments_ms,
 )
 from tests.training.ms_helpers import (
     _assert_ms_structure,
@@ -27,10 +27,10 @@ def test_curriculum_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
 
     # UniformPartition(n=3) → end times [1.0, 3.0, 6.0]
     dir_uniform = dir_tmp / "dir_uniform"
-    strategy_uniform = CurriculumMultipleShooting(
-        multiple_shooting=MultipleShooting(UniformPartition(n=3), penalty=5.0)
+    cms_prob_uniform = CurriculumMultipleShootingProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3), penalty=5.0
     )
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy_uniform).export(dir_uniform)
+    cms_prob_uniform.export(dir_uniform)
 
     stage_windows_uniform = [
         [(0.0, 1.0), (1.0, 3.0), (3.0, 6.0)],
@@ -42,15 +42,15 @@ def test_curriculum_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
         path_yaml,
         stage_windows_uniform,
         species,
-        strategy_uniform.multiple_shooting,
+        cms_prob_uniform,
     )
 
     # CustomPartition([2.5, 5.0]) → end times [2.5, 5.0, 6.0]
     dir_custom = dir_tmp / "dir_custom"
-    strategy_custom = CurriculumMultipleShooting(
-        multiple_shooting=MultipleShooting(CustomPartition([2.5, 5.0]), penalty=5.0)
+    cms_prob_custom = CurriculumMultipleShootingProblem(
+        yaml=path_yaml, partition=CustomPartition([2.5, 5.0]), penalty=5.0
     )
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy_custom).export(dir_custom)
+    cms_prob_custom.export(dir_custom)
 
     stage_windows_custom = [
         [(0.0, 2.5), (2.5, 5.0), (5.0, 6.0)],
@@ -62,7 +62,7 @@ def test_curriculum_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
         path_yaml,
         stage_windows_custom,
         species,
-        strategy_custom.multiple_shooting,
+        cms_prob_custom,
     )
 
 
@@ -73,10 +73,10 @@ def test_curriculum_multiple_shooting_partial_experiments(dir_tmp: Path) -> None
     species = ["x1", "x2"]
 
     dir_out = dir_tmp / "dir_cms"
-    strategy = CurriculumMultipleShooting(
-        multiple_shooting=MultipleShooting(UniformPartition(n=3), penalty=5.0)
+    cms_prob = CurriculumMultipleShootingProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3), penalty=5.0
     )
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy).export(dir_out)
+    cms_prob.export(dir_out)
 
     # UniformPartition(n=3) on 7 time points → end times [1.0, 3.0, 6.0]
     # Stage 1: [(0,1), (1,3), (3,6)]   — exp1 in all, exp2 only in [0] and [1]
@@ -92,7 +92,7 @@ def test_curriculum_multiple_shooting_partial_experiments(dir_tmp: Path) -> None
         path_yaml,
         stage_windows,
         species,
-        strategy.multiple_shooting,
+        cms_prob,
     )
 
 
@@ -101,7 +101,7 @@ def _check_cms_stages(
     path_yaml: Path,
     stage_windows: list[list[tuple[float, float]]],
     species: list[str],
-    ms_strategy: MultipleShooting,
+    cms_prob: CurriculumMultipleShootingProblem,
 ) -> None:
     """Run the standard MS invariant checks on each stage directory.
 
@@ -118,7 +118,7 @@ def _check_cms_stages(
             windows=windows,
             species=species,
             original_yaml=path_yaml,
-            strategy=ms_strategy,
+            prob=cms_prob,
         )
         _assert_window_measurements_match(stage_dir, path_yaml, windows)
         _assert_penalty_measurements(
