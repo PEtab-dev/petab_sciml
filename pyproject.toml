@@ -21,7 +21,7 @@ dependencies = [
   "scipy",
   "ruamel.yaml",
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 description = "Specify parameter estimation problems and hybrid models."
 readme = "README.md"
 license = {file = "LICENSE"}

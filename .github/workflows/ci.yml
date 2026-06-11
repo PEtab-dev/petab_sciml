@@ -17,6 +17,9 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        python-version:
+          - "3.12"
+          - "3.x"
 
     steps:
       - name: Check out repository
@@ -25,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: pyproject.toml
 
@@ -43,5 +46,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-        if: matrix.os == 'ubuntu-latest'
-      
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.x'
