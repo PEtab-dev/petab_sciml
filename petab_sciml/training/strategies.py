@@ -1,4 +1,3 @@
-from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -7,6 +6,7 @@ import petab
 from .partition import Partition
 from .curriculum import _export_curriculum_learning
 from .multiple_shooting import _export_multiple_shooting
+from .curriculum_multiple_shooting import _export_curriculum_multiple_shooting
 
 
 @dataclass
@@ -103,6 +103,7 @@ class CurriculumMultipleShooting:
 
 Strategy = MultipleShooting | CurriculumLearning | CurriculumMultipleShooting
 
+
 # TODO: Fix dir logic!
 @dataclass
 class PEtabTrainingProblem:
@@ -173,3 +174,8 @@ class PEtabTrainingProblem:
 
         elif isinstance(self.strategy, MultipleShooting):
             _export_multiple_shooting(problem, self.strategy, output_dir, validate)
+
+        elif isinstance(self.strategy, CurriculumMultipleShooting):
+            _export_curriculum_multiple_shooting(
+                problem, self.strategy, output_dir, validate
+            )
