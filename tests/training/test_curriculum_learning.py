@@ -3,8 +3,11 @@ from pathlib import Path
 import pandas as pd
 import petab.v2
 
-from petab_sciml.training.partition import CustomPartition, UniformPartition
-from petab_sciml.training.strategies import CurriculumLearning, PEtabTrainingProblem
+from petab_sciml.training import (
+    CurriculumLearningProblem,
+    CustomPartition,
+    UniformPartition,
+)
 
 from tests.training.petab_problems import (
     get_prob_no_experiment,
@@ -22,8 +25,8 @@ def test_no_experiments(dir_tmp: Path) -> None:
     get_prob_no_experiment(dir_tmp)
 
     dir_uniform = dir_tmp / "dir_uniform"
-    training_problem1 = PEtabTrainingProblem(
-        yaml=path_yaml, strategy=CurriculumLearning(UniformPartition(n=3))
+    training_problem1 = CurriculumLearningProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3)
     )
     training_problem1.export(dir_uniform)
     end_times = [1.0, 3.0, 6.0]
@@ -36,8 +39,8 @@ def test_no_experiments(dir_tmp: Path) -> None:
     # Also tests setting partition points at no measurements is handled
     # correctly
     dir_custom = dir_tmp / "dir_custom"
-    training_problem2 = PEtabTrainingProblem(
-        yaml=path_yaml, strategy=CurriculumLearning(CustomPartition([2.5, 5.0]))
+    training_problem2 = CurriculumLearningProblem(
+        yaml=path_yaml, partition=CustomPartition([2.5, 5.0])
     )
     training_problem2.export(dir_custom)
     end_times = [2.0, 5.0, 6.0]
@@ -56,8 +59,8 @@ def test_all_experiments(dir_tmp: Path) -> None:
     get_prob_all_experiments(dir_tmp)
 
     dir_uniform = dir_tmp / "dir_uniform"
-    training_problem1 = PEtabTrainingProblem(
-        yaml=path_yaml, strategy=CurriculumLearning(UniformPartition(n=3))
+    training_problem1 = CurriculumLearningProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3)
     )
     training_problem1.export(dir_uniform)
     end_times = [1.0, 3.0, 6.0]
@@ -93,8 +96,8 @@ def test_partial_experiments(dir_tmp: Path) -> None:
     path_yaml = dir_tmp / "problem.yaml"
     get_prob_partial_experiments(dir_tmp)
     dir_uniform = dir_tmp / "dir_uniform"
-    training_problem = PEtabTrainingProblem(
-        yaml=path_yaml, strategy=CurriculumLearning(UniformPartition(n=3))
+    training_problem = CurriculumLearningProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3)
     )
     training_problem.export(dir_uniform)
     end_times = [1.0, 3.0, 6.0]

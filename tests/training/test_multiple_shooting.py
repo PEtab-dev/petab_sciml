@@ -6,15 +6,13 @@ import math
 from pathlib import Path
 
 import pandas as pd
-import petab.v2
 import numpy as np
-import pytest
 from petab.v1.math import sympify_petab
 
-from petab_sciml.training.partition import CustomPartition, UniformPartition
-from petab_sciml.training.strategies import (
-    MultipleShooting,
-    PEtabTrainingProblem,
+from petab_sciml.training import (
+    CustomPartition,
+    MultipleShootingProblem,
+    UniformPartition,
 )
 
 from tests.training.petab_problems import (
@@ -45,9 +43,8 @@ def test_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
     # UniformPartition(n=3): hard-coded reference test to ensure all formulas
     # are correct
     dir_uniform = dir_tmp / "dir_uniform"
-    PEtabTrainingProblem(
-        yaml=path_yaml,
-        strategy=MultipleShooting(UniformPartition(n=3), penalty=5.0),
+    MultipleShootingProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3), penalty=5.0
     ).export(dir_uniform)
 
     # Expected parameter table
@@ -268,8 +265,10 @@ def test_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
     # CustomPartition([2.5, 5.0]): invariant-based test
     # End times [2.5, 5.0, 6.0], windows [0,2.5], [2.5,5.0], [5.0,6.0]
     dir_custom = dir_tmp / "dir_custom"
-    strategy = MultipleShooting(CustomPartition([2.5, 5.0]), penalty=4.0)
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy).export(dir_custom)
+    ms_prob = MultipleShootingProblem(
+        yaml=path_yaml, partition=CustomPartition([2.5, 5.0]), penalty=4.0
+    )
+    ms_prob.export(dir_custom)
 
     windows = [(0.0, 2.5), (2.5, 5.0), (5.0, 6.0)]
     _assert_ms_structure(
@@ -277,7 +276,7 @@ def test_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
         windows=windows,
         species=species,
         original_yaml=path_yaml,
-        strategy=strategy,
+        prob=ms_prob,
     )
 
     _assert_window_measurements_match(dir_custom, path_yaml, windows)
@@ -298,8 +297,10 @@ def test_multiple_shooting_partial_experiments(dir_tmp: Path) -> None:
     # UniformPartition(n=3) → end times [1.0, 3.0, 6.0], windows [0,1], [1,3], [3,6]
     # exp1 participates in all three windows; exp2 only in windows 0 and 1
     dir_uniform = dir_tmp / "dir_uniform"
-    strategy = MultipleShooting(UniformPartition(n=3), penalty=5.0, log_penalty=True)
-    PEtabTrainingProblem(yaml=path_yaml, strategy=strategy).export(dir_uniform)
+    ms_prob = MultipleShootingProblem(
+        yaml=path_yaml, partition=UniformPartition(n=3), penalty=5.0, log_penalty=True
+    )
+    ms_prob.export(dir_uniform)
 
     windows = [(0.0, 1.0), (1.0, 3.0), (3.0, 6.0)]
     _assert_ms_structure(
@@ -307,7 +308,7 @@ def test_multiple_shooting_partial_experiments(dir_tmp: Path) -> None:
         windows=windows,
         species=species,
         original_yaml=path_yaml,
-        strategy=strategy,
+        prob=ms_prob,
     )
     _assert_window_measurements_match(dir_uniform, path_yaml, windows)
     _assert_penalty_measurements(

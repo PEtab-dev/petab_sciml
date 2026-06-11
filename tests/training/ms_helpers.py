@@ -5,7 +5,10 @@ import numpy as np
 import pandas as pd
 import petab
 
-from petab_sciml.training.strategies import MultipleShooting
+from petab_sciml.training import (
+    CurriculumMultipleShootingProblem,
+    MultipleShootingProblem,
+)
 
 
 def _compute_exp_windows(
@@ -40,9 +43,9 @@ def _assert_ms_structure(
     windows: list[tuple[float, float]],
     species: list[str],
     original_yaml: Path,
-    strategy: MultipleShooting,
+    prob: MultipleShootingProblem | CurriculumMultipleShootingProblem,
 ) -> None:
-    """MS-specific structure: per-(window i>0, experiment) artifacts exist where the experiment participates."""
+    """MS-specific structure: per-(window i>0, experiment)."""
     exp_windows = _compute_exp_windows(original_yaml, windows)
 
     parameters = pd.read_csv(problem_dir / "parameters.tsv", sep="\t")
@@ -51,8 +54,8 @@ def _assert_ms_structure(
     experiments = pd.read_csv(problem_dir / "experiments.tsv", sep="\t")
 
     ms_row = parameters[parameters["parameterId"] == "MS_PENALTY_SQRT"].iloc[0]
-    assert ms_row["estimate"] == False  # noqa: E712
-    assert float(ms_row["nominalValue"]) == math.sqrt(strategy.penalty)
+    assert ms_row["estimate"] == np.False_
+    assert float(ms_row["nominalValue"]) == math.sqrt(prob.penalty)
 
     param_ids = set(parameters["parameterId"])
     obs_ids = set(observables["observableId"])
@@ -70,7 +73,7 @@ def _assert_ms_structure(
                 assert pid in param_ids, f"Missing parameter {pid}"
                 p = parameters[parameters["parameterId"] == pid].iloc[0]
                 assert p["estimate"] == np.True_
-                assert float(p["nominalValue"]) == strategy.initial_value
+                assert float(p["nominalValue"]) == prob.initial_value
                 assert f"{prefix}_PENALTY_{s}" in obs_ids
             assert f"{prefix}_IC" in cond_ids
 

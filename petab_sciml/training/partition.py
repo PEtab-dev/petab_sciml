@@ -26,6 +26,35 @@ class UniformPartition:
         if self.n < 2:
             raise ValueError(f"n must be >= 2, got {self.n}.")
 
+    def get_time_points(self, measurement_table: pd.DataFrame) -> list[float]:
+        """Return the end time of each segment for this partition.
+
+        Parameters
+        ----------
+        measurement_table:
+            PEtab measurement table providing the time points to partition.
+
+        Returns
+        -------
+        The end time of each segment, including the final time point of the data.
+        """
+        time_points = np.sort(measurement_table["time"].unique())
+
+        if len(time_points) < self.n:
+            raise ValueError(
+                f"Cannot create {self.n} segments with only "
+                f"{len(time_points)} unique time points."
+            )
+
+        # Divide time points into n groups as evenly as possible, with any
+        # remainder distributed across the last few groups
+        n = self.n
+        base_size = len(time_points) // n
+        remainder = len(time_points) % n
+        sizes = [base_size + (1 if i >= n - remainder else 0) for i in range(n)]
+        indices = np.cumsum(sizes)
+        return [float(time_points[i - 1]) for i in indices]
+
 
 @dataclass
 class CustomPartition:
@@ -62,61 +91,39 @@ class CustomPartition:
                 f"{self.interior_points}."
             )
 
+    def get_time_points(self, measurement_table: pd.DataFrame) -> list[float]:
+        """Return the end time of each segment for this partition.
 
-Partition = UniformPartition | CustomPartition
+        Parameters
+        ----------
+        measurement_table:
+            PEtab measurement table providing the time points to partition.
 
+        Returns
+        -------
+        The interior points followed by the final time point of the data.
+        """
+        time_points = np.sort(measurement_table["time"].unique())
+        t_end = float(time_points[-1])
 
-def _get_uniform_partition_time_points(
-    partition: UniformPartition, measurement_table: pd.DataFrame
-) -> list[float]:
-    time_points = np.sort(measurement_table["time"].unique())
-
-    if len(time_points) < partition.n:
-        raise ValueError(
-            f"Cannot create {partition.n} segments with only "
-            f"{len(time_points)} unique time points."
-        )
-
-    # Divide time points into n groups as evenly as possible, with any
-    # remainder distributed across the last few groups
-    n = partition.n
-    base_size = len(time_points) // n
-    remainder = len(time_points) % n
-    sizes = [base_size + (1 if i >= n - remainder else 0) for i in range(n)]
-    indices = np.cumsum(sizes)
-    return [float(time_points[i - 1]) for i in indices]
-
-
-def _get_custom_partition_time_points(
-    partition: CustomPartition, measurement_table: pd.DataFrame
-) -> list[float]:
-    time_points = np.sort(measurement_table["time"].unique())
-    t_end = float(time_points[-1])
-
-    if any(p >= t_end for p in partition.interior_points):
-        raise ValueError(
-            "interior_points must be strictly less than the maximum time "
-            f"point {t_end}, got {partition.interior_points}."
-        )
-
-    all_points = [float(time_points[0])] + partition.interior_points + [t_end]
-    for i in range(len(all_points) - 1):
-        t_start_segment, t_end_segment = all_points[i], all_points[i + 1]
-        if not any(t_start_segment <= t <= t_end_segment for t in time_points):
+        if any(p >= t_end for p in self.interior_points):
             raise ValueError(
-                f"Segment [{t_start_segment}, {t_end_segment}] contains no "
-                "data points. The corresponding curriculum learning stage or "
-                "multiple shooting window would therefore not introduce any "
-                "new measurements."
+                "interior_points must be strictly less than the maximum time "
+                f"point {t_end}, got {self.interior_points}."
             )
 
-    return partition.interior_points + [t_end]
+        all_points = [float(time_points[0])] + self.interior_points + [t_end]
+        for i in range(len(all_points) - 1):
+            t_start_segment, t_end_segment = all_points[i], all_points[i + 1]
+            if not any(t_start_segment <= t <= t_end_segment for t in time_points):
+                raise ValueError(
+                    f"Segment [{t_start_segment}, {t_end_segment}] contains no "
+                    "data points. The corresponding curriculum learning stage or "
+                    "multiple shooting window would therefore not introduce any "
+                    "new measurements."
+                )
+
+        return self.interior_points + [t_end]
 
 
-def get_partition_time_points(
-    partition: Partition, measurement_table: pd.DataFrame
-) -> list[float]:
-    if isinstance(partition, CustomPartition):
-        return _get_custom_partition_time_points(partition, measurement_table)
-
-    return _get_uniform_partition_time_points(partition, measurement_table)
+Partition = UniformPartition | CustomPartition

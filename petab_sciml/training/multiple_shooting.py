@@ -2,45 +2,93 @@
 
 import copy
 import math
+from dataclasses import dataclass
 from pathlib import Path
 
 import petab.v2
 from petab.v1.models.sbml_model import SbmlModel
 
-from .partition import get_partition_time_points
+from .partition import Partition
+from .helper import _resolve_output_dir
 
 
-def _export_multiple_shooting(
-    problem: petab.v2.Problem, strategy, output_dir: Path, validate: bool
-) -> None:
-    """Export a PEtab problem as a multiple shooting training problem.
+@dataclass
+class MultipleShootingProblem:
+    """Multiple shooting training problem.
 
-    Creates a transformed PEtab problem under ``output_dir`` where the time
-    span is split into shooting windows. Each window-experiment pair has its
-    own estimated initial state, and a quadratic continuity penalty
+    The simulation time span is split into windows that are fitted jointly.
+    Each window has its own estimated initial state, and a continuity penalty
     encourages a continuous trajectory between adjacent windows.
 
-    Boundary measurements are double-counted: a measurement at exactly the
-    boundary between two windows appears in both windows.
+    Parameters
+    ----------
+    yaml:
+        Path to the source PEtab YAML file.
+    partition:
+        How to split the time range into shooting windows. A
+        ``UniformPartition(n)`` produces ``n`` windows by dividing the unique
+        time points in the measurement table into equally-sized groups. A
+        ``CustomPartition`` allows finer control by specifying the end-points
+        of all windows except the last.
+    penalty:
+        Weight ``lambda`` of the continuity penalty term. A quadratic penalty
+        is applied, so the contribution to the loss is
+        ``lambda * (state - estimated_initial_state) ** 2``.
+    log_penalty:
+        If ``True``, apply the penalty on log-transformed states;
+        ``lambda * (log(state) - log(estimated_initial_state)) ** 2``. Useful
+        when states span several orders of magnitude.
+    initial_value:
+        Initial guess for the estimated initial state of each window, applied
+        uniformly across all model states and all windows except the first
+        (whose initial states are already defined in the PEtab problem).
     """
-    output_dir.mkdir(parents=True, exist_ok=True)
 
-    measurement_df = problem.measurement_df
-    end_times = get_partition_time_points(strategy.partition, measurement_df)
-    t_min = float(measurement_df["time"].min())
-    windows = list(zip([t_min] + end_times[:-1], end_times))
+    yaml: Path | str
+    partition: Partition
+    penalty: float
+    log_penalty: bool = False
+    initial_value: float = 1e-6
 
-    ms_problem = _get_ms_problem(problem, windows, strategy)
-    if validate:
-        ms_problem.validate()
+    def export(self, output_dir: Path | str = None, validate: bool = True) -> None:
+        """Export this multiple shooting problem to disk.
 
-    ms_problem.to_files(output_dir)
+        Creates one sub-directory under ``output_dir`` containing the PEtab ms
+        problem. Each window-experiment pair has its own estimated initial
+        state, and a quadratic continuity penalty encourages a continuous
+        trajectory between adjacent windows.
+
+        Parameters
+        ----------
+        output_dir:
+            Directory to write the exported stage problems to. Created if it
+            does not exist. If ``None``, defaults to a ``ms_prob`` subdirectory
+            of the source YAML's directory.
+        validate:
+            Whether to validate each exported stage problem before writing.
+        """
+        output_dir = _resolve_output_dir(
+            yaml=self.yaml, output_dir=output_dir, default_name="ms_prob"
+        )
+
+        problem = petab.v2.Problem.from_yaml(self.yaml)
+
+        measurement_df = problem.measurement_df
+        end_times = self.partition.get_time_points(measurement_df)
+        t_min = float(measurement_df["time"].min())
+        windows = list(zip([t_min] + end_times[:-1], end_times))
+
+        ms_problem = _get_ms_problem(problem, windows, self)
+        if validate:
+            ms_problem.validate()
+
+        ms_problem.to_files(output_dir)
 
 
 def _get_ms_problem(
     problem: petab.v2.Problem,
     windows: list[float],
-    strategy,
+    strategy: MultipleShootingProblem,
 ) -> petab.v2.Problem:
     """Build multiple shooting PEtab problem given windows
 
