@@ -1,7 +1,5 @@
 """Multiple shooting export for PEtab problems."""
 
-from __future__ import annotations
-
 import copy
 import math
 from pathlib import Path
@@ -25,17 +23,37 @@ def _export_multiple_shooting(
     Boundary measurements are double-counted: a measurement at exactly the
     boundary between two windows appears in both windows.
     """
-    _check_no_preequilibration(problem)
-    if not isinstance(problem.model, SbmlModel):
-        raise ValueError("Multiple shooting export currently requires an SBML model.")
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    specie_ids = [s.getId() for s in problem.model.sbml_model.getListOfSpecies()]
 
     measurement_df = problem.measurement_df
     end_times = get_partition_time_points(strategy.partition, measurement_df)
     t_min = float(measurement_df["time"].min())
     windows = list(zip([t_min] + end_times[:-1], end_times))
+
+    ms_problem = _get_ms_problem(problem, windows, strategy)
+    if validate:
+        ms_problem.validate()
+
+    ms_problem.to_files(output_dir)
+
+
+def _get_ms_problem(
+    problem: petab.v2.Problem,
+    windows: list[float],
+    strategy,
+) -> petab.v2.Problem:
+    """Build multiple shooting PEtab problem given windows
+
+    Used to build both multiple shooting and curriculum multiple shooting
+    problems.
+    """
+
+    _check_no_preequilibration(problem)
+    if not isinstance(problem.model, SbmlModel):
+        raise ValueError("Multiple shooting export currently requires an SBML model.")
+    specie_ids = [s.getId() for s in problem.model.sbml_model.getListOfSpecies()]
+
+    t_min = windows[0][0]
     n_windows = len(windows)
 
     ms_problem = copy.deepcopy(problem)
@@ -86,20 +104,22 @@ def _export_multiple_shooting(
 
             # Add penalty measurements only if this experiment continues into
             # the next window
-            if window_index < n_windows - 1 and original_exp_t_end[orig_exp.id] >= tf:
-                new_measurements.extend(
-                    _build_penalty_measurements(
-                        new_exp_id, orig_exp.id, window_index + 1, tf, specie_ids
+            if window_index < n_windows - 1:
+                next_t0 = windows[window_index + 1][0]
+                if original_exp_t_end[orig_exp.id] >= next_t0:
+                    new_measurements.extend(
+                        _build_penalty_measurements(
+                            new_exp_id,
+                            orig_exp.id,
+                            window_index + 1,
+                            next_t0,
+                            specie_ids,
+                        )
                     )
-                )
 
     ms_problem.measurement_tables[0].elements = new_measurements
     ms_problem.experiment_tables[0].elements = new_experiments
-
-    if validate:
-        ms_problem.validate()
-
-    ms_problem.to_files(output_dir)
+    return ms_problem
 
 
 def _check_no_preequilibration(problem: petab.v2.Problem) -> None:
@@ -160,9 +180,7 @@ def _add_per_experiment_ic_artifacts(
         )
 
         if strategy.log_penalty:
-            _formula = (
-                f"(log(abs({specie_id})) - log(abs({prefix}_PARAMETER_{specie_id}))) * MS_PENALTY_SQRT"
-            )
+            _formula = f"(log(abs({specie_id})) - log(abs({prefix}_PARAMETER_{specie_id}))) * MS_PENALTY_SQRT"
         else:
             _formula = (
                 f"({specie_id} - {prefix}_PARAMETER_{specie_id}) * MS_PENALTY_SQRT"
@@ -256,10 +274,10 @@ def _build_penalty_measurements(
     new_exp_id: str,
     orig_exp_id: str,
     next_window_index: int,
-    tf: float,
+    next_t0: float,
     specie_ids: list[str],
 ) -> list[petab.v2.Measurement]:
-    """Build penalty measurements at tf pointing to next window's per-experiment parameters.
+    """Build penalty measurements at next_t0 pointing to next window's per-experiment parameters.
 
     Each measurement encodes the continuity penalty for one species at the
     boundary between this window and the next one. The measurement value is
@@ -270,7 +288,7 @@ def _build_penalty_measurements(
         petab.v2.Measurement(
             observable_id=f"{next_prefix}_PENALTY_{specie_id}",
             experiment_id=new_exp_id,
-            time=tf,
+            time=next_t0,
             measurement=0.0,
         )
         for specie_id in specie_ids
