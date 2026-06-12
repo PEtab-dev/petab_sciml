@@ -1,9 +1,10 @@
-from __future__ import annotations
+"""Read, write, and validate PEtab SciML neural network YAML files."""
 
 import ast
 import inspect
 import re
 
+from typing import Self
 from pydantic import BaseModel, Field
 
 from mkstd import YamlStandard
@@ -16,7 +17,7 @@ except ImportError:
     pass
 
 
-__all__ = ["Input", "Layer", "Node", "NNModel", "NNModelStandard"]
+__all__ = ["Input", "NNModel", "NNModelStandard"]
 
 
 class Input(BaseModel):
@@ -222,7 +223,7 @@ class NNModel(BaseModel):
     @staticmethod
     def from_pytorch_module(
         module: nn.Module, nn_model_id: str, inputs: list[Input] = None,
-    ) -> NNModel:
+    ) -> Self:
         """Create a PEtab SciML NN model from a pytorch module.
 
         If `inputs` are not provided, their info will be generated from the
