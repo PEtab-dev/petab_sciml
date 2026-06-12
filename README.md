@@ -1,14 +1,21 @@
 # PEtab SciML
 *A data format for scientific machine learning*
 
+[![Build Status](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/PEtab-dev/petab_sciml/graph/badge.svg?token=ki1YcdIHII)](https://codecov.io/gh/PEtab-dev/petab_sciml)
+
+[Getting Started](https://petab-sciml.readthedocs.io/latest/examples/getting_started/getting_started.html) |
+[Documentation](https://petab-sciml.readthedocs.io/latest/introduction.html) |
+[Contributing](https://petab-sciml.readthedocs.io/latest/_tmp/CONTRIBUTING.html)
+
 PEtab SciML is a table-based data format for creating training (parameter estimation)
 problems for **scientific machine learning (SciML)** models that combine machine learning
 and mechanistic ordinary differential equation (ODE) models.
 
 > [!WARNING]
-> **Beta Disclaimer**: this software is under active development and may contain bugs or instabilities. The PEtab SciML format is finalised and support for it has been implemented in PEtab importers, though not yet released.  Documentation and utility functions are currently being added. 
+> **Beta Disclaimer**: this software is under active development and may contain bugs or instabilities. The PEtab SciML format is finalised and support for it has been implemented in PEtab importers, though not yet released.  Documentation and utility functions are currently being added.
 
-## Highlights
+## Major features
 
 Extending the [PEtab format](https://petab.readthedocs.io) for mechanistic ODE models,
 PEtab SciML provides a human readable, reproducible way to specify SciML training problems
@@ -41,12 +48,22 @@ aspects enabling this are:
 
 ## Installation
 
-The PEtab SciML Python3 helper library can be installed with:
+The PEtab SciML Python 3 helper library can be installed with:
 
 ```bash
+# (Optional) for PyTorch import/export support
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# Required
 pip install petab-sciml
 ```
 
-## Documentation
+or
 
-Information on features and tutorials can be found in the online [documentation](https://petab-sciml.readthedocs.io/latest/introduction.html).
+```bash
+# Option 1 with PyTorch import/export support
+uv pip install petab-sciml[torch]
+
+# Option 2
+uv pip install petab-sciml
+```

@@ -5,6 +5,7 @@ PEtab SciML Python API
 
 .. autosummary::
    :toctree: generated
+   :recursive:
 
    petab_sciml
    petab_sciml.standard

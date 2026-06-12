@@ -105,7 +105,7 @@ pandas==2.3.2
 pandocfilters==1.5.1
 parso==0.8.5
 petab @ git+https://github.com/petab-dev/libpetab-python.git@99373c4340512def5a23bf2a75805c3f88251251
-petab_sciml @ git+https://github.com/sebapersson/petab_sciml.git@80af726a3c2e430a068ea1ebf567f77c072fd85f#subdirectory=src/python
+petab_sciml @ git+https://github.com/PEtab-dev/petab_sciml.git@80af726a3c2e430a068ea1ebf567f77c072fd85f#subdirectory=src/python
 pexpect==4.9.0
 pillow==11.3.0
 Pint==0.25

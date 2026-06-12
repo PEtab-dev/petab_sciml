@@ -1,41 +1,12 @@
-PEtab SciML - Scientific Machine Learning Format and Tooling
-============================================================
+.. include:: introduction.rst
 
-| Version: |version|
-| Source code: https://github.com/sebapersson/petab_sciml
 
 .. toctree::
-   :maxdepth: 3
-   :caption: User Guide
+   :maxdepth: 2
+   :hidden:
 
-   Introduction <introduction>
-   Getting Started <examples/getting_started/getting_started.ipynb>
-   trouble
-
-.. toctree::
-   :maxdepth: 3
-   :caption: How To Guides
-
-   Networks setting ODE parameters <examples/how_to_dmms/how_to_dmms.ipynb>
-   Observable Formulae <examples/how_to_observable/how_to_observable.ipynb>
-   Neural ODE <examples/how_to_neural_ode/how_to_neural_ode.ipynb>
-
-.. toctree::
-   :caption: PEtab SciML file format
-   :maxdepth: 3
-
-   format
-   layers
-   tutorial
-
-.. toctree::
-   :caption: Tool developer guide
-   :maxdepth: 3
-
-   training_approaches
-
-.. toctree::
-   :caption: Python package
-   :maxdepth: 3
-
-   api
+   Getting started <examples/getting_started/getting_started>
+   how_to_guides
+   format_overview
+   Python package API <api>
+   Contributing <_tmp/CONTRIBUTING.md>

@@ -12,9 +12,10 @@ sphinx:
 python:
   install:
     - method: pip
-      path: ./src/python
+      path: .
       extra_requirements:
         - doc
+        - torch
 
 build:
   os: ubuntu-24.04
