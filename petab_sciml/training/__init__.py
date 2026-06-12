@@ -1,4 +1,4 @@
-"""Training strategy exports for PEtab problems."""
+"""Training strategy export for PEtab and PEtab SciML problems."""
 
 from .partition import CustomPartition, UniformPartition
 from .curriculum import CurriculumLearningProblem

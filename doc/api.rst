@@ -1,12 +1,22 @@
 PEtab SciML Python API
 =======================
 
-.. rubric:: Modules
+Standard tooling
+----------------
 
 .. autosummary::
    :toctree: generated
-   :recursive:
 
-   petab_sciml
    petab_sciml.standard
    petab_sciml.problem_utils
+
+Training strategies
+-------------------
+
+.. autosummary::
+   :toctree: generated
+
+   petab_sciml.training.partition
+   petab_sciml.training.CurriculumLearningProblem
+   petab_sciml.training.MultipleShootingProblem
+   petab_sciml.training.CurriculumMultipleShootingProblem

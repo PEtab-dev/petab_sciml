@@ -1,4 +1,5 @@
-from __future__ import annotations
+"""Partition the time-axis for training strategies"""
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -9,10 +10,15 @@ import pandas as pd
 class UniformPartition:
     """Partition a time range into equally-spaced segments.
 
-    The interior split points are computed by dividing the unique time points
-    in the PEtab measurement table into ``n`` equally-sized groups. Note that
-    this partitions time points, not individual measurements, so the number of
-    measurements per segment may vary.
+    Interior split points are computed by dividing the unique time points in
+    the PEtab measurement table into ``n`` equally-sized groups. Note that
+    this partitions time points, not individual measurements, so the number
+    of measurements per segment may vary.
+
+    Used by :class:`CurriculumLearningProblem`,
+    :class:`MultipleShootingProblem`, and
+    :class:`CurriculumMultipleShootingProblem`; see each class for what the
+    resulting segments mean.
 
     Parameters
     ----------
@@ -63,9 +69,9 @@ class CustomPartition:
     The start and end of the time range are inferred from the PEtab measurement
     table at export time, so only interior points should be provided.
 
-    The interpretation of the split points depends on the training strategy; see
-    :class:`MultipleShooting`, :class:`CurriculumLearning`, and
-    :class:`CurriculumMultipleShooting` for details.
+    The interpretation of the split points depends on the training strategy;
+    see :class:`CurriculumLearningProblem`, :class:`MultipleShootingProblem`,
+    and :class:`CurriculumMultipleShootingProblem` for details.
 
     Parameters
     ----------
@@ -75,8 +81,8 @@ class CustomPartition:
 
     Examples
     --------
-    ``CustomPartition([3.0, 4.0, 5.0])`` on data spanning ``[0, 6]``
-    produces four segments with boundaries ``[0, 3], [3, 4], [4, 5], [5, 6]``.
+    ``CustomPartition([3.0, 4.0, 5.0])`` on data spanning ``[0, 6]`` produces
+    four segments with end points ``[3, 4, 5, 6]``.
     """
 
     interior_points: list[float]

@@ -7,7 +7,7 @@ from pathlib import Path
 import petab
 
 from .partition import Partition
-from .helper import _resolve_output_dir
+from ._helper import _resolve_output_dir
 
 
 @dataclass
@@ -16,10 +16,7 @@ class CurriculumLearningProblem:
 
     Training difficulty is progressively increased across stages by gradually
     extending the measurement time horizon. Each stage is a self-contained
-    PEtab problem, containing all measurements up to the stage's end time point.
-
-    For training loops, the parameter estimate from stage ``i`` should be used
-    to initialise stage ``i+1``.
+    PEtab problem containing all measurements up to the stage's end time point.
 
     Parameters
     ----------
@@ -27,11 +24,20 @@ class CurriculumLearningProblem:
         Path to the source PEtab YAML file.
     partition:
         How to split the time range in the PEtab measurement table into
-        curriculum stages. A ``UniformPartition(n)`` produces ``n`` stages by
-        dividing the unique time points in the measurement table into
-        equally-sized groups, where the end of each group defines the stage's
-        time horizon. A ``CustomPartition`` allows finer control by specifying
-        the end time point of each stage explicitly.
+        curriculum stages. End points are provided by ``UniformPartition(n)``
+        for uniform stages or ``CustomPartition`` for finer control.
+
+    Example
+    -------
+    For measurements at time points ``[0, 1, 2, 3, 4, 5, 6]``, a uniform
+    partition of 3 stages produces stages with time horizons ending at
+    ``[1, 3, 6]``:
+
+    >>> problem = CurriculumLearningProblem(
+    ...     yaml="my_model/problem.yaml",
+    ...     partition=UniformPartition(n=3),
+    ... )
+    >>> problem.export()
     """
 
     yaml: Path | str
@@ -42,10 +48,9 @@ class CurriculumLearningProblem:
     ) -> None:
         """Export this curriculum learning problem to disk.
 
-        Creates one sub-directory per curriculum stage under ``output_dir``, each
-        containing a self-contained PEtab problem with measurements filtered to
-        the stage's time horizon. Experiments and conditions not referenced by
-        the filtered measurement table are removed from each stage problem.
+        Creates one sub-directory per curriculum stage under ``output_dir``,
+        each containing a self-contained PEtab problem with measurements
+        filtered to the stage's time horizon.
 
         Parameters
         ----------

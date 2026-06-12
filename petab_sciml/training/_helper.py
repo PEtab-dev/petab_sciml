@@ -19,6 +19,7 @@ def _resolve_output_dir(
     if output_dir is None:
         output_dir = yaml_dir / default_name
     output_dir = Path(output_dir)
+
     if output_dir.resolve() == yaml_dir.resolve():
         raise ValueError(
             f"output_dir ({output_dir}) must differ from the source problem's "

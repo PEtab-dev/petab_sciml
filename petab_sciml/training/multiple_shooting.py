@@ -9,7 +9,7 @@ import petab.v2
 from petab.v1.models.sbml_model import SbmlModel
 
 from .partition import Partition
-from .helper import _resolve_output_dir
+from ._helper import _resolve_output_dir
 
 
 @dataclass
@@ -17,19 +17,17 @@ class MultipleShootingProblem:
     """Multiple shooting training problem.
 
     The simulation time span is split into windows that are fitted jointly.
-    Each window has its own estimated initial state, and a continuity penalty
-    encourages a continuous trajectory between adjacent windows.
+    Each window has its own estimated initial state, and a quadratic continuity
+    penalty encourages a continuous trajectory between adjacent windows.
 
     Parameters
     ----------
     yaml:
         Path to the source PEtab YAML file.
     partition:
-        How to split the time range into shooting windows. A
-        ``UniformPartition(n)`` produces ``n`` windows by dividing the unique
-        time points in the measurement table into equally-sized groups. A
-        ``CustomPartition`` allows finer control by specifying the end-points
-        of all windows except the last.
+        How to split the time range into shooting windows. End points are
+        provided by ``UniformPartition(n)`` for uniform windows or
+        ``CustomPartition`` for finer control.
     penalty:
         Weight ``lambda`` of the continuity penalty term. A quadratic penalty
         is applied, so the contribution to the loss is
@@ -42,6 +40,19 @@ class MultipleShootingProblem:
         Initial guess for the estimated initial state of each window, applied
         uniformly across all model states and all windows except the first
         (whose initial states are already defined in the PEtab problem).
+
+    Example
+    -------
+    For measurements at time points ``[0, 1, 2, 3, 4, 5, 6]``, a uniform
+    partition of 3 windows produces shooting windows
+    ``[0, 1], [1, 3], [3, 6]``:
+
+    >>> problem = MultipleShootingProblem(
+    ...     yaml="my_model/problem.yaml",
+    ...     partition=UniformPartition(n=3),
+    ...     penalty=10.0,
+    ... )
+    >>> problem.export()
     """
 
     yaml: Path | str
@@ -53,10 +64,8 @@ class MultipleShootingProblem:
     def export(self, output_dir: Path | str = None, validate: bool = True) -> None:
         """Export this multiple shooting problem to disk.
 
-        Creates one sub-directory under ``output_dir`` containing the PEtab ms
-        problem. Each window-experiment pair has its own estimated initial
-        state, and a quadratic continuity penalty encourages a continuous
-        trajectory between adjacent windows.
+        Creates one sub-directory under ``output_dir`` containing the PEtab
+        multiple shooting problem.
 
         Parameters
         ----------
@@ -90,11 +99,7 @@ def _get_ms_problem(
     windows: list[float],
     strategy: MultipleShootingProblem,
 ) -> petab.v2.Problem:
-    """Build multiple shooting PEtab problem given windows
-
-    Used to build both multiple shooting and curriculum multiple shooting
-    problems.
-    """
+    """Build multiple shooting PEtab problem given windows"""
 
     _check_no_preequilibration(problem)
     if not isinstance(problem.model, SbmlModel):
