@@ -6,7 +6,7 @@ from pathlib import Path
 
 import petab.v2
 
-from .helper import _resolve_output_dir
+from ._helper import _resolve_output_dir
 from .multiple_shooting import _get_ms_problem
 from .partition import Partition
 
@@ -18,23 +18,31 @@ class CurriculumMultipleShootingProblem:
     Training starts with a full multiple shooting configuration and
     progressively merges adjacent windows across stages until a single window
     remains. Each stage is a self-contained multiple shooting problem with one
-    fewer window than the previous stage.
+    fewer window than the previous stage. At each stage, a continuity penalty
+    as in multiple shooting is applied at the first overlapping time point
+    between adjacent windows.
 
-    For example, with ``UniformPartition(3)`` on data spanning ``[0, 6]``, the
-    initial windows are ``[0, 2], [2, 4], [4, 6]``. The stages are then:
+    Parameters
+    ----------
+    yaml, partition, penalty, log_penalty, initial_value:
+        See :class:`MultipleShootingProblem` for details; parameters have the
+        same interpretation and apply across all curriculum stages.
+
+    Examples
+    --------
+    With ``UniformPartition(3)`` on data spanning ``[0, 6]``, the initial
+    windows are ``[0, 2], [2, 4], [4, 6]``. The stages are then:
 
     - Stage 1: windows ``[0, 2], [2, 4], [4, 6]`` (full multiple shooting)
     - Stage 2: windows ``[0, 4], [2, 6]`` (last window dropped, remaining extended)
     - Stage 3: window ``[0, 6]`` (single window, original problem)
 
-    At each stage, a continuity penalty as in multiple shooting is applied at
-    the first overlapping time point between adjacent windows.
-
-    Parameters
-    ----------
-    yaml, partition, penalty, log_penalty, initial_value:
-        See :class:`MultipleShootingProblem` for details, parameters have
-        the same interpretation and apply across all curriculum stages.
+    >>> problem = CurriculumMultipleShootingProblem(
+    ...     yaml="my_model/problem.yaml",
+    ...     partition=UniformPartition(n=3),
+    ...     penalty=10.0,
+    ... )
+    >>> problem.export()
     """
 
     yaml: Path | str

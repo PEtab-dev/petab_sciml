@@ -30,7 +30,17 @@ components.
 
 .. autosummary::
    :toctree: generated
-   :recursive:
 
    petab_sciml.problem_utils.neural_ode
    petab_sciml.problem_utils
+
+Training strategies
+-------------------
+
+.. autosummary::
+   :toctree: generated
+
+   petab_sciml.training.partition
+   petab_sciml.training.CurriculumLearningProblem
+   petab_sciml.training.MultipleShootingProblem
+   petab_sciml.training.CurriculumMultipleShootingProblem
