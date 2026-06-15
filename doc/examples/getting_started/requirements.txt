@@ -17,7 +17,7 @@ bleach==6.2.0
 certifi==2025.8.3
 cffi==2.0.0
 charset-normalizer==3.4.3
-chex==0.1.91
+chex==0.1.90
 cmake==4.1.0
 cmake-build-extension==0.6.0
 colorama==0.4.6
@@ -97,7 +97,7 @@ notebook==7.4.5
 notebook_shim==0.2.4
 numpy==2.2.3
 opt_einsum==3.4.0
-optax==0.2.6
+optax==0.2.5
 optimistix==0.0.10
 oyaml==1.0
 packaging==25.0
@@ -105,7 +105,7 @@ pandas==2.3.2
 pandocfilters==1.5.1
 parso==0.8.5
 petab @ git+https://github.com/petab-dev/libpetab-python.git@99373c4340512def5a23bf2a75805c3f88251251
-petab_sciml @ git+https://github.com/PEtab-dev/petab_sciml.git@80af726a3c2e430a068ea1ebf567f77c072fd85f#subdirectory=src/python
+petab_sciml @ git+https://github.com/PEtab-dev/petab_sciml.git@main
 pexpect==4.9.0
 pillow==11.3.0
 Pint==0.25
