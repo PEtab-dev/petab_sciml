@@ -4,8 +4,8 @@ PEtab SciML Python API
 Standard
 --------
 
-Read, write, and validate the array data and neural network YAML files
-defined by the PEtab SciML standard.
+Read, write, and validate the PEtab SciML array data and neural network YAML
+files.
 
 .. autosummary::
    :toctree: generated
