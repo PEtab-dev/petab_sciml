@@ -80,6 +80,11 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "logo": {
+        "image_light": "logo/logo_light.svg",
+        "image_dark": "logo/logo_dark.svg",
+        "alt_text": "PEtab SciML",
+    },
     "navbar_center": ["navbar-nav"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button"],
