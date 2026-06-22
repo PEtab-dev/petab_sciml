@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)"  srcset="doc/logo/logo_dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="doc/logo/logo_light.svg">
+    <source media="(prefers-color-scheme: dark)"  srcset="doc/logo/logo_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="doc/logo/logo_light.png">
     <img alt="PEtab SciML" src="doc/logo/logo_light.svg" width="420">
   </picture>
 </p>
