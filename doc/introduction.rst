@@ -56,7 +56,21 @@ The PEtab SciML Python3 helper library can be installed with:
 
 .. code-block:: bash
 
+   # (Optional) for PyTorch import/export support
+   pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+   # Required
    pip install petab-sciml
+
+or
+
+.. code-block:: bash
+
+   # Option 1 with PyTorch import/export support
+   uv pip install petab-sciml[torch]
+
+   # Option 2
+   uv pip install petab-sciml
 
 
 How to read the documentation
