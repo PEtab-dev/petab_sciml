@@ -9,10 +9,10 @@ Feel free to use it in any presentation or publication that uses PEtab SciML.
 
 .. container:: figure align-center
 
-   .. image:: logo/logo_light.svg
+   .. image:: logo/logo_light.png
       :class: only-light
 
-   .. image:: logo/logo_dark.svg
+   .. image:: logo/logo_dark.png
       :class: only-dark
 
    .. container:: caption
