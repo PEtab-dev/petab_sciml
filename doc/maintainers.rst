@@ -2,8 +2,8 @@ Maintainers
 ===========
 
 PEtab SciML, like PEtab, is intended as a community effort. The maintainers
-listed below review proposed changes, discuss extensions, and help coordinate
-releases.
+listed below review proposed changes, discuss extensions, maintain the PEtab
+SciML Python library and help coordinate releases.
 
 Current maintainers
 -------------------
