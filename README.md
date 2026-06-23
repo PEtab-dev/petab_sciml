@@ -1,27 +1,36 @@
-# PEtab SciML
-*A data format for scientific machine learning*
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)"  srcset="doc/logo/logo_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="doc/logo/logo_light.png">
+    <img alt="PEtab SciML" src="doc/logo/logo_light.svg" width="420">
+  </picture>
+</p>
+
+_Data format and tooling for scientific machine learning modeling_
 
 [![PyPI](https://badge.fury.io/py/petab_sciml.svg)](https://badge.fury.io/py/petab_sciml)
 [![Build Status](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/PEtab-dev/petab_sciml/graph/badge.svg?token=ki1YcdIHII)](https://codecov.io/gh/PEtab-dev/petab_sciml)
 
-[Getting Started](https://petab-sciml.readthedocs.io/latest/examples/getting_started/getting_started.html) |
-[Documentation](https://petab-sciml.readthedocs.io/latest/introduction.html) |
+[Getting Started](https://petab-sciml.readthedocs.io/latest/examples/getting_started/getting_started.html)
+| [Documentation](https://petab-sciml.readthedocs.io/latest/introduction.html) |
 [Contributing](https://petab-sciml.readthedocs.io/latest/_tmp/CONTRIBUTING.html)
 
 PEtab SciML is a table-based data format for creating training (parameter estimation)
 problems for **scientific machine learning (SciML)** models that combine machine learning
 and mechanistic ordinary differential equation (ODE) models.
 
-> [!WARNING]
-> **Beta Disclaimer**: this software is under active development and may contain bugs or instabilities. The PEtab SciML format is finalised and support for it has been implemented in PEtab importers, though not yet released.  Documentation and utility functions are currently being added.
+> [!WARNING] **Beta Disclaimer**: this software is under active development and may contain
+> bugs or instabilities. The PEtab SciML format is finalised and support for it has been
+> implemented in PEtab importers, though not yet released. Documentation and utility
+> functions are currently being added.
 
 ## Major features
 
-Extending the [PEtab format](https://petab.readthedocs.io) for mechanistic ODE models,
-PEtab SciML provides a human readable, reproducible way to specify SciML training problems
-across diverse scenarios, in a format directly importable by downstream tools. The main
-aspects enabling this are:
+Extending the [PEtab format](https://petab.readthedocs.io) for mechanistic ODE models, PEtab
+SciML provides a human readable, reproducible way to specify SciML training problems across
+diverse scenarios, in a format directly importable by downstream tools. The main aspects
+enabling this are:
 
 - **Flexible hybridization.** Machine learning (ML) and ODE models can be combined in three
   ways: (1) ML within the ODE dynamics (includes **Neural ODEs**), (2) ML in the
@@ -31,10 +40,9 @@ aspects enabling this are:
   toolboxes for dynamic-model training in Julia
   ([PEtab.jl](https://github.com/sebapersson/PEtab.jl)) and Python/JAX
   ([AMICI](https://github.com/AMICI-dev/AMICI)).
-- **Broad support for ML architectures.** A diverse set of ML architectures can be
-  specified via an exchangeable PEtab SciML YAML format (supports export from PyTorch
-  modules), or via importer-specific libraries (e.g., Lux.jl in PEtab.jl; Equinox in
-  AMICI).
+- **Broad support for ML architectures.** A diverse set of ML architectures can be specified
+  via an exchangeable PEtab SciML YAML format (supports export from PyTorch modules), or via
+  importer-specific libraries (e.g., Lux.jl in PEtab.jl; Equinox in AMICI).
 - **Diverse model types.** All model features of the
   [PEtab format](https://petab.readthedocs.io) are supported, like models with partial
   observability, multiple simulation conditions, diverse noise models, and/or events.
