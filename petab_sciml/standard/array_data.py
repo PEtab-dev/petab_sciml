@@ -10,6 +10,12 @@ from numpy.typing import ArrayLike
 from pydantic import BaseModel, field_validator
 from ruamel.yaml import YAML
 
+from petab_sciml.constants import (
+    ALL_CONDITION_IDS,
+    INPUTS,
+    METADATA,
+    PARAMETERS,
+)
 from petab_sciml.standard.nn_model import NNModelStandard
 
 if TYPE_CHECKING:
@@ -20,23 +26,9 @@ __all__ = [
     "Metadata",
     "ArrayData",
     "ArrayDataStandard",
-    "METADATA",
-    "DATA",
-    "CONDITION_IDS",
-    "INPUTS",
-    "PARAMETERS",
-    "ALL_CONDITION_IDS",
     "extract_torch_parameters",
     "add_array_files_to_yaml",
 ]
-
-
-METADATA = "metadata"
-DATA = "data"
-CONDITION_IDS = "conditionIds"
-INPUTS = "inputs"
-PARAMETERS = "parameters"
-ALL_CONDITION_IDS = "0"
 
 
 Array = get_array_type()

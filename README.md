@@ -8,6 +8,7 @@
 
 _Data format and tooling for scientific machine learning modeling_
 
+[![PyPI](https://badge.fury.io/py/petab_sciml.svg)](https://badge.fury.io/py/petab_sciml)
 [![Build Status](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PEtab-dev/petab_sciml/actions/workflows/ci.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/PEtab-dev/petab_sciml/graph/badge.svg?token=ki1YcdIHII)](https://codecov.io/gh/PEtab-dev/petab_sciml)
 
