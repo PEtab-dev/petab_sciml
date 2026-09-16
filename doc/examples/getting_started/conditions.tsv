@@ -1,2 +1,3 @@
-conditionId
-cond1
+conditionId	targetId	targetValue
+cond1	prey	0.44249296
+cond1	predator	4.6280594
