@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 
 from mkstd import YamlStandard
 
+from petab_sciml.constants import Op, TensorOps
+
 # For PyTorch import/export support
 try:
     import torch.fx
@@ -252,9 +254,9 @@ class NNModel(BaseModel):
         for pytorch_node in pytorch_nodes:
             op = pytorch_node.op
             target = pytorch_node.target
-            if op == "call_function":
+            if op == Op.CALL_FUNCTION:
                 target = pytorch_node.target.__name__
-            if op == "placeholder" and generate_inputs:
+            if op == Op.PLACEHOLDER and generate_inputs:
                 inputs.append(Input(input_id=pytorch_node.target))
 
             # Convert module args to strings
@@ -315,25 +317,25 @@ class NNModel(BaseModel):
                     for k, v in node.kwargs.items()
                 }
             match node.op:
-                case "placeholder":
+                case Op.PLACEHOLDER:
                     state[node.name] = graph.placeholder(node.target)
-                case "call_function":
-                    if node.target in ["flatten", "cat"]:
+                case Op.CALL_FUNCTION:
+                    if node.target in TensorOps:
                         function = getattr(torch, node.target)
                     else:
                         function = getattr(nn.functional, node.target)
                     state[node.name] = graph.call_function(
                         function, args, kwargs
                     )
-                case "call_method":
+                case Op.CALL_METHOD:
                     state[node.name] = graph.call_method(
                         node.target, args, kwargs
                     )
-                case "call_module":
+                case Op.CALL_MODULE:
                     state[node.name] = graph.call_module(
                         node.target, args, kwargs
                     )
-                case "output":
+                case Op.OUTPUT:
                     graph.output(args[0])
 
         return torch.fx.GraphModule(_PytorchModule(), graph)
