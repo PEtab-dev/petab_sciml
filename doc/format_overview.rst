@@ -12,3 +12,4 @@ contribute to the development of PEtab SciML.
    Supported Layers and Activation Functions <layers>
    Development process <development>
    Maintainers <maintainers>
+   PEtab SciML logo license <logo>
