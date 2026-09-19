@@ -208,7 +208,7 @@ def create_neural_ode_problem(
             "sciml": {
                 "version": "0.1.0",
                 "required": True,
-                "neural_nets": {
+                "neural_networks": {
                     network_name: {
                         "location": network_filename,
                         "pre_initialization": False,
