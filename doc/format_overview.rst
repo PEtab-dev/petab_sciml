@@ -10,6 +10,7 @@ contribute to the development of PEtab SciML.
 
    Format Specification <format>
    Supported Layers and Activation Functions <layers>
+   SciML Training strategies at the PEtab level <training_strategies>
    Development process <development>
    Maintainers <maintainers>
    PEtab SciML logo license <logo>
