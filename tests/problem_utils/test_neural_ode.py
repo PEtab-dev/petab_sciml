@@ -152,9 +152,11 @@ def test_create_neural_ode_problem(dir_tmp):
         assert problem["model_files"]["model"]["location"] == "model.xml"
         assert problem["measurement_files"][0] == "measurements.tsv"
 
-        assert "net1" in problem["extensions"]["sciml"]["neural_nets"]
+        assert "net1" in problem["extensions"]["sciml"]["neural_networks"]
         assert (
-            problem["extensions"]["sciml"]["neural_nets"]["net1"]["location"]
+            problem["extensions"]["sciml"]["neural_networks"]["net1"][
+                "location"
+            ]
             == "net1.yaml"
         )
         assert "array_files" in problem["extensions"]["sciml"]
