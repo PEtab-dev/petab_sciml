@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
-  <model>
+  <model id="neural_ode">
     <listOfCompartments>
-      <compartment size="1" constant="true"/>
+      <compartment id="default" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="prey" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="false" constant="false"/>
-      <species id="predator" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="false" constant="false"/>
+      <species id="prey" compartment="default" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="false" constant="false"/>
+      <species id="predator" compartment="default" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="false" constant="false"/>
     </listOfSpecies>
     <listOfParameters>
       <parameter id="prey_param" value="0" constant="false"/>

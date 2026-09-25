@@ -49,10 +49,14 @@ def _write_sbml(
     document = SBMLDocument(3, 1)
 
     model = document.createModel()
+    model.setId("neural_ode")
 
+    compartment_id = "default"
     c1 = model.createCompartment()
+    c1.setId(compartment_id)
     c1.setConstant(True)
     c1.setSize(1)
+    c1.setSpatialDimensions(3)
 
     if isinstance(species_all, dict):
         species_items = species_all.items()
@@ -62,6 +66,7 @@ def _write_sbml(
     for species, initial_amount in species_items:
         s = model.createSpecies()
         s.setId(species)
+        s.setCompartment(compartment_id)
         s.setConstant(False)
         s.setInitialAmount(initial_amount)
         s.setBoundaryCondition(False)
@@ -119,13 +124,14 @@ def _write_petab(
     pd.DataFrame(mapping).to_csv(save_directory / "mapping.tsv", sep="\t", index=False)
 
     # parameters
+    # `nominalValue = array` marks the NN parameters as being initialized from
+    # an array data file rather than from a scalar value in this table.
     parameters = {
         "parameterId": [f"{network_name}_ps"],
-        "parameterScale": ["lin"],
         "lowerBound": ["-inf"],
         "upperBound": ["inf"],
-        "nominalValue": [None],
-        "estimate": [1],
+        "nominalValue": ["array"],
+        "estimate": ["true"],
     }
     pd.DataFrame(parameters).to_csv(
         save_directory / "parameters.tsv", sep="\t", index=False
@@ -146,7 +152,7 @@ def create_neural_ode_problem(
     """Write the PEtab files needed for the neural ODE PEtab problem.
 
     The mappings, parameters and hybridization files can be created using the
-    create_neural_ode function. This function will create the conditions and
+    create_neural_ode function. This function will create the experiments and
     problem.yaml files. The measurements and observables files need to be
     provided by the user.
 
@@ -180,12 +186,18 @@ def create_neural_ode_problem(
     save_directory = _ensure_directory(save_directory)
 
     measurements = pd.read_csv(save_directory / measurements_filename, sep="\t")
-    condition_ids = measurements["simulationConditionId"].unique()
+    experiment_ids = measurements["experimentId"].unique()
 
-    # conditions
-    conditions = {"conditionId": condition_ids}
-    pd.DataFrame(conditions).to_csv(
-        save_directory / "conditions.tsv", sep="\t", index=False
+    # experiments
+    # Each experiment consists of a single simulation period starting at t=0.
+    # No conditions are applied, so the `conditionId` column is left empty.
+    experiments = {
+        "experimentId": experiment_ids,
+        "time": [0] * len(experiment_ids),
+        "conditionId": [None] * len(experiment_ids),
+    }
+    pd.DataFrame(experiments).to_csv(
+        save_directory / "experiments.tsv", sep="\t", index=False
     )
 
     # get network name from network yaml file
@@ -203,6 +215,7 @@ def create_neural_ode_problem(
         "measurement_files": [measurements_filename],
         "observable_files": [observables_filename],
         "parameter_files": [parameters_filename],
+        "experiment_files": ["experiments.tsv"],
         "mapping_files": mapping_filenames,
         "extensions": {
             "sciml": {
