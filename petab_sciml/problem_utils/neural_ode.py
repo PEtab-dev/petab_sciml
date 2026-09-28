@@ -1,3 +1,5 @@
+"""Neural ODE problem construction."""
+
 from pathlib import Path
 from typing import Iterable
 

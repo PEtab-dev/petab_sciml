@@ -2,20 +2,22 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-from __future__ import annotations
 
 import inspect
-
-import sphinx
+import re
 
 # Copy CONTRIBUTING file here to avoid access issues.
 import shutil
 from pathlib import Path
 
+import sphinx
+
 doc_path = Path(__file__).resolve().parent
 tmp_path = doc_path / "_tmp"
 tmp_path.mkdir(exist_ok=True, parents=True)
 shutil.copy(doc_path.parent / "CONTRIBUTING.md", tmp_path / "CONTRIBUTING.md")
+
+_ADMONITION_RE = re.compile(r"^!!!\s+\S+")
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -112,6 +114,21 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
     return None
 
+def strip_mkdocs_admonitions(app, what, name, obj, options, lines):
+    cleaned = []
+    in_admonition = False
+    for line in lines:
+        if _ADMONITION_RE.match(line.strip()):
+            in_admonition = True
+            continue
+        if in_admonition:
+            if line.strip() == "" or line.startswith((" ", "\t")):
+                continue
+            in_admonition = False
+        cleaned.append(line)
+    lines[:] = cleaned
+
 
 def setup(app: sphinx.application.Sphinx):
     app.connect("autodoc-skip-member", autodoc_skip_member, priority=0)
+    app.connect("autodoc-process-docstring", strip_mkdocs_admonitions, priority=0)
