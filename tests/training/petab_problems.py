@@ -11,8 +11,8 @@ def get_prob_no_experiment(dir_tmp: Path) -> None:
     model = SbmlModel.from_file(sbml_path, model_id="test_model")
 
     prob_no_experiments = petab.v2.Problem()
-    prob_no_experiments.add_observable("obs1", formula="x1")
-    prob_no_experiments.add_observable("obs2", formula="x2")
+    prob_no_experiments.add_observable("obs1", formula="x1", noise_formula=1.0)
+    prob_no_experiments.add_observable("obs2", formula="x2", noise_formula=1.0)
     prob_no_experiments.add_parameter("k1", lb=1e-3, ub=1e3)
     prob_no_experiments.add_parameter("k2", lb=1e-3, ub=1e3)
     prob_no_experiments.models = [model]
@@ -38,7 +38,7 @@ def get_prob_all_experiments(dir_tmp: Path) -> None:
     model = SbmlModel.from_file(sbml_path, model_id="test_model")
 
     prob = petab.v2.Problem()
-    prob.add_observable("obs1", formula="x1")
+    prob.add_observable("obs1", formula="x1", noise_formula=1.0)
     prob.add_parameter("k1", lb=1e-3, ub=1e3)
     prob.add_condition("condA", x1=1.0)
     prob.add_condition("condB", x1=2.0)
@@ -69,7 +69,7 @@ def get_prob_partial_experiments(dir_tmp: Path) -> None:
     model = SbmlModel.from_file(sbml_path, model_id="test_model")
 
     prob = petab.v2.Problem()
-    prob.add_observable("obs1", formula="x1")
+    prob.add_observable("obs1", formula="x1", noise_formula=1.0)
     prob.add_parameter("k1", lb=1e-3, ub=1e3)
     prob.add_condition("condA", x1=1.0)
     prob.add_condition("condB", x1=2.0)
@@ -103,7 +103,7 @@ def get_prob_partial_experiments_ms(dir_tmp: Path) -> None:
     sbml_path = Path(__file__).parent / "model.xml"
     model = SbmlModel.from_file(sbml_path, model_id="test_model")
     prob = petab.v2.Problem()
-    prob.add_observable("obs1", formula="x1")
+    prob.add_observable("obs1", formula="x1", noise_formula=1.0)
     prob.add_parameter("k1", lb=1e-3, ub=1e3)
     prob.add_condition("condA", x1=1.0)
     prob.add_condition("condB", x1=2.0)
