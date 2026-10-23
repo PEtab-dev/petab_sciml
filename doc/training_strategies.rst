@@ -56,6 +56,24 @@ Inputs:
 4. Export each curriculum problem to disk, in directories named ``stage{i}``
    for :math:`i = 1, \ldots, n_{\text{stages}}`.
 
+With the PEtab SciML library, a curriculum learning problem can be created
+from an existing PEtab problem with ``CurriculumLearningProblem``.
+
+.. code-block:: python
+
+   from petab_sciml.training import CurriculumLearningProblem, UniformPartition
+
+   cl_problem = CurriculumLearningProblem(
+       yaml="my_model/problem.yaml",
+       partition=UniformPartition(n=3),
+   )
+   # Writes my_model/cl_prob/stage1, ..., my_model/cl_prob/stage3
+   cl_problem.export(output_dir="my_model/cl_prob")
+
+This will give you a sequence of PEtab problems, one for each stage. Using you
+preferred importer (e.g. AMICI, PEtab.jl) you can then train the model on each
+stage sequentially.
+
 A practical consideration for tools implementing and/or importing curriculum
 problems is to ensure that parameters are transferred consistently across
 stages in training loops. Although the number of estimated parameters does not
@@ -171,13 +189,42 @@ log-scale penalty such as
 can be effective, where ``abs`` avoids potential problems with states going
 below zero due to numerical errors.
 
+With the PEtab SciML library, a multiple shooting problem can be created from
+an existing PEtab problem with ``MultipleShootingProblem``. Here ``penalty``
+is :math:`\lambda`, ``initial_value`` is :math:`v_0`, and ``log_penalty=True``
+selects the log-scale penalty.
+
+.. code-block:: python
+
+   from petab_sciml.training import MultipleShootingProblem, UniformPartition
+
+   ms_problem = MultipleShootingProblem(
+       yaml="my_model/problem.yaml",
+       partition=UniformPartition(n=3),
+       penalty=10.0,
+       log_penalty=False,
+       initial_value=1e-6,
+   )
+   # Writes a single PEtab problem to my_model/ms_prob
+   ms_problem.export(output_dir="my_model/ms_prob")
+
+This results in a single PEtab problem in which each original
+experiment is split into one experiment per window, with additional estimated
+window initial-state parameters and continuity penalty observables and
+measurements. It can be imported and trained with any PEtab-compatible
+tool using a standard training loop (e.g., Adam for a fixed number of epochs),
+where the continuity penalty is part of the objective function.
+
+
 Curriculum multiple shooting
 ----------------------------
 
 Curriculum multiple shooting (CMS) combines multiple shooting with a
 curriculum schedule. The idea is to start from a multiple-shooting formulation,
 which is often easier to train, and then progressively reduce the number of
-windows until the original (single-window) problem is recovered.
+windows until the original (single-window) problem is recovered. For more
+details on CMS, see `Persson et al. (2026)
+<https://arxiv.org/abs/2608.05777>`__.
 
 .. container:: figure align-center
 
@@ -247,6 +294,32 @@ Inputs:
    :math:`n_{\text{stages}} - 1` to initialize optimization for the final
    stage.
 
+With the PEtab SciML library, a CMS problem can be created from an existing
+PEtab problem with ``CurriculumMultipleShootingProblem``, which takes the same
+arguments as ``MultipleShootingProblem``.
+
+.. code-block:: python
+
+   from petab_sciml.training import (
+       CurriculumMultipleShootingProblem,
+       UniformPartition,
+   )
+
+   cms_problem = CurriculumMultipleShootingProblem(
+       yaml="my_model/problem.yaml",
+       partition=UniformPartition(n=3),
+       penalty=10.0,
+   )
+   # Writes my_model/cms_prob/stage1, ..., my_model/cms_prob/stage3
+   cms_problem.export(output_dir="my_model/cms_prob")
+
+This results in one PEtab problem per curriculum stage: stages 1 to
+:math:`n_{\text{stages}} - 1` are multiple shooting problems with
+progressively fewer windows, and the final stage is the original problem. The
+stages are trained sequentially, with each stage trained using a standard
+training loop (e.g., Adam for a fixed number of epochs) and initialized from
+the parameter estimate of the previous stage.
+
 A practical consideration for tools implementing and/or importing CMS is that
 the number of window-initial parameters to estimate changes between stages. To
 support transferring parameter values between stages, it can be beneficial to
@@ -272,5 +345,23 @@ For multiple shooting, window intervals :math:`[t_{0,i}, t_{f,i}]` must be
 defined. We recommend supporting automatic window construction (e.g., take
 :math:`n_{\text{windows}}` as input and allocate windows based on unique
 measurement time points) as well as user-specified intervals. As a basic
-sanity check, tools should ensure that each window contains at least one
+sense check, tools should ensure that each window contains at least one
 measurement.
+
+In the PEtab SciML library, both schemes are available for all three training
+strategies through the ``partition`` argument. ``UniformPartition(n)`` splits
+the unique measurement time points into ``n`` (approximately) equally sized
+groups, while ``CustomPartition`` takes user-defined interior split points;
+the start and end of the time range are inferred from the measurement table:
+
+.. code-block:: python
+
+   from petab_sciml.training import CustomPartition, MultipleShootingProblem
+
+   # For measurements spanning [0, 6], gives windows [0, 3], [3, 4], [4, 6]
+   ms_problem = MultipleShootingProblem(
+       yaml="my_model/problem.yaml",
+       partition=CustomPartition(interior_points=[3.0, 4.0]),
+       penalty=10.0,
+   )
+   ms_problem.export(output_dir="my_model/ms_prob")
