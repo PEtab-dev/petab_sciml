@@ -86,6 +86,9 @@
         <listOfReactants>
           <speciesReference species="prey" stoichiometry="1"/>
         </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="predator"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -101,6 +104,9 @@
         <listOfProducts>
           <speciesReference species="predator" stoichiometry="1"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="prey"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>

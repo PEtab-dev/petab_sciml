@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "petab_sciml"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
   {name = "Sebastian Persson"},
   {name = "Dilan Pathirana"},
@@ -59,6 +59,8 @@ torch = [
 [project.urls]
 Repository = "https://github.com/PEtab-dev/petab_sciml"
 "Bug Tracker" = "https://github.com/PEtab-dev/petab_sciml/issues"
+
+[tool.setuptools_scm]
 
 [tool.uv.sources]
 torch = { index = "pytorch" }

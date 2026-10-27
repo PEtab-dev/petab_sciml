@@ -56,11 +56,10 @@ def test_create_neural_ode(dir_tmp: Path):
     parameters_expected = [
         {
             "parameterId": "net1_ps",
-            "parameterScale": "lin",
             "lowerBound": "-inf",
             "upperBound": "inf",
-            "nominalValue": "",
-            "estimate": "1",
+            "nominalValue": "array",
+            "estimate": "true",
         }
     ]
     with open(test_dir / "parameters.tsv", "r") as f:
@@ -95,6 +94,8 @@ def test_create_neural_ode_with_options(dir_tmp: Path):
     model = document.getModel()
     species_list = model.getListOfSpecies()
 
+    assert model.getCompartment(0).getId() == "default"
+    assert species_list.get("prey").getCompartment() == "default"
     assert species_list.get("prey").getInitialAmount() == 1.0
     assert species_list.get("predator").getInitialAmount() == 2.0
 
@@ -136,25 +137,29 @@ def test_create_neural_ode_problem(dir_tmp):
     )
 
     expected_files = [
-        "conditions.tsv",
+        "experiments.tsv",
         "problem.yaml",
     ]
     for fname in expected_files:
         assert (test_dir / fname).is_file()
 
-    conditions_expected = [{"conditionId": "cond1"}]
-    with open(test_dir / "conditions.tsv", "r") as f:
-        condition = list(csv.DictReader(f, delimiter="\t"))
-        assert condition == conditions_expected
+    experiments_expected = [
+        {"experimentId": "exp1", "time": "0", "conditionId": ""}
+    ]
+    with open(test_dir / "experiments.tsv", "r") as f:
+        experiments = list(csv.DictReader(f, delimiter="\t"))
+        assert experiments == experiments_expected
 
     with open(test_dir / "problem.yaml", "r") as f:
         problem = safe_load(f)
         assert problem["model_files"]["model"]["location"] == "model.xml"
         assert problem["measurement_files"][0] == "measurements.tsv"
 
-        assert "net1" in problem["extensions"]["sciml"]["neural_nets"]
+        assert problem["experiment_files"][0] == "experiments.tsv"
+
+        assert "net1" in problem["extensions"]["sciml"]["neural_networks"]
         assert (
-            problem["extensions"]["sciml"]["neural_nets"]["net1"]["location"]
+            problem["extensions"]["sciml"]["neural_networks"]["net1"]["location"]
             == "net1.yaml"
         )
         assert "array_files" in problem["extensions"]["sciml"]
@@ -166,25 +171,25 @@ def _write_test_measurements_file(test_dir: Path):
     measurements = [
         {
             "observableId": "prey_o",
-            "simulationConditionId": "cond1",
+            "experimentId": "exp1",
             "time": "1.0",
             "measurement": "0.1",
         },
         {
             "observableId": "prey_o",
-            "simulationConditionId": "cond1",
+            "experimentId": "exp1",
             "time": "2.0",
             "measurement": "0.5",
         },
         {
             "observableId": "predator_o",
-            "simulationConditionId": "cond1",
+            "experimentId": "exp1",
             "time": "1.0",
             "measurement": "0.8",
         },
         {
             "observableId": "predator_o",
-            "simulationConditionId": "cond1",
+            "experimentId": "exp1",
             "time": "1.0",
             "measurement": "0.2",
         },

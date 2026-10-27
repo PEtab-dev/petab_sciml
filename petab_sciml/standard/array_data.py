@@ -1,4 +1,4 @@
-from __future__ import annotations
+"""Read, write, and validate PEtab SciML array data (HDF5) files."""
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
@@ -10,6 +10,12 @@ from numpy.typing import ArrayLike
 from pydantic import BaseModel, field_validator
 from ruamel.yaml import YAML
 
+from petab_sciml.constants import (
+    ALL_CONDITION_IDS,
+    INPUTS,
+    METADATA,
+    PARAMETERS,
+)
 from petab_sciml.standard.nn_model import NNModelStandard
 
 if TYPE_CHECKING:
@@ -20,23 +26,9 @@ __all__ = [
     "Metadata",
     "ArrayData",
     "ArrayDataStandard",
-    "METADATA",
-    "DATA",
-    "CONDITION_IDS",
-    "INPUTS",
-    "PARAMETERS",
-    "ALL_CONDITION_IDS",
     "extract_torch_parameters",
     "add_array_files_to_yaml",
 ]
-
-
-METADATA = "metadata"
-DATA = "data"
-CONDITION_IDS = "conditionIds"
-INPUTS = "inputs"
-PARAMETERS = "parameters"
-ALL_CONDITION_IDS = "0"
 
 
 Array = get_array_type()
@@ -57,7 +49,7 @@ class Metadata(BaseModel):
 
 
 class ArrayData(BaseModel):
-    """Multiple arrays.
+    """A PEtab SciML array data container.
 
     For example, data for different inputs for different conditions,
     or values for different parameters of different layers.
@@ -245,6 +237,11 @@ def _to_numpy_array(array: ArrayLike) -> np.ndarray:
 
 
 ArrayDataStandard = Hdf5Standard(model=ArrayData)
+"""HDF5 (de)serialisation interface for :class:`ArrayData`.
+
+Use ``ArrayDataStandard.save(data, path)`` and ``ArrayDataStandard.load(path)``
+to write and read PEtab SciML array data files.
+"""
 
 
 if __name__ == "__main__":

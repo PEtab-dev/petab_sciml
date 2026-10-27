@@ -19,7 +19,7 @@ jobs:
           - windows-latest
         python-version:
           - "3.12"
-          - "3.x"
+          - "3.14"
 
     steps:
       - name: Check out repository
@@ -46,4 +46,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'

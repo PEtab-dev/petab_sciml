@@ -1,2 +1,2 @@
-parameterId	parameterScale	lowerBound	upperBound	nominalValue	estimate
-net1_ps	lin	-inf	inf		1
+parameterId	lowerBound	upperBound	nominalValue	estimate
+net1_ps	-inf	inf	array	true

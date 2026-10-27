@@ -13,6 +13,21 @@ models.
   support for it has been implemented  in PEtab importers, though not yet
   released.  Documentation and utility functions are currently being added.
 
+.. container:: figure align-center
+
+   .. image:: assets/hybrid_types.png
+      :alt: Hybrid model types
+      :class: only-light
+
+   .. image:: assets/hybrid_types_dark.png
+      :alt: Hybrid model types
+      :class: only-dark
+
+   .. container:: caption
+
+      Hybridization patterns supported by PEtab SciML.
+
+
 Main features
 -------------
 
@@ -25,7 +40,7 @@ importable by downstream tools. The main features are:
    combined in three ways: (1) ML within the ODE dynamics (includes
    Neural ODEs), (2) ML in the observable/measurement model linking simulations
    to data, and (3) ML upstream of the ODE, mapping high-dimensional inputs
-   (e.g., images) to ODE model parameters.
+   (e.g., images) to ODE model parameters. See figure above.
 -  **Import across ecosystems.** PEtab SciML problems can be imported into
    state-of-the-art toolboxes for dynamic-model training in Julia
    (`PEtab.jl <https://github.com/sebapersson/PEtab.jl>`_) and Python/JAX
@@ -56,17 +71,32 @@ The PEtab SciML Python3 helper library can be installed with:
 
 .. code-block:: bash
 
+   # (Optional) for PyTorch import/export support
+   pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+   # Required
    pip install petab-sciml
+
+or
+
+.. code-block:: bash
+
+   # Option 1 with PyTorch import/export support
+   uv pip install petab-sciml[torch]
+
+   # Option 2
+   uv pip install petab-sciml
 
 
 How to read the documentation
 -----------------------------
 
 If you are new to PEtab SciML, start with the
-:doc:`Getting Started tutorial <tutorial>`. It is a prerequisite for the
-How-to guides, which cover different model scenarios (e.g., Neural ODEs, ML
-model upstream of the ODE). For a complete description of all options when
-defining a SciML problem, see the :doc:`Format specification <format>`.
+:doc:`Getting Started tutorial <examples/getting_started/getting_started>`
+It is a prerequisite for the How-to guides, which cover different model
+scenarios (e.g., Neural ODEs, or ML model upstream of the ODE). For a complete
+description of all options when defining a SciML problem, see the
+:doc:`Format specification <format>`.
 
 Why a SciML data format?
 ------------------------
@@ -97,7 +127,6 @@ Getting Help with and Extending PEtab SciML
 
 If you run into problems:
 
-- Check the :doc:`Troubleshooting <trouble>` section of the documentation.
 - If you encounter unexpected behavior or a bug, please open an
   `issue <https://github.com/PEtab-dev/petab_sciml/issues/>`_ on GitHub
 
