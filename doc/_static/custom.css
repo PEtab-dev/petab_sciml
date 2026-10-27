@@ -1,0 +1,34 @@
+/* Let the top navigation wrap onto a second line instead of collapsing
+   overflowing items into a "More" dropdown. */
+@media (min-width: 960px) {
+  .bd-header .bd-header__inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Keep the search, theme switcher and GitHub links on the right of the
+     first row; only the centre links wrap. */
+  .bd-header .navbar-header-items {
+    flex-wrap: nowrap;
+    height: auto;
+    align-items: flex-start;
+  }
+
+  .bd-header .navbar-header-items__center {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .bd-header .navbar-header-items__end {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .bd-header .navbar-nav {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+}
