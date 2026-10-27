@@ -10,7 +10,7 @@ curriculum learning, multiple shooting, and combined curriculum multiple
 shooting, all of which can be implemented at the PEtab abstraction level for
 mechanistic ODE models as well as hybrid PEtab SciML problems. This page
 describes these PEtab-level abstractions for tool developers. The PEtab SciML
-library also provides reference implementations supporting both PEtab v2, and
+library also provides reference implementations supporting both PEtab v2 and
 PEtab SciML problems. For more details on these strategies, see `Persson et
 al. (2026) <https://arxiv.org/abs/2608.05777>`__.
 
@@ -25,11 +25,11 @@ over a fixed number of stages.
 .. container:: figure align-center
 
    .. image:: assets/cl_illustration.png
-      :alt: Hybrid model types
+      :alt: Curriculum learning illustration
       :class: only-light
 
    .. image:: assets/cl_illustration_dark.png
-      :alt: Hybrid model types
+      :alt: Curriculum learning illustration
       :class: only-dark
 
    .. container:: caption text-start
@@ -50,7 +50,7 @@ Inputs:
    problem. For stage :math:`i`, filter the measurement table to keep only
    measurements with time :math:`t \leq t_{\text{end},i}`.
 
-   These subset-data PEtab problem will contain unused conditions, experiments, or
+   These subset-data PEtab problems will contain unused conditions, experiments, or
    experiment periods that were carried over from the complete-data PEtab problem. This
    does not affect the correctness of the subset-data PEtab problems. However, the
    helper methods we provide in the PEtab SciML package also trim these unused
@@ -78,7 +78,9 @@ preferred importer (e.g. AMICI, PEtab.jl) you can then train the model on each
 stage sequentially.
 
 Note that this provides you with the PEtab problems only. You will then need to implement the training
-loop, for example, when to switch from an earlier stage to the next stage. An important point is to ensure parameters are transferred appropriately between training loops. For example, it is possible that your importer changes the ordering of parameters between stages.
+loop, for example, when to switch from an earlier stage to the next stage. An important
+point is to ensure parameters are transferred appropriately between stages. For example,
+it is possible that your importer changes the ordering of parameters between stages.
 
 .. _multiple_shooting:
 
@@ -93,12 +95,12 @@ continuous trajectory between adjacent windows.
 .. container:: figure align-center
 
    .. image:: assets/ms_illustration.png
-      :alt: Hybrid model types
+      :alt: Multiple shooting illustration
       :class: only-light
       :width: 75%
 
    .. image:: assets/ms_illustration_dark.png
-      :alt: Hybrid model types
+      :alt: Multiple shooting illustration
       :class: only-dark
       :width: 75%
 
@@ -123,11 +125,12 @@ Inputs:
 - An initial guess :math:`v_0` for each estimated window initial state.
 
 1. Copy the input PEtab problem to create a multiple shooting (MS) PEtab
-   problem. For this problem, create empty measurement, experiment and
-   condition tables.
+   problem. For this problem, create empty measurement and experiment
+   tables. The condition table is kept, since the window experiments re-use
+   the original conditions.
 2. Add a non-estimated parameter ``MS_PENALTY_SQRT`` to the parameter table
    with nominal value :math:`\sqrt{\lambda}`.
-3. For each PEtab experiment with ID ``expId`` in the MS PEtab problem and
+3. For each PEtab experiment with ID ``expId`` in the input PEtab problem and
    each window :math:`i = 1, \ldots, n_{\text{windows}}`:
 
    1. If the maximum measurement time of ``expId`` in the original problem is
@@ -145,7 +148,7 @@ Inputs:
         initialization.
       - For windows :math:`i > 1`, add a leading period at :math:`t_{0,i}`
         with the window's IC condition (defined below). Keep original
-        conditions that are applied in :math:`[t_{0,i}, t_{f,i}]`.
+        conditions that are applied in :math:`(t_{0,i}, t_{f,i}]`.
 
    3. Assign all measurements of ``expId`` in :math:`[t_{0,i}, t_{f,i}]` to
       experiment ``WINDOW{i}_EXPERIMENT_{expId}``. Measurements at exactly
@@ -176,7 +179,7 @@ Inputs:
          (L2) penalty evaluated where the simulated trajectory of window
          :math:`i-1` meets the estimated initial state of window :math:`i`.
 
-Note that all artifacts in step 3-4 are added per ``(window, experiment)`` pair
+Note that all artifacts in step 3 are added per ``(window, experiment)`` pair
 rather than globally per window, since trajectories differ between experiments.
 ``MS_PENALTY_SQRT`` is added once and shared across all experiments and
 windows.
@@ -193,7 +196,8 @@ below zero due to numerical errors.
 With the PEtab SciML library, a multiple shooting problem can be created from
 an existing PEtab problem with ``MultipleShootingProblem``. Here ``penalty``
 is :math:`\lambda`, ``initial_value`` is :math:`v_0`, and ``log_penalty=True``
-selects the log-scale penalty.
+selects the log-scale penalty. The library currently requires an SBML model,
+and treats each SBML species as a model state.
 
 .. code-block:: python
 
@@ -230,11 +234,11 @@ details on CMS, see `Persson et al. (2026)
 .. container:: figure align-center
 
    .. image:: assets/cms_illustration.png
-      :alt: Hybrid model types
+      :alt: Curriculum multiple shooting illustration
       :class: only-light
 
    .. image:: assets/cms_illustration_dark.png
-      :alt: Hybrid model types
+      :alt: Curriculum multiple shooting illustration
       :class: only-dark
 
    .. container:: caption text-start
@@ -251,7 +255,7 @@ is shifted one position to the right; equivalently, window :math:`i` at stage
 window than the previous, with each remaining window covering more of the time
 range. The final stage is a single window covering
 :math:`[t_{0,1}, t_{f,n_{\text{stages}}}]` and corresponds to the original
-problem. Stages 2 onwards have overlapping windows; the multiple-shooting
+problem. Stages 2 to :math:`n_{\text{stages}} - 1` have overlapping windows; the multiple-shooting
 construction handles this naturally when the continuity penalty is placed at
 :math:`t_{0,i+1}`, the first overlapping time point. The PEtab-level
 implementation is then:
@@ -329,7 +333,7 @@ provide a utility function for mapping parameters between stage problems.
 Partitioning time windows
 -------------------------
 
-The above training approaches above require either splitting measurements into
+The training approaches above require either splitting measurements into
 curriculum stages (curriculum learning) or partitioning the simulation time
 span into windows (multiple shooting and curriculum multiple shooting). We
 recommend that tools supporting these methods provide the splitting schemes
