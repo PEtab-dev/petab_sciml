@@ -1,9 +1,9 @@
 SciML Training strategies at the PEtab level
 ============================================
 
-Training (parameter estimating) SciML models can be challenging, and often
-standard ML training workflows such as training with Adam for a fixed number of
-epochs fail to find a good minimum or require many training epochs.
+Training (estimating the parameters of) SciML models can be challenging. For example,
+standard ML training workflows (e.g. a fixed number of epochs with Adam) often fail
+to find a good minimum, or require many training epochs.
 
 Several training strategies have been developed to address this. These include
 curriculum learning, multiple shooting, and combined curriculum multiple
@@ -70,15 +70,12 @@ from an existing PEtab problem with ``CurriculumLearningProblem``.
    # Writes my_model/cl_prob/stage1, ..., my_model/cl_prob/stage3
    cl_problem.export(output_dir="my_model/cl_prob")
 
-This will give you a sequence of PEtab problems, one for each stage. Using you
+This will give you a sequence of PEtab problems, one for each stage. Using your
 preferred importer (e.g. AMICI, PEtab.jl) you can then train the model on each
 stage sequentially.
 
-A practical consideration for tools implementing and/or importing curriculum
-problems is to ensure that parameters are transferred consistently across
-stages in training loops. Although the number of estimated parameters does not
-change between stages, different PEtab importers may use different internal
-parameter orderings when importing the stage-problems.
+Note that this provides you with the PEtab problems only. You will then need to implement the training
+loop, for example, when to switch from an earlier stage to the next stage. An important point is to ensure parameters are transferred appropriately between training loops. For example, it is possible that your importer changes the ordering of parameters between stages.
 
 .. _multiple_shooting:
 
@@ -162,7 +159,7 @@ Inputs:
          ``WINDOW{i}_EXPERIMENT_{expId}_PARAMETER_{stateId}``.
       c. In the observable table, create an observable with ID
          ``WINDOW{i}_EXPERIMENT_{expId}_PENALTY_{stateId}`` for each model
-         state ``stateId`` and set
+         state ``stateId`` and set the continuity penalty expression:
 
          - ``observableFormula = (stateId - WINDOW{i}_EXPERIMENT_{expId}_PARAMETER_{stateId}) * MS_PENALTY_SQRT``
          - ``noiseFormula = 1.0``
@@ -175,7 +172,7 @@ Inputs:
          (L2) penalty evaluated where the simulated trajectory of window
          :math:`i-1` meets the estimated initial state of window :math:`i`.
 
-Note that all artifacts in step 3-4 are added per ``(window, experiment)``pair
+Note that all artifacts in step 3-4 are added per ``(window, experiment)`` pair
 rather than globally per window, since trajectories differ between experiments.
 ``MS_PENALTY_SQRT`` is added once and shared across all experiments and
 windows.
