@@ -69,7 +69,8 @@ autodoc_default_options = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ["standard"]
+html_static_path = ["standard", "_static"]
+html_css_files = ["custom.css"]
 html_title = "PEtab SciML"
 # html_logo = "logo/logo-wide.svg"
 
@@ -87,6 +88,7 @@ html_theme_options = {
         "image_dark": "logo/logo_dark.png",
         "alt_text": "PEtab SciML",
     },
+    "header_links_before_dropdown": 20,
     "navbar_center": ["navbar-nav"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button"],

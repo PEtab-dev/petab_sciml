@@ -4,6 +4,7 @@ Test suite and benchmark collection
 ===================================
 
 Two companion resources support tools implementing PEtab SciML:
+
 - a test suite for verifying correct implementation of the format
 - a benchmark collection of real-data problems for evaluating methods
 
