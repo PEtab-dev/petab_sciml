@@ -11,7 +11,8 @@ shooting, all of which can be implemented at the PEtab abstraction level for
 mechanistic ODE models as well as hybrid PEtab SciML problems. This page
 describes these PEtab-level abstractions for tool developers. The PEtab SciML
 library also provides reference implementations supporting both PEtab v2, and
-PEtab SciML problems.
+PEtab SciML problems. For more details on these strategies, see `Persson et
+al. (2026) <https://arxiv.org/abs/2608.05777>`__.
 
 Curriculum learning
 -------------------
@@ -48,12 +49,14 @@ Inputs:
 1. Create :math:`n_{\text{stages}}` PEtab sub-problems by copying the input
    problem. For stage :math:`i`, filter the measurement table to keep only
    measurements with time :math:`t \leq t_{\text{end},i}`.
-2. Filter the experiment table to only include experiments referenced by the
-   filtered measurement table. Within each remaining experiment, drop periods
-   that start after :math:`t_{\text{end},i}`.
-3. Filter the condition table to only include conditions referenced by the
-   filtered experiment table.
-4. Export each curriculum problem to disk, in directories named ``stage{i}``
+
+   These subset-data PEtab problem will contain unused conditions, experiments, or
+   experiment periods that were carried over from the complete-data PEtab problem. This
+   does not affect the correctness of the subset-data PEtab problems. However, the
+   helper methods we provide in the PEtab SciML package also trim these unused
+   components from the subset-data PEtab problems.
+
+2. Export each curriculum problem to disk, in directories named ``stage{i}``
    for :math:`i = 1, \ldots, n_{\text{stages}}`.
 
 With the PEtab SciML library, a curriculum learning problem can be created
@@ -135,10 +138,11 @@ Inputs:
    2. Build the PEtab conditions of ``WINDOW{i}_EXPERIMENT_{expId}``:
 
       - For window :math:`i = 1`, keep original conditions of ``expId`` that
-        fall in :math:`[t_{0,1}, t_{f,1}]`. If no condition is applied at
-        :math:`t_{0,1}`, add a condition applied at :math:`t_{0,1}` with
-        ``conditionId`` so the simulation starts with the original PEtab
-        problem initialization.
+        fall in :math:`[t_{0,1}, t_{f,1}]`. If ``expId`` has no period
+        starting at :math:`t_{0,1}`, add a period at :math:`t_{0,1}` with an
+        empty ``conditionId``. This applies no changes, so the simulation
+        starts at :math:`t_{0,1}` from the original PEtab problem
+        initialization.
       - For windows :math:`i > 1`, add a leading period at :math:`t_{0,i}`
         with the window's IC condition (defined below). Keep original
         conditions that are applied in :math:`[t_{0,i}, t_{f,i}]`.
