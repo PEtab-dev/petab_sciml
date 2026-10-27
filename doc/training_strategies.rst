@@ -77,10 +77,11 @@ This will give you a sequence of PEtab problems, one for each stage. Using your
 preferred importer (e.g. AMICI, PEtab.jl) you can then train the model on each
 stage sequentially.
 
-Note that this provides you with the PEtab problems only. You will then need to implement the training
-loop, for example, when to switch from an earlier stage to the next stage. An important
-point is to ensure parameters are transferred appropriately between stages. For example,
-it is possible that your importer changes the ordering of parameters between stages.
+Note that this provides you with the PEtab problems only. You will then need to
+implement the training loop yourself, including deciding when to switch from one
+stage to the next. An important point is to ensure that parameters are transferred
+appropriately between stages. For example, your importer may change the ordering
+of parameters between stages.
 
 .. _multiple_shooting:
 
@@ -126,7 +127,7 @@ Inputs:
 
 1. Copy the input PEtab problem to create a multiple shooting (MS) PEtab
    problem. For this problem, create empty measurement and experiment
-   tables. The condition table is kept, since the window experiments re-use
+   tables. The condition table is kept, since the window experiments reuse
    the original conditions.
 2. Add a non-estimated parameter ``MS_PENALTY_SQRT`` to the parameter table
    with nominal value :math:`\sqrt{\lambda}`.
@@ -154,7 +155,7 @@ Inputs:
       experiment ``WINDOW{i}_EXPERIMENT_{expId}``. Measurements at exactly
       the boundary between two adjacent windows are duplicated so they
       appear in both windows.
-   4. If :math:`i > 1`, add per-experiment window initial values and
+   4. If :math:`i > 1`, add per-experiment window initial values and a
       continuity penalty:
 
       a. In the parameter table, create parameters
@@ -255,7 +256,7 @@ is shifted one position to the right; equivalently, window :math:`i` at stage
 window than the previous, with each remaining window covering more of the time
 range. The final stage is a single window covering
 :math:`[t_{0,1}, t_{f,n_{\text{stages}}}]` and corresponds to the original
-problem. Stages 2 to :math:`n_{\text{stages}} - 1` have overlapping windows; the multiple-shooting
+problem. Stages 2 to :math:`n_{\text{stages}} - 1` have overlapping windows. The multiple-shooting
 construction handles this naturally when the continuity penalty is placed at
 :math:`t_{0,i+1}`, the first overlapping time point. The PEtab-level
 implementation is then:
@@ -355,7 +356,7 @@ measurement.
 
 In the PEtab SciML library, both schemes are available for all three training
 strategies through the ``partition`` argument. ``UniformPartition(n)`` splits
-the unique measurement time points into ``n`` (approximately) equally sized
+the unique measurement time points into ``n`` approximately equally sized
 groups, while ``CustomPartition`` takes user-defined interior split points;
 the start and end of the time range are inferred from the measurement table:
 
