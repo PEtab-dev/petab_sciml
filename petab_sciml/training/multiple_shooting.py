@@ -8,8 +8,8 @@ from pathlib import Path
 import petab.v2
 from petab.v1.models.sbml_model import SbmlModel
 
-from .partition import Partition
 from ._helper import _resolve_output_dir
+from .partition import Partition
 
 
 @dataclass
@@ -104,7 +104,7 @@ def _get_ms_problem(
     _check_no_preequilibration(problem)
     if not isinstance(problem.model, SbmlModel):
         raise ValueError("Multiple shooting export currently requires an SBML model.")
-    specie_ids = [s.getId() for s in problem.model.sbml_model.getListOfSpecies()]
+    species_ids = [s.getId() for s in problem.model.sbml_model.getListOfSpecies()]
 
     t_min = windows[0][0]
     n_windows = len(windows)
@@ -145,7 +145,7 @@ def _get_ms_problem(
             # For windows i > 0, this experiment needs its own ICs per window
             if window_index > 0:
                 _add_per_experiment_ic_artifacts(
-                    ms_problem, orig_exp.id, window_index, specie_ids, strategy
+                    ms_problem, orig_exp.id, window_index, species_ids, strategy
                 )
 
             new_measurements.extend(
@@ -166,7 +166,7 @@ def _get_ms_problem(
                             orig_exp.id,
                             window_index + 1,
                             next_t0,
-                            specie_ids,
+                            species_ids,
                         )
                     )
 
@@ -192,7 +192,7 @@ def _ensure_default_experiment(problem: petab.v2.Problem, t_min: float) -> None:
     default experiment.
     """
     if problem.experiments:
-        return None
+        return
     default_exp_id = "default_experiment"
     problem.add_experiment(default_exp_id, t_min, [])
     for table in problem.measurement_tables:
@@ -202,14 +202,14 @@ def _ensure_default_experiment(problem: petab.v2.Problem, t_min: float) -> None:
 
     if not problem.experiment_tables[0].rel_path:
         problem.experiment_tables[0].rel_path = Path("experiments.tsv")
-    return None
+    return
 
 
 def _add_per_experiment_ic_artifacts(
     problem: petab.v2.Problem,
     orig_exp_id: str,
     window_index: int,
-    specie_ids: list[str],
+    species_ids: list[str],
     strategy,
 ) -> None:
     """Add per-(window, experiment) IC parameters, penalty observables, and IC condition.
@@ -221,10 +221,10 @@ def _add_per_experiment_ic_artifacts(
     species to the estimated initial value at the start of the window.
     """
     prefix = f"WINDOW{window_index}_EXPERIMENT_{orig_exp_id}"
-    for specie_id in specie_ids:
+    for species_id in species_ids:
         problem.parameter_tables[0].elements.append(
             petab.v2.Parameter(
-                id=f"{prefix}_PARAMETER_{specie_id}",
+                id=f"{prefix}_PARAMETER_{species_id}",
                 lb=1e-8,
                 ub=1e8,
                 nominal_value=strategy.initial_value,
@@ -233,14 +233,14 @@ def _add_per_experiment_ic_artifacts(
         )
 
         if strategy.log_penalty:
-            _formula = f"(log(abs({specie_id})) - log(abs({prefix}_PARAMETER_{specie_id}))) * MS_PENALTY_SQRT"
+            _formula = f"(log(abs({species_id})) - log(abs({prefix}_PARAMETER_{species_id}))) * MS_PENALTY_SQRT"
         else:
             _formula = (
-                f"({specie_id} - {prefix}_PARAMETER_{specie_id}) * MS_PENALTY_SQRT"
+                f"({species_id} - {prefix}_PARAMETER_{species_id}) * MS_PENALTY_SQRT"
             )
         problem.observable_tables[0].elements.append(
             petab.v2.Observable(
-                id=f"{prefix}_PENALTY_{specie_id}",
+                id=f"{prefix}_PENALTY_{species_id}",
                 formula=_formula,
                 noise_formula="1.0",
                 noise_distribution="normal",
@@ -251,10 +251,10 @@ def _add_per_experiment_ic_artifacts(
             id=f"{prefix}_IC",
             changes=[
                 petab.v2.Change(
-                    target_id=specie_id,
-                    target_value=f"{prefix}_PARAMETER_{specie_id}",
+                    target_id=species_id,
+                    target_value=f"{prefix}_PARAMETER_{species_id}",
                 )
-                for specie_id in specie_ids
+                for species_id in species_ids
             ],
         )
     )
@@ -328,7 +328,7 @@ def _build_penalty_measurements(
     orig_exp_id: str,
     next_window_index: int,
     next_t0: float,
-    specie_ids: list[str],
+    species_ids: list[str],
 ) -> list[petab.v2.Measurement]:
     """Build penalty measurements at next_t0 pointing to next window's per-experiment parameters.
 
@@ -339,10 +339,10 @@ def _build_penalty_measurements(
     next_prefix = f"WINDOW{next_window_index}_EXPERIMENT_{orig_exp_id}"
     return [
         petab.v2.Measurement(
-            observable_id=f"{next_prefix}_PENALTY_{specie_id}",
+            observable_id=f"{next_prefix}_PENALTY_{species_id}",
             experiment_id=new_exp_id,
             time=next_t0,
             measurement=0.0,
         )
-        for specie_id in specie_ids
+        for species_id in species_ids
     ]
