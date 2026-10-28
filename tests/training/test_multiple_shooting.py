@@ -238,7 +238,9 @@ def test_multiple_shooting_no_experiments(dir_tmp: Path) -> None:
 
     # Observable table: penalty observable formulas need sympy-aware comparison,
     # so we check them separately rather than via _assert_table_equal
-    observables = pd.read_csv(dir_uniform / "observables.tsv", sep="\t")
+    observables = pd.read_csv(
+        dir_uniform / "observables.tsv", sep="\t", dtype=str
+    )
     assert set(observables["observableId"]) == {
         "obs1",
         "obs2",
