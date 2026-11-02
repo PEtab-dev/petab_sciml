@@ -1,5 +1,7 @@
 """Read, write, and validate PEtab SciML neural network YAML files."""
 
+from __future__ import annotations
+
 import ast
 import inspect
 import re
