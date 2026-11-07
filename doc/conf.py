@@ -88,7 +88,7 @@ html_theme_options = {
         "image_dark": "logo/logo_dark.png",
         "alt_text": "PEtab SciML",
     },
-    "header_links_before_dropdown": 20,
+    "header_links_before_dropdown": 5,
     "navbar_center": ["navbar-nav"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button"],
