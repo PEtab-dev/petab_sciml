@@ -1,5 +1,5 @@
-How to guides
-=============
+Guides
+======
 
 These guides show how to set up PEtab SciML problems for the different
 hybridization scenarios supported by the format.
